@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace MK94.DataGenerator
@@ -15,53 +17,151 @@ namespace MK94.DataGenerator
 
     public class CodeBuilder
     {
-        private static readonly List<string> filesWritten = new List<string>();
+        private record OutputContext(string Path, MemoryStream Stream, StreamWriter writer, SHA256 Hash);
 
-        private readonly string project;
+        private static readonly List<OutputContext> files = new();
+
         private readonly StreamWriter output;
         private readonly IndentStyle indentStyle;
         private readonly StringBuilder lineBuilder = new StringBuilder();
 
         private bool lineHasContent = false;
         private int indent = 0;
-        private int enabledCount = 0;
         private int parenthesisOpenCount = 0;
         private bool optionalComma = false;
 
-        private bool BuilderEnabled => enabledCount > 0;
-
         public static Func<string, CodeBuilder> FactoryFromBasePath(string path, IndentStyle indentStyle = IndentStyle.NewLine)
         {
-            return x => FromFile(Path.Combine(path, x));
+            return x => FromFile(Path.Combine(path, x), indentStyle);
+        }
+
+        public static Func<string, CodeBuilder> FactoryFromBasePath(string path, string extraPath, IndentStyle indentStyle = IndentStyle.NewLine)
+        {
+            return x => FromFile(Path.Combine(path, extraPath), indentStyle);
+        }
+
+        public static Func<string, CodeBuilder> FactoryFromMemoryStream(out Dictionary<string, MemoryStream> files, IndentStyle indentStyle = IndentStyle.NewLine)
+        {
+            var dict = new Dictionary<string, MemoryStream>();
+            files = dict;
+
+            return x =>
+            {
+                var ret = FromMemoryStream(out var stream, indentStyle);
+
+                dict[x] = stream;
+
+                return ret;
+            };
         }
 
         public static CodeBuilder FromMemoryStream(out MemoryStream stream, IndentStyle indentStyle = IndentStyle.NewLine)
         {
             stream = new MemoryStream();
 
-            return new CodeBuilder(new StreamWriter(stream), null, indentStyle);
+            return new CodeBuilder(new StreamWriter(stream), indentStyle);
         }
 
         public static CodeBuilder FromFile(string file, IndentStyle indentStyle = IndentStyle.NewLine)
         {
-            if (File.Exists(file))
-                File.Delete(file);
-
             if (!Directory.Exists(Path.GetDirectoryName(file)))
                 Directory.CreateDirectory(Path.GetDirectoryName(file));
 
-            filesWritten.Add(file);
+            var mem = new MemoryStream();
+            var sha = SHA256.Create();
+            var crypto = new CryptoStream(mem, sha, CryptoStreamMode.Write, true);
+            var writer = new StreamWriter(crypto);
 
-            return new CodeBuilder(new StreamWriter(File.OpenWrite(file)), null, indentStyle);
+            files.Add(new(file, mem, writer, sha));
+
+            return new CodeBuilder(writer, indentStyle);
+        }
+
+        private static string HashToString(byte[] hash)
+        {
+            return Convert.ToBase64String(hash!).Replace('/', '-').ToLower();
+        }
+
+        private static void SaveExistingFileHashes(Dictionary<string, string> hashes)
+        {
+            const string hashFile = "../existing files.json";
+            var file = Path.Combine(System.Reflection.Assembly.GetEntryAssembly()!.Location, hashFile);
+
+            if (!File.Exists(file))
+                File.Delete(file);
+
+            File.WriteAllText(file, JsonSerializer.Serialize(hashes, new JsonSerializerOptions { WriteIndented = true }));
+        }
+
+        private static Dictionary<string, string> ReadExistingFileHashes()
+        {
+            const string hashFile = "../existing files.json";
+            var file = Path.Combine(System.Reflection.Assembly.GetEntryAssembly()!.Location, hashFile);
+
+            if (!File.Exists(file))
+                return new Dictionary<string, string>();
+
+            return JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(file))!;
+        }
+        public static void FlushAll(bool force = false)
+        {
+            var existingHashes = force ? new() : ReadExistingFileHashes();
+            var toDelete = new HashSet<string>(existingHashes.Keys);
+            var updates = 0;
+
+            foreach (var kv in files)
+            {
+                var file = kv.Path;
+                kv.writer.Flush();
+                kv.writer.Close();
+
+                toDelete.Remove(file);
+
+                var actualHash = HashToString(kv.Hash.Hash!);
+
+                if (existingHashes.TryGetValue(file, out var existingHash) && existingHash.Equals(actualHash))
+                    continue;
+
+                existingHashes[file] = actualHash;
+                updates++;
+
+                Console.WriteLine($"Updating {file}");
+
+                if (File.Exists(file))
+                    File.Delete(file);
+
+                if (!Directory.Exists(Path.GetDirectoryName(file)))
+                    Directory.CreateDirectory(Path.GetDirectoryName(file)!);
+
+                using var fileStream = File.OpenWrite(file);
+                kv.Stream.Position = 0;
+                kv.Stream.CopyTo(fileStream);
+                fileStream.Flush();
+            }
+
+            if (updates == 0 && !toDelete.Any())
+                return;
+
+            foreach (var del in toDelete)
+            {
+                if (File.Exists(del))
+                    File.Delete(del);
+
+                existingHashes.Remove(del);
+            }
+
+            SaveExistingFileHashes(existingHashes);
+            if (updates > 0) Console.WriteLine($"Updated {updates} files");
+            if (toDelete.Any()) Console.WriteLine($"Deleted {toDelete.Count} files");
         }
 
         public static void GenerateGitIgnores()
         {
-            var groupByDir = filesWritten.GroupBy(x => Path.GetDirectoryName(x));
+            var groupByDir = files.GroupBy(x => Path.GetDirectoryName(x.Path));
 
             foreach (var group in groupByDir)
             {
-                var file = Path.Combine(group.Key, ".gitignore");
+                var file = Path.Combine(group.Key!, ".gitignore");
 
                 if (File.Exists(file))
                     File.Delete(file);
@@ -69,16 +169,15 @@ namespace MK94.DataGenerator
                 var output = new StreamWriter(File.OpenWrite(file));
 
                 foreach (var item in group)
-                    output.WriteLine(Path.GetFileName(item));
+                    output.WriteLine(Path.GetFileName(item.Path));
 
                 output.Close();
             }
         }
 
-        private CodeBuilder(StreamWriter output, string project, IndentStyle indentStyle = IndentStyle.NewLine)
+        private CodeBuilder(StreamWriter output, IndentStyle indentStyle = IndentStyle.NewLine)
         {
             this.output = output;
-            this.project = project;
             this.indentStyle = indentStyle;
         }
 
@@ -89,11 +188,8 @@ namespace MK94.DataGenerator
             return this;
         }
 
-        private void InternalAppend(string content, bool force)
+        private void InternalAppend(string content)
         {
-            if (!BuilderEnabled && !force)
-                return;
-
             if (!lineHasContent)
                 lineBuilder.Append("".PadLeft(indent * 4, ' '));
 
@@ -107,7 +203,7 @@ namespace MK94.DataGenerator
             {
                 var lines = content.Split(Environment.NewLine);
 
-                for(int i = 0; i < lines.Length; i++)
+                for (int i = 0; i < lines.Length; i++)
                 {
                     Append(lines[i]);
 
@@ -122,23 +218,14 @@ namespace MK94.DataGenerator
             }
         }
 
-        public CodeBuilder Enable()
-        {
-            enabledCount++;
-            return this;
-        }
-
         public CodeBuilder AppendOptionalComma()
         {
             optionalComma = true;
             return this;
         }
 
-        public CodeBuilder NewLine(bool force = false)
+        public CodeBuilder NewLine()
         {
-            if (!BuilderEnabled && !force)
-                return this;
-
             lineHasContent = false;
             output.WriteLine(lineBuilder);
             lineBuilder.Clear();
@@ -146,61 +233,49 @@ namespace MK94.DataGenerator
             return this;
         }
 
-        public CodeBuilder AppendLine(string content, bool force = false)
+        public CodeBuilder AppendLine(string content)
         {
-            InternalAppend(content, force);
-            NewLine(force);
+            InternalAppend(content);
+            NewLine();
 
             return this;
         }
 
-        public CodeBuilder Append(string content, bool force = false)
+        public CodeBuilder Append(string content)
         {
-            if (!BuilderEnabled && !force)
-                return this;
-
-            InternalAppend(content, force);
+            InternalAppend(content);
 
             return this;
         }
 
-        public CodeBuilder Append(Action<CodeBuilder> generator, bool force = false)
+        public CodeBuilder Append(Action<CodeBuilder> generator)
         {
-            if (!BuilderEnabled && !force)
-                return this;
-
             generator(this);
 
             return this;
         }
 
-        public CodeBuilder Append<T>(Action<CodeBuilder, T> generator, T from, bool force = false)
+        public CodeBuilder Append<T>(Action<CodeBuilder, T> generator, T from)
         {
-            if (!BuilderEnabled && !force)
-                return this;
-
             generator(this, from);
 
             return this;
         }
 
-        public CodeBuilder Append<T>(Action<CodeBuilder, T> generator, IEnumerable<T> from, bool force = false)
+        public CodeBuilder Append<T>(Action<CodeBuilder, T> generator, IEnumerable<T> from)
         {
-            if (!BuilderEnabled && !force)
-                return this;
-
-            foreach(var f in from)
+            foreach (var f in from)
                 generator(this, f);
 
             return this;
         }
 
-        public CodeBuilder AppendComma(bool force = false)
+        public CodeBuilder AppendComma()
         {
-            Append(", ", force);
+            Append(", ");
 
             if (parenthesisOpenCount > 0 && lineBuilder.Length > 150 + indent * 4)
-                NewLine(force);
+                NewLine();
 
             return this;
         }
@@ -220,17 +295,17 @@ namespace MK94.DataGenerator
             return this.OpenParanthesis().Append<T>((b, i) => b.Append(blockContent, i).AppendOptionalComma(), item).CloseParanthesis();
         }
 
-        public CodeBuilder OpenParanthesis(bool force = false)
+        public CodeBuilder OpenParanthesis()
         {
             optionalComma = false;
             parenthesisOpenCount++;
             indent++;
-            InternalAppend("(", force);
+            InternalAppend("(");
 
             return this;
         }
 
-        public CodeBuilder CloseParanthesis(bool force = false)
+        public CodeBuilder CloseParanthesis()
         {
             optionalComma = false;
             parenthesisOpenCount--;
@@ -238,7 +313,7 @@ namespace MK94.DataGenerator
             if (parenthesisOpenCount < 0)
                 throw new InvalidOperationException("Closing too many parenthesis");
 
-            InternalAppend(")", force);
+            InternalAppend(")");
             indent--;
 
             return this;
@@ -256,24 +331,24 @@ namespace MK94.DataGenerator
             return this;
         }
 
-        public CodeBuilder OpenBlock(bool force = false)
+        public CodeBuilder OpenBlock()
         {
             optionalComma = false;
             if (indentStyle == IndentStyle.NewLine && lineHasContent)
             {
-                NewLine(force);
-                InternalAppend("{", force);
+                NewLine();
+                InternalAppend("{");
             }
             else if (indentStyle == IndentStyle.SameLine)
             {
-                InternalAppend(" {", force);
+                InternalAppend(" {");
             }
             else
-                InternalAppend("{", force);
+                InternalAppend("{");
 
             indent++;
 
-            NewLine(force);
+            NewLine();
 
             return this;
         }
@@ -293,7 +368,7 @@ namespace MK94.DataGenerator
             return this.OpenBlock().Append(blockContent, item).CloseBlock();
         }
 
-        public CodeBuilder CloseBlock(bool force = false, bool sameLine = false)
+        public CodeBuilder CloseBlock()
         {
             optionalComma = false;
             indent--;
@@ -302,37 +377,16 @@ namespace MK94.DataGenerator
                 throw new InvalidOperationException("Closing too many blocks");
 
             if (lineHasContent)
-                NewLine(force);
+                NewLine();
             else
             {
                 lineBuilder.Clear();
             }
 
-            InternalAppend("}", force);
-
-            if (!sameLine)
-                NewLine(force);
+            InternalAppend("}");
+            NewLine();
 
             return this;
-        }
-
-        public bool EnableProjects(Type type)
-        {
-            var attribute = type.GetCustomAttributes(false).Select(a => a as ProjectAttribute).FirstOrDefault(a => a?.Project.Equals(project) == true);
-
-            if (attribute != null)
-            {
-                enabledCount++;
-                return true;
-            }
-
-            return false;
-        }
-
-        public void DisableProjects(bool anyEnabled)
-        {
-            if (anyEnabled)
-                enabledCount--;
         }
     }
 }

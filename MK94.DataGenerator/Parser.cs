@@ -10,13 +10,13 @@ namespace MK94.DataGenerator
 {
     public class FileDefinition
     {
+        public FileAttribute FileInfo { get; set; }
+
         public string Name { get; set; }
 
         public List<EnumDefintion> EnumTypes { get; set; }
 
-        public List<DataDefinition> DataClasses { get; set; }
-
-        public List<ApiDefinition> ApiClasses { get; set; }
+        public List<TypeDefinition> Types { get; set; }
     }
 
     public class EnumDefintion
@@ -24,13 +24,6 @@ namespace MK94.DataGenerator
         public Type Type { get; set; }
 
         public Dictionary<string, int> KeyValuePairs { get; set; }
-    }
-
-    public class DataDefinition
-    {
-        public Type Type { get; set; }
-
-        public List<PropertyDefinition> Properties { get; set; }
     }
 
     public class PropertyDefinition
@@ -42,18 +35,22 @@ namespace MK94.DataGenerator
         public PropertyInfo Info { get; set; }
     }
 
-    public class ApiDefinition
+    public class TypeDefinition
     {
         public Type Type { get; set; }
 
-        public List<ApiEndpoint> Methods { get; set; }
+        public List<MethodDefinition> Methods { get; set; }
+
+        public List<PropertyDefinition> Properties { get; set; }
     }
 
-    public class ApiEndpoint
+    public class MethodDefinition
     {
         public string Name { get; set; }
 
         public Type ResponseType { get; set; }
+
+        public MethodInfo MethodInfo { get; set; }
 
         public List<ParameterDefinition> Parameters { get; set; }
     }
@@ -63,6 +60,8 @@ namespace MK94.DataGenerator
         public Type Type { get; set; }
 
         public string Name { get; set; }
+
+        public ParameterInfo Parameter { get; set; }
     }
 
     public class Parser
@@ -74,12 +73,9 @@ namespace MK94.DataGenerator
             this.project = project;
         }
 
-        public List<FileDefinition> ParseFromType(Type type)
-        {
-            var typesGroupedByOutputFile = new[] { type }.GroupBy(x => GetFilePath(x), x => x);
+        public List<FileDefinition> ParseFromAssemblyContainingType<T>() => ParseFromAssembly(typeof(T).Assembly);
 
-            return typesGroupedByOutputFile.Select(ParseFile).ToList();
-        }
+        public List<FileDefinition> ParseFromEntryAssembly() => ParseFromAssembly(Assembly.GetEntryAssembly());
 
         public List<FileDefinition> ParseFromAssembly(Assembly assembly)
         {
@@ -88,25 +84,30 @@ namespace MK94.DataGenerator
                 .ToDictionary(
                     x => x,
                     x => GetAttributeForCurrentProject(x))
-                .Where(x => x.Value != null);
+                .Where(x => (project == null && x.Key.GetCustomAttribute<FileAttribute>() != null) || x.Value != null);
 
             var typesGroupedByOutputFile = typesForProject.GroupBy(x => GetFilePath(x.Key), x => x.Key);
 
             return typesGroupedByOutputFile.Select(ParseFile).ToList();
         }
 
+        public List<FileDefinition> ParseFromType(Type type)
+        {
+            var typesGroupedByOutputFile = new[] { type }.GroupBy(x => GetFilePath(x), x => x);
+
+            return typesGroupedByOutputFile.Select(ParseFile).ToList();
+        }
+
         private FileDefinition ParseFile(IGrouping<string, Type> types)
         {
-            var apiTypes = types.Where(IsApiType).ToList();
-            var enumTypes = types.Except(apiTypes).Where(x => x.IsEnum).ToList();
-            var dataTypes = types.Except(apiTypes).Except(enumTypes).ToList();
+            var allTypes = types.Where(x => !x.IsEnum);
+            var enumTypes = types.Where(x => x.IsEnum);
 
             return new FileDefinition
             {
                 Name = types.Key,
                 EnumTypes = enumTypes.Select(ParseEnumType).ToList(),
-                DataClasses = dataTypes.Select(ParseDataClass).ToList(),
-                ApiClasses = apiTypes.Select(ParseApiClass).ToList()
+                Types = allTypes.Select(ParseDataClass).ToList(),
             };
         }
 
@@ -121,40 +122,31 @@ namespace MK94.DataGenerator
             };
         }
 
-        private ApiDefinition ParseApiClass(Type type)
-        {
-            return new ApiDefinition
-            {
-                Type = type,
-                Methods = type
-                    .GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                    .Select(ParseApiMethod)
-                    .ToList()
-            };
-        }
 
-        private ApiEndpoint ParseApiMethod(MethodInfo method)
+        private MethodDefinition ParseApiMethod(MethodInfo method)
         {
-            var parameters = method.GetParameters();
+            var parameters = method.GetParameters().Select(p => Tuple.Create(p, p.GetCustomAttribute<ParameterAttribute>())).ToList();
 
-            return new ApiEndpoint
+            return new MethodDefinition
             {
                 Name = method.Name,
+                MethodInfo = method,
                 Parameters = parameters.Select(ParseParameter).ToList(),
-                ResponseType = method.ReturnType
+                ResponseType = method.ReturnType,
             };
         }
 
-        private ParameterDefinition ParseParameter(ParameterInfo param)
+        private ParameterDefinition ParseParameter(Tuple<ParameterInfo, ParameterAttribute> arg)
         {
             return new ParameterDefinition
             {
-                Name = param.Name,
-                Type = param.ParameterType
+                Name = arg.Item1.Name,
+                Type = arg.Item1.ParameterType,
+                Parameter = arg.Item1
             };
         }
 
-        private DataDefinition ParseDataClass(Type type)
+        private TypeDefinition ParseDataClass(Type type)
         {
             var parsedProps = new List<PropertyDefinition>();
 
@@ -171,10 +163,15 @@ namespace MK94.DataGenerator
                 });
             }
 
-            return new DataDefinition
+            return new TypeDefinition
             {
                 Type = type,
-                Properties = parsedProps
+                Properties = parsedProps,
+                Methods = type
+                    .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                    .Where(x => !x.IsSpecialName)
+                    .Select(ParseApiMethod)
+                    .ToList()
             };
         }
 
@@ -182,7 +179,7 @@ namespace MK94.DataGenerator
         {
             var onlyOnAttr = property.GetCustomAttributesUngrouped<OnlyOnAttribute>();
 
-            if (onlyOnAttr.Any() && onlyOnAttr.All(a => a.Feature != project))
+            if (onlyOnAttr.Any() && onlyOnAttr.All(a => a.Project != project))
                 return false;
 
             var projAttr = property.GetCustomAttributesUngrouped<ProjectAttribute>();
@@ -195,7 +192,7 @@ namespace MK94.DataGenerator
 
         private ProjectAttribute GetAttributeForCurrentProject(Type type)
         {
-            return type.GetCustomAttributesUngrouped<ProjectAttribute>().FirstOrDefault(p => p.Project == project);
+            return type.GetCustomAttributesUngrouped<ProjectAttribute>().FirstOrDefault(p => project != "*" && p.Project == project);
         }
 
         private string GetFilePath(Type type)
@@ -206,33 +203,6 @@ namespace MK94.DataGenerator
                 throw new InvalidProgramException($"Type {type} is missing the File attribute");
 
             return attr.Name;
-        }
-
-        private static bool IsApiType(Type type)
-        {
-            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
-            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-            if (type.IsEnum)
-                return false;
-
-            else if (type.Name.EndsWith("Controller"))
-            {
-                // TODO these checks should go into a roslyn code analyser
-                if (properties.Any())
-                    throw new InvalidProgramException($"Controller type {type.FullName} is not allowed to have properties");
-                if (!methods.Any())
-                    throw new InvalidProgramException($"Controller type {type.FullName} has no methods");
-
-                return true;
-            }
-            else
-            {
-                if (!properties.Any())
-                    throw new InvalidProgramException($"Controller type {type.FullName} has no properties");
-
-                return false;
-            }
         }
     }
 }
