@@ -1,4 +1,5 @@
 ﻿using MK94.DataGenerator.Attributes;
+using MK94.DataGenerator.Intermediate.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -514,6 +515,27 @@ namespace MK94.DataGenerator
                     Type = type.Type
                 };
             }
+        }
+
+        public static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key)
+            where TKey : notnull
+            where TValue : new()
+        {
+            return dict.GetOrAdd(key, () => new TValue());
+        }
+         
+        public static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, Func<TValue> valueFactory)
+            where TKey : notnull
+        {
+            TValue? value;
+
+            if (!dict.TryGetValue(key, out value))
+            {
+                value = valueFactory();
+                dict.Add(key, value);
+            }
+
+            return value;
         }
     }
 }

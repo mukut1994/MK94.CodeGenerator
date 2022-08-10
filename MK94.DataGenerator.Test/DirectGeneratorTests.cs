@@ -6,7 +6,7 @@ using System.Text;
 
 namespace MK94.DataGenerator.Test
 {
-    public class Tests
+    public class DirectGeneratorTests
     {
         [SetUp]
         public void Setup()
@@ -18,7 +18,7 @@ namespace MK94.DataGenerator.Test
         {
             DiskAssert.EnableWriteMode();
 
-            var controllerFeature = ControllerFeature.Parser.ParseFromAssemblyContainingType<Tests>();
+            var controllerFeature = ControllerFeature.Parser.ParseFromAssemblyContainingType<DirectGeneratorTests>();
 
             new CSharpControllerClientGenerator().Generate(CodeBuilder.FactoryFromMemoryStream(out var files), @"space", controllerFeature);
 
