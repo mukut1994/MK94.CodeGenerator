@@ -22,7 +22,7 @@ namespace MK94.CodeGenerator.Test
             DiskAsserter.Default.PathResolver = PathResolver.Instance;
 
             // Remove the comment to update/fix tests
-            // AssertConfigure.EnableWriteMode();
+            // DiskAssert.EnableWriteMode();
         }
 
     }

@@ -49,7 +49,7 @@ namespace MK94.CodeGenerator.Test
 
             foreach (var file in files)
             {
-                DiskAssert.MatchesRaw(file.Key, Encoding.UTF8.GetString(file.Value.ToArray()));
+                DiskAssert.MatchesRaw(file.Key, Encoding.UTF8.GetString(file.Value.ToArray()).Replace("\r\n", "\n"));
             }
         }
 
@@ -88,7 +88,7 @@ namespace MK94.CodeGenerator.Test
 
             foreach (var file in files)
             {
-                DiskAssert.MatchesRaw(file.Key, Encoding.UTF8.GetString(file.Value.ToArray()));
+                DiskAssert.MatchesRaw(file.Key, Encoding.UTF8.GetString(file.Value.ToArray()).Replace("\r\n", "\n"));
             }
         }
     }
