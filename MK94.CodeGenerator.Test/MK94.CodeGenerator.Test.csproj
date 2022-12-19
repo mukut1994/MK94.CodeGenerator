@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MK94.DataGenerator\MK94.CodeGenerator.csproj" />
+    <ProjectReference Include="..\MK94.CodeGenerator\MK94.CodeGenerator.csproj" />
   </ItemGroup>
 
 </Project>
