@@ -29,6 +29,7 @@ namespace MK94.DataGenerator
         private int indent = 0;
         private int parenthesisOpenCount = 0;
         private bool optionalComma = false;
+        private bool optionalSpace = false;
 
         public static Func<string, CodeBuilder> FactoryFromBasePath(string path, IndentStyle indentStyle = IndentStyle.NewLine)
         {
@@ -183,6 +184,9 @@ namespace MK94.DataGenerator
 
         public CodeBuilder Flush()
         {
+            if(lineHasContent)
+                NewLine();
+
             output.Flush();
 
             return this;
@@ -190,13 +194,25 @@ namespace MK94.DataGenerator
 
         private void InternalAppend(string content)
         {
+            if (string.IsNullOrEmpty(content))
+                return;
+
             if (!lineHasContent)
+            {
                 lineBuilder.Append("".PadLeft(indent * 4, ' '));
+                lineHasContent = true;
+            }
 
             if (optionalComma)
             {
                 optionalComma = false;
                 AppendComma();
+            }
+
+            if (optionalSpace)
+            {
+                optionalSpace = false;
+                InternalAppend(" ");
             }
 
             if (content.Contains(Environment.NewLine))
@@ -213,9 +229,16 @@ namespace MK94.DataGenerator
             }
             else
             {
-                lineHasContent = true;
                 lineBuilder.Append(content);
             }
+        }
+
+        public CodeBuilder AppendWord(string word)
+        {
+            InternalAppend(word);
+            optionalSpace = true;
+
+            return this;
         }
 
         public CodeBuilder AppendOptionalComma()
@@ -237,6 +260,17 @@ namespace MK94.DataGenerator
         {
             InternalAppend(content);
             NewLine();
+
+            return this;
+        }
+
+        public CodeBuilder Append(MemoryStream stream)
+        {
+            using var reader = new StreamReader(stream);
+
+            var text = reader.ReadToEnd();
+
+            InternalAppend(text);
 
             return this;
         }
@@ -272,6 +306,7 @@ namespace MK94.DataGenerator
 
         public CodeBuilder AppendComma()
         {
+            optionalSpace = false;
             Append(", ");
 
             if (parenthesisOpenCount > 0 && lineBuilder.Length > 150 + indent * 4)
@@ -297,6 +332,7 @@ namespace MK94.DataGenerator
 
         public CodeBuilder OpenParanthesis()
         {
+            optionalSpace = false;
             optionalComma = false;
             parenthesisOpenCount++;
             indent++;
@@ -307,6 +343,7 @@ namespace MK94.DataGenerator
 
         public CodeBuilder CloseParanthesis()
         {
+            optionalSpace = false;
             optionalComma = false;
             parenthesisOpenCount--;
 
@@ -334,6 +371,7 @@ namespace MK94.DataGenerator
         public CodeBuilder OpenBlock()
         {
             optionalComma = false;
+            optionalSpace = false;
             if (indentStyle == IndentStyle.NewLine && lineHasContent)
             {
                 NewLine();
@@ -371,6 +409,7 @@ namespace MK94.DataGenerator
         public CodeBuilder CloseBlock()
         {
             optionalComma = false;
+            optionalSpace = false;
             indent--;
 
             if (indent < 0)

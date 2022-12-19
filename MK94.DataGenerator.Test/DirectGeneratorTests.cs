@@ -16,8 +16,6 @@ namespace MK94.DataGenerator.Test
         [Test]
         public void Test1()
         {
-            DiskAssert.EnableWriteMode();
-
             var controllerFeature = ControllerFeature.Parser.ParseFromAssemblyContainingType<DirectGeneratorTests>();
 
             new CSharpControllerClientGenerator().Generate(CodeBuilder.FactoryFromMemoryStream(out var files), @"space", controllerFeature);
