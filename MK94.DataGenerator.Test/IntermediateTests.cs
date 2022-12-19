@@ -16,8 +16,6 @@ namespace MK94.DataGenerator.Test
         [Test]
         public void Test()
         {
-            DiskAssert.EnableWriteMode();
-
             var c = new CSharpCodeGenerator();
 
             var t = c
@@ -59,8 +57,6 @@ namespace MK94.DataGenerator.Test
         [Test]
         public void TestTs()
         {
-            DiskAssert.EnableWriteMode();
-
             var c = new TypescriptCodeGenerator();
 
             var t = c
