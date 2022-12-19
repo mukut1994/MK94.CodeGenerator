@@ -5,9 +5,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using static MK94.DataGenerator.Generator.Generators.CSharpHelper;
+using static MK94.CodeGenerator.Generator.Generators.CSharpHelper;
 
-namespace MK94.DataGenerator.Generator.Generators
+namespace MK94.CodeGenerator.Generator.Generators
 {
     public class QueueBinding
     {

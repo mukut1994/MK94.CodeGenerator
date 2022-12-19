@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MK94.DataGenerator.Generator
+namespace MK94.CodeGenerator.Generator
 {
     public class CSharpListenerGenerator
     {

@@ -1,10 +1,10 @@
-using MK94.DataGenerator.Generator;
+using MK94.CodeGenerator.Generator;
 using NUnit.Framework;
 using MK94.Assert;
 using System.Linq;
 using System.Text;
 
-namespace MK94.DataGenerator.Test
+namespace MK94.CodeGenerator.Test
 {
     public class DirectGeneratorTests
     {

@@ -1,4 +1,4 @@
-﻿using MK94.DataGenerator.Attributes;
+﻿using MK94.CodeGenerator.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MK94.DataGenerator
+namespace MK94.CodeGenerator
 {
     public class FileDefinition
     {

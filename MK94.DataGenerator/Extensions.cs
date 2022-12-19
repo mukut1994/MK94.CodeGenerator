@@ -1,5 +1,5 @@
-﻿using MK94.DataGenerator.Attributes;
-using MK94.DataGenerator.Intermediate.CSharp;
+﻿using MK94.CodeGenerator.Attributes;
+using MK94.CodeGenerator.Intermediate.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MK94.DataGenerator
+namespace MK94.CodeGenerator
 {
     public static class Extensions
     {

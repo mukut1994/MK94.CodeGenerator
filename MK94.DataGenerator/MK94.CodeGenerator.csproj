@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
+    <Nullable>enable</Nullable>
+    <PackageProjectUrl>https://github.com/mukut1994/MK94.CodeGenerator</PackageProjectUrl>
+    <PackageLicense>https://github.com/mukut1994/MK94.CodeGenerator/blob/master/LICENSE</PackageLicense>
+    <PackageVersion>0.0.1</PackageVersion>
+  </PropertyGroup>
+
+</Project>

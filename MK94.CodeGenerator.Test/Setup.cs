@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MK94.DataGenerator.Test
+namespace MK94.CodeGenerator.Test
 {
     [SetUpFixture]
     public class GlobalSetup
@@ -17,7 +17,7 @@ namespace MK94.DataGenerator.Test
         [OneTimeSetUp]
         public void Setup()
         {
-            SetupDiskAssert.WithRecommendedSettings("MK94.DataGenerator.Test", "../TestData");
+            SetupDiskAssert.WithRecommendedSettings("MK94.CodeGenerator.Test", "../TestData");
 
             DiskAsserter.Default.PathResolver = PathResolver.Instance;
 

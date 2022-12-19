@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MK94.DataGenerator.Attributes
+namespace MK94.CodeGenerator.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
     public abstract class ControllerMethodAttribute : Attribute

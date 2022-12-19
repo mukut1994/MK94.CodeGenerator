@@ -1,5 +1,5 @@
-﻿using MK94.DataGenerator.Attributes;
-using MK94.DataGenerator.Generator.Generators;
+﻿using MK94.CodeGenerator.Attributes;
+using MK94.CodeGenerator.Generator.Generators;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace MK94.DataGenerator.Intermediate.Typescript
+namespace MK94.CodeGenerator.Intermediate.Typescript
 {
     public interface IGenerator
     {

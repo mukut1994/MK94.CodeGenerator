@@ -1,11 +1,11 @@
-﻿using MK94.DataGenerator.Attributes;
+﻿using MK94.CodeGenerator.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MK94.DataGenerator.Test
+namespace MK94.CodeGenerator.Test
 {
     public class ControllerFeature : ProjectAttribute
     {

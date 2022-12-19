@@ -1,0 +1,31 @@
+name: Publish Nuget MK94.CodeGenerator
+
+on:
+  workflow_dispatch:
+    branches: [ master ]
+    
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Install dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    
+    - name: Pack
+      working-directory: MK94.CodeGenerator
+      run: dotnet pack --configuration Release --no-restore
+        
+    - name: Publish
+      working-directory: MK94.CodeGenerator/bin/Release
+      run: dotnet nuget push *.nupkg -k ${{ secrets.NUGET }} -s https://api.nuget.org/v3/index.json

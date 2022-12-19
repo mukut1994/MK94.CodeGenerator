@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MK94.DataGenerator.Attributes
+namespace MK94.CodeGenerator.Attributes
 {
     public class IdFeature : ProjectAttribute
     {

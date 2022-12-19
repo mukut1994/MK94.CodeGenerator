@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static MK94.DataGenerator.Generator.Generators.CSharpHelper;
+using static MK94.CodeGenerator.Generator.Generators.CSharpHelper;
 
-namespace MK94.DataGenerator.Generator.Generators
+namespace MK94.CodeGenerator.Generator.Generators
 {
-    public class CSharpDataGenerator
+    public class CSharpCodeGenerator
     {
         public void Generate(Func<string, CodeBuilder> builderFactory, string @namespace, List<FileDefinition> files, params string[] additionalNamespaces)
         {

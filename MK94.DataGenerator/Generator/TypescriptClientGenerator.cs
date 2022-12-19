@@ -1,4 +1,4 @@
-﻿using MK94.DataGenerator.Attributes;
+﻿using MK94.CodeGenerator.Attributes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MK94.DataGenerator.Generator
+namespace MK94.CodeGenerator.Generator
 {
     public class Parameters
     {
@@ -127,7 +127,7 @@ namespace MK94.DataGenerator.Generator
             builder
                 .AppendLine("/*")
                 .AppendLine("    GENERATED FILE")
-                .AppendLine("    Any changes you make to this file by hand are going to be overwritten by MK94.DataGenerator.Generator and the code generator there.")
+                .AppendLine("    Any changes you make to this file by hand are going to be overwritten by MK94.CodeGenerator.Generator and the code generator there.")
                 .AppendLine("*/")
                 .NewLine();
 
@@ -150,7 +150,7 @@ namespace MK94.DataGenerator.Generator
             builder
                 .AppendLine("/*")
                 .AppendLine("    GENERATED FILE")
-                .AppendLine("    Any changes you make to this file by hand are going to be overwritten by MK94.DataGenerator.Generator and the code generator there.")
+                .AppendLine("    Any changes you make to this file by hand are going to be overwritten by MK94.CodeGenerator.Generator and the code generator there.")
                 .AppendLine("*/")
                 .NewLine();
 

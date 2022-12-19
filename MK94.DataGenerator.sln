@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31612.314
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MK94.DataGenerator", "MK94.DataGenerator\MK94.DataGenerator.csproj", "{DF0E3B82-0E87-4D6D-B99A-41640A26F380}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MK94.DataGenerator", "MK94.DataGenerator\MK94.CodeGenerator.csproj", "{DF0E3B82-0E87-4D6D-B99A-41640A26F380}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MK94.DataGenerator.Test", "MK94.DataGenerator.Test\MK94.DataGenerator.Test.csproj", "{CEA74623-26F9-4FE4-BADB-D56B54480E08}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MK94.CodeGenerator.Test", "MK94.CodeGenerator.Test\MK94.CodeGenerator.Test.csproj", "{CEA74623-26F9-4FE4-BADB-D56B54480E08}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

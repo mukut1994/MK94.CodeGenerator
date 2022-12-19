@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace MK94.DataGenerator
+namespace MK94.CodeGenerator
 {
     public enum IndentStyle
     {

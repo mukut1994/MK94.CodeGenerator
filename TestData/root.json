@@ -1,10 +1,10 @@
 {
-  "MK94.DataGenerator.Test.DirectGeneratorTests/Test1/Controller.cs": "d5dh7rfua8c9p5wne2f0rld1r-qaf-i25wifvgrsizk=",
-  "MK94.DataGenerator.Test.IntermediateCSharpTests/Test/file": "47deqpj8hbsa\u002B-timw\u002B5jceuqerkm5nmpjwzg3hsufu=",
-  "MK94.DataGenerator.Test.IntermediateCSharpTests/Test/file.cs": "pkhj68srkxb-lteney5impe4hmuvjtepaiurishoada=",
-  "MK94.DataGenerator.Test.IntermediateCSharpTests/TestTs/filea.cs": "nx79bqjmmj7oxzgqnnkcxim2v15uomagsv5anjuzh0o=",
-  "MK94.DataGenerator.Test.IntermediateCSharpTests/TestTs/fileb.cs": "3h0ksoxtslbhcfxkkhsui0gdlp8ygxaux0r-nxremai=",
-  "MK94.DataGenerator.Test.IntermediateTests/TestTs/filea.ts": "nx79bqjmmj7oxzgqnnkcxim2v15uomagsv5anjuzh0o=",
-  "MK94.DataGenerator.Test.IntermediateTests/TestTs/fileb.ts": "sougzp\u002Bwljm0oom6p7tns5luckxcsr0wkh2djgi9mc4=",
-  "MK94.DataGenerator.Test.IntermediateTests/Test/file.cs": "pkhj68srkxb-lteney5impe4hmuvjtepaiurishoada="
+  "MK94.CodeGenerator.Test.DirectGeneratorTests/Test1/Controller.cs": "d5dh7rfua8c9p5wne2f0rld1r-qaf-i25wifvgrsizk=",
+  "MK94.CodeGenerator.Test.IntermediateCSharpTests/Test/file": "47deqpj8hbsa\u002B-timw\u002B5jceuqerkm5nmpjwzg3hsufu=",
+  "MK94.CodeGenerator.Test.IntermediateCSharpTests/Test/file.cs": "pkhj68srkxb-lteney5impe4hmuvjtepaiurishoada=",
+  "MK94.CodeGenerator.Test.IntermediateCSharpTests/TestTs/filea.cs": "nx79bqjmmj7oxzgqnnkcxim2v15uomagsv5anjuzh0o=",
+  "MK94.CodeGenerator.Test.IntermediateCSharpTests/TestTs/fileb.cs": "3h0ksoxtslbhcfxkkhsui0gdlp8ygxaux0r-nxremai=",
+  "MK94.CodeGenerator.Test.IntermediateTests/TestTs/filea.ts": "nx79bqjmmj7oxzgqnnkcxim2v15uomagsv5anjuzh0o=",
+  "MK94.CodeGenerator.Test.IntermediateTests/TestTs/fileb.ts": "sougzp\u002Bwljm0oom6p7tns5luckxcsr0wkh2djgi9mc4=",
+  "MK94.CodeGenerator.Test.IntermediateTests/Test/file.cs": "pkhj68srkxb-lteney5impe4hmuvjtepaiurishoada="
 }
