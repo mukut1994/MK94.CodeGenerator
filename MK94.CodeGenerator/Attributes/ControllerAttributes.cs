@@ -38,6 +38,8 @@ namespace MK94.CodeGenerator.Attributes
     public class ParameterAttribute : Attribute { }
 
     public class RouteAttribute : ParameterAttribute { }
+
+    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Property)]
     public class QueryAttribute : ParameterAttribute { }
     public class FormAttribute : ParameterAttribute { }
     public class BodyAttribute : ParameterAttribute { }

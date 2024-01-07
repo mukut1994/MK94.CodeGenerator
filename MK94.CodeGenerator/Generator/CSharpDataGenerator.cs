@@ -1,6 +1,8 @@
-﻿using System;
+﻿using MK94.CodeGenerator.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using static MK94.CodeGenerator.Generator.CSharpHelper;
@@ -9,6 +11,13 @@ namespace MK94.CodeGenerator.Generator;
 
 public class CSharpDataGenerator
 {
+    private bool AspNetCompatability;
+
+    public CSharpDataGenerator(bool aspNetCompatability = false)
+    {
+        AspNetCompatability = aspNetCompatability;
+    }
+
     public void Generate(Func<string, CodeBuilder> builderFactory, string @namespace, List<FileDefinition> files, params string[] additionalNamespaces)
     {
         foreach (var file in files)
@@ -109,6 +118,11 @@ public class CSharpDataGenerator
 
     private void Generate(CodeBuilder builder, PropertyDefinition property, bool isOnClass)
     {
+        if (AspNetCompatability && property.Info.GetCustomAttribute<QueryAttribute>() != null)
+        {
+            builder.AppendLine("[Microsoft.AspNetCore.Mvc.FromQuery]");
+        }
+
         if (isOnClass && !IsNullable(property.Info))
             builder.Append("public required ");
         else

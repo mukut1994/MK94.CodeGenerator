@@ -14,9 +14,9 @@ namespace space
         private readonly FlurlClient client;
         public PizzaController(FlurlClient client) { this.client = client; }
 
-        public async Task PizzaList()
+        public async Task PizzaList(Page page)
         {
-            await client.Request("/api/Pizza/PizzaList").GetAsync();
+            await client.Request("/api/Pizza/PizzaList".SetQueryParam("page", page)).GetAsync();
         }
 
     }
