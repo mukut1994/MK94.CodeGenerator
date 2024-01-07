@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using static MK94.CodeGenerator.Generator.Generators.CSharpHelper;
+using static MK94.CodeGenerator.Generator.CSharpHelper;
 
 namespace MK94.CodeGenerator.Generator
 {

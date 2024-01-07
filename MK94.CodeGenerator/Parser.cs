@@ -6,203 +6,221 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MK94.CodeGenerator
+namespace MK94.CodeGenerator;
+
+public class FileDefinition
 {
-    public class FileDefinition
+    public FileAttribute FileInfo { get; set; }
+
+    public string Name { get; set; }
+
+    public List<EnumDefintion> EnumTypes { get; set; }
+
+    public List<TypeDefinition> Types { get; set; }
+}
+
+public class EnumDefintion
+{
+    public Type Type { get; set; }
+
+    public Dictionary<string, int> KeyValuePairs { get; set; }
+}
+
+public class PropertyDefinition
+{
+    public Type Type { get; set; }
+
+    public string Name { get; set; }
+
+    public PropertyInfo Info { get; set; }
+}
+
+public class TypeDefinition
+{
+    public Type Type { get; set; }
+
+    public List<MethodDefinition> Methods { get; set; }
+
+    public List<PropertyDefinition> Properties { get; set; }
+}
+
+public class MethodDefinition
+{
+    public string Name { get; set; }
+
+    public Type ResponseType { get; set; }
+
+    public MethodInfo MethodInfo { get; set; }
+
+    public List<ParameterDefinition> Parameters { get; set; }
+}
+
+public class ParameterDefinition
+{
+    public Type Type { get; set; }
+
+    public string Name { get; set; }
+
+    public ParameterInfo Parameter { get; set; }
+}
+
+public class Parser
+{
+    private string? project;
+
+    public Parser(string? project)
     {
-        public FileAttribute FileInfo { get; set; }
-
-        public string Name { get; set; }
-
-        public List<EnumDefintion> EnumTypes { get; set; }
-
-        public List<TypeDefinition> Types { get; set; }
+        this.project = project;
     }
 
-    public class EnumDefintion
-    {
-        public Type Type { get; set; }
+    public List<FileDefinition> ParseFromAssemblyContainingType<T>() => ParseFromAssembly(typeof(T).Assembly);
 
-        public Dictionary<string, int> KeyValuePairs { get; set; }
+    public List<FileDefinition> ParseFromEntryAssembly() => ParseFromAssembly(Assembly.GetEntryAssembly()!);
+
+    public List<FileDefinition> ParseFromAssembly(Assembly assembly)
+    {
+        var typesForProject = assembly
+            .GetTypes()
+            .ToDictionary(
+                x => x,
+                x => GetAttributeForCurrentProject(x))
+            .Where(x => (project == null && x.Key.GetCustomAttribute<FileAttribute>() != null) || x.Value != null);
+
+        var typesGroupedByOutputFile = typesForProject.GroupBy(x => GetFilePath(x.Key), x => x.Key);
+
+        return typesGroupedByOutputFile.Select(ParseFile).ToList();
     }
 
-    public class PropertyDefinition
+    public List<FileDefinition> ParseFromType(Type type)
     {
-        public Type Type { get; set; }
+        var typesGroupedByOutputFile = new[] { type }.GroupBy(x => GetFilePath(x), x => x);
 
-        public string Name { get; set; }
-
-        public PropertyInfo Info { get; set; }
+        return typesGroupedByOutputFile.Select(ParseFile).ToList();
     }
 
-    public class TypeDefinition
+    private FileDefinition ParseFile(IGrouping<string, Type> types)
     {
-        public Type Type { get; set; }
+        var allTypes = types.Where(x => !x.IsEnum);
+        var enumTypes = types.Where(x => x.IsEnum);
 
-        public List<MethodDefinition> Methods { get; set; }
-
-        public List<PropertyDefinition> Properties { get; set; }
+        return new FileDefinition
+        {
+            Name = types.Key,
+            EnumTypes = enumTypes.Select(ParseEnumType).ToList(),
+            Types = allTypes.Select(ParseDataClass).ToList(),
+        };
     }
 
-    public class MethodDefinition
+    private EnumDefintion ParseEnumType(Type type)
     {
-        public string Name { get; set; }
-
-        public Type ResponseType { get; set; }
-
-        public MethodInfo MethodInfo { get; set; }
-
-        public List<ParameterDefinition> Parameters { get; set; }
+        return new EnumDefintion
+        {
+            Type = type,
+            KeyValuePairs = Enum.GetValues(type)
+                .Cast<int>()
+                .ToDictionary(x => Enum.GetName(type, x)!, x => x)
+        };
     }
 
-    public class ParameterDefinition
+
+    private MethodDefinition ParseApiMethod(MethodInfo method)
     {
-        public Type Type { get; set; }
+        var parameters = method.GetParameters().Select(p => Tuple.Create(p, p.GetCustomAttribute<ParameterAttribute>())).ToList();
 
-        public string Name { get; set; }
-
-        public ParameterInfo Parameter { get; set; }
+        return new MethodDefinition
+        {
+            Name = method.Name,
+            MethodInfo = method,
+            Parameters = parameters.Select(ParseParameter!).ToList(),
+            ResponseType = method.ReturnType,
+        };
     }
 
-    public class Parser
+    private ParameterDefinition ParseParameter(Tuple<ParameterInfo, ParameterAttribute> arg)
     {
-        private string project;
-
-        public Parser(string project)
+        return new ParameterDefinition
         {
-            this.project = project;
-        }
+            Name = arg.Item1.Name!,
+            Type = arg.Item1.ParameterType,
+            Parameter = arg.Item1
+        };
+    }
 
-        public List<FileDefinition> ParseFromAssemblyContainingType<T>() => ParseFromAssembly(typeof(T).Assembly);
+    private TypeDefinition ParseDataClass(Type type)
+    {
+        var parsedProps = new List<PropertyDefinition>();
 
-        public List<FileDefinition> ParseFromEntryAssembly() => ParseFromAssembly(Assembly.GetEntryAssembly());
-
-        public List<FileDefinition> ParseFromAssembly(Assembly assembly)
+        foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(PropertyEnabledForCurrentProject))
         {
-            var typesForProject = assembly
-                .GetTypes()
-                .ToDictionary(
-                    x => x,
-                    x => GetAttributeForCurrentProject(x))
-                .Where(x => (project == null && x.Key.GetCustomAttribute<FileAttribute>() != null) || x.Value != null);
+            if (property.DeclaringType != type)
+                continue;
 
-            var typesGroupedByOutputFile = typesForProject.GroupBy(x => GetFilePath(x.Key), x => x.Key);
-
-            return typesGroupedByOutputFile.Select(ParseFile).ToList();
-        }
-
-        public List<FileDefinition> ParseFromType(Type type)
-        {
-            var typesGroupedByOutputFile = new[] { type }.GroupBy(x => GetFilePath(x), x => x);
-
-            return typesGroupedByOutputFile.Select(ParseFile).ToList();
-        }
-
-        private FileDefinition ParseFile(IGrouping<string, Type> types)
-        {
-            var allTypes = types.Where(x => !x.IsEnum);
-            var enumTypes = types.Where(x => x.IsEnum);
-
-            return new FileDefinition
+            parsedProps.Add(new PropertyDefinition
             {
-                Name = types.Key,
-                EnumTypes = enumTypes.Select(ParseEnumType).ToList(),
-                Types = allTypes.Select(ParseDataClass).ToList(),
-            };
+                Type = property.PropertyType,
+                Name = property.Name,
+                Info = property
+            });
         }
 
-        private EnumDefintion ParseEnumType(Type type)
+        return new TypeDefinition
         {
-            return new EnumDefintion
-            {
-                Type = type,
-                KeyValuePairs = Enum.GetValues(type)
-                    .Cast<int>()
-                    .ToDictionary(x => Enum.GetName(type, x), x => x)
-            };
-        }
+            Type = type,
+            Properties = parsedProps,
+            Methods = type
+                .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                .Where(x => !x.IsSpecialName)
+                .Select(ParseApiMethod)
+                .ToList()
+        };
+    }
 
+    private bool PropertyEnabledForCurrentProject(PropertyInfo property)
+    {
+        var onlyOnAttr = property.GetCustomAttributesUngrouped<OnlyOnAttribute>();
 
-        private MethodDefinition ParseApiMethod(MethodInfo method)
-        {
-            var parameters = method.GetParameters().Select(p => Tuple.Create(p, p.GetCustomAttribute<ParameterAttribute>())).ToList();
+        if (onlyOnAttr.Any() && onlyOnAttr.All(a => a.Project != project))
+            return false;
 
-            return new MethodDefinition
-            {
-                Name = method.Name,
-                MethodInfo = method,
-                Parameters = parameters.Select(ParseParameter).ToList(),
-                ResponseType = method.ReturnType,
-            };
-        }
+        var projAttr = property.GetCustomAttributesUngrouped<ProjectAttribute>();
 
-        private ParameterDefinition ParseParameter(Tuple<ParameterInfo, ParameterAttribute> arg)
-        {
-            return new ParameterDefinition
-            {
-                Name = arg.Item1.Name,
-                Type = arg.Item1.ParameterType,
-                Parameter = arg.Item1
-            };
-        }
+        if (projAttr.Any() && projAttr.All(p => p.Project != project))
+            return false;
 
-        private TypeDefinition ParseDataClass(Type type)
-        {
-            var parsedProps = new List<PropertyDefinition>();
+        return true;
+    }
 
-            foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(PropertyEnabledForCurrentProject))
-            {
-                if (property.DeclaringType != type)
-                    continue;
+    private ProjectAttribute? GetAttributeForCurrentProject(Type type)
+    {
+        return type
+                .GetCustomAttributesUngrouped<ProjectAttribute>()
+                .FirstOrDefault(p => project != "*" && p.Project == project);
+    }
 
-                parsedProps.Add(new PropertyDefinition
-                {
-                    Type = property.PropertyType,
-                    Name = property.Name,
-                    Info = property
-                });
-            }
+    private string GetFilePath(Type type)
+    {
+        var attr = type.GetCustomAttribute<FileAttribute>();
 
-            return new TypeDefinition
-            {
-                Type = type,
-                Properties = parsedProps,
-                Methods = type
-                    .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                    .Where(x => !x.IsSpecialName)
-                    .Select(ParseApiMethod)
-                    .ToList()
-            };
-        }
+        if (attr == null)
+            throw new InvalidProgramException($"Type {type} is missing the File attribute");
 
-        private bool PropertyEnabledForCurrentProject(PropertyInfo property)
-        {
-            var onlyOnAttr = property.GetCustomAttributesUngrouped<OnlyOnAttribute>();
+        return attr.Name;
+    }
+}
 
-            if (onlyOnAttr.Any() && onlyOnAttr.All(a => a.Project != project))
-                return false;
+public class ParserV2
+{
+    public static void FromEntryAssembly() => new ParserV2(Assembly.GetEntryAssembly()!);
 
-            var projAttr = property.GetCustomAttributesUngrouped<ProjectAttribute>();
+    private Assembly assembly;
 
-            if (projAttr.Any() && projAttr.All(p => p.Project != project))
-                return false;
+    public ParserV2(Assembly assembly)
+    {
+        this.assembly = assembly;
+    }
 
-            return true;
-        }
+    public void FindTypesWithProperty<T>()
+    {
 
-        private ProjectAttribute GetAttributeForCurrentProject(Type type)
-        {
-            return type.GetCustomAttributesUngrouped<ProjectAttribute>().FirstOrDefault(p => project != "*" && p.Project == project);
-        }
-
-        private string GetFilePath(Type type)
-        {
-            var attr = type.GetCustomAttribute<FileAttribute>();
-
-            if (attr == null)
-                throw new InvalidProgramException($"Type {type} is missing the File attribute");
-
-            return attr.Name;
-        }
     }
 }

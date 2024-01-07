@@ -27,7 +27,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
         public static CsTypeReference ToType<T>()
         {
-            return new NamedTypeReference(CSharpHelper.CSharpName(typeof(T)));
+            return new NamedTypeReference(MK94.CodeGenerator.Generator.CSharpHelper.CSharpName(typeof(T)));
         }
 
         public abstract string Resolve(CSharpCodeGenerator root);
