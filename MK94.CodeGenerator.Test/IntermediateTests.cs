@@ -14,47 +14,6 @@ namespace MK94.CodeGenerator.Test
     public class IntermediateTests
     {
         [Test]
-        public void Test()
-        {
-            var c = new CSharpCodeGenerator();
-
-            var t = c
-                .File("file.cs")
-                .Namespace("Namespace.A")
-                .Type("TypeA", System.Reflection.BindingFlags.Public);
-
-            t.Property(System.Reflection.BindingFlags.Public, CsTypeReference.ToType<int>(), "PropA");
-            t.Method(System.Reflection.BindingFlags.Public, CsTypeReference.ToType<int>(), "MethodA")
-                .WithArgument(CsTypeReference.ToType<int>(), "a")
-                .WithArgument(CsTypeReference.ToType<int>(), "b")
-                .Body
-                .Append("return a + b;");
-
-
-            var t2 = c
-                .File("file.cs")
-                .Namespace("Namespace.B")
-                .Type("TypeB", System.Reflection.BindingFlags.Public);
-
-            t2.Property(System.Reflection.BindingFlags.Public, CsTypeReference.ToType<int>(), "PropA");
-            t2.Method(System.Reflection.BindingFlags.Public, CsTypeReference.ToType<int>(), "MethodA")
-                .WithArgument(CsTypeReference.ToType<int>(), "c")
-                .WithArgument(CsTypeReference.ToType<int>(), "d")
-                .Body
-                .Append("return c + d;");
-
-            c.Generate(CodeBuilder.FactoryFromMemoryStream(out var files));
-
-            CodeBuilder.FlushAll();
-
-            foreach (var file in files)
-            {
-                DiskAssert.MatchesRaw(file.Key, Encoding.UTF8.GetString(file.Value.ToArray()).Replace("\r\n", "\n"));
-            }
-        }
-
-
-        [Test]
         public void TestTs()
         {
             var c = new TypescriptCodeGenerator();

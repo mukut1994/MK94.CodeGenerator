@@ -181,6 +181,13 @@ public class CodeBuilder
 
     public CodeBuilder Flush()
     {
+        if (lineHasContent)
+        {
+            output.Write(lineBuilder);
+            lineHasContent = false;
+            lineBuilder.Clear();
+        }
+
         output.Flush();
 
         return this;

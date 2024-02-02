@@ -25,9 +25,16 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             return new NamedTypeReference(type);
         }
 
+        public static CsTypeReference ToVoid() => ToRaw("void");
+
         public static CsTypeReference ToType<T>()
         {
             return new NamedTypeReference(MK94.CodeGenerator.Generator.CSharpHelper.CSharpName(typeof(T)));
+        }
+
+        public static CsTypeReference ToType(Type t)
+        {
+            return new NamedTypeReference(MK94.CodeGenerator.Generator.CSharpHelper.CSharpName(t));
         }
 
         public abstract string Resolve(CSharpCodeGenerator root);
@@ -48,7 +55,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
         }
     }
 
-    public class CSharpCodeGenerator
+    public class CSharpCodeGenerator : IFileGenerator
     {
         public Dictionary<string, IntermediateFileDefinition> Files { get; } = new();
 
@@ -111,7 +118,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 this.root = root;
             }
 
-            public IntermediateTypeDefinition Type(string name, BindingFlags flags)
+            public IntermediateTypeDefinition Type(string name, MemberFlags flags)
             {
                 var definition = Types.GetOrAdd(name, () => new IntermediateTypeDefinition(root, flags: flags, name: name));
 
@@ -121,8 +128,9 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public void Generate(CodeBuilder builder)
             {
                 builder
-                    .Append($"namespace {Namespace}")
-                    .WithBlock((b, i) => i.Value.Generate(b), Types);
+                    .AppendLine($"namespace {Namespace};")
+                    .NewLine()
+                    .Append((b, i) => i.Value.Generate(b), Types);
             }
         }
 
@@ -130,21 +138,24 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
         {
             public string Name { get; set; }
 
-            public BindingFlags Flags { get; set; }
+            public MemberFlags Flags { get; set; }
 
-            public IntermediateMemberDefinition(BindingFlags flags, string name)
+            public IntermediateMemberDefinition(MemberFlags flags, string name)
             {
                 Name = name;
                 Flags = flags;
             }
 
-            public void MemberFlags(CodeBuilder builder)
+            public void AppendMemberFlags(CodeBuilder builder)
             {
-                if (Flags.HasFlag(BindingFlags.Public))
+                if (Flags.HasFlag(MemberFlags.Public))
                     builder.AppendWord("public");
 
-                if (Flags.HasFlag(BindingFlags.Static))
+                if (Flags.HasFlag(MemberFlags.Static))
                     builder.AppendWord("static");
+
+                if (Flags.HasFlag(MemberFlags.Override))
+                    builder.AppendWord("override");
             }
 
             public void MemberName(CodeBuilder builder)
@@ -158,7 +169,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
         {
             public CsTypeReference Type { get; set; }
 
-            protected IntermediateTypedMemberDefinition(BindingFlags flags, CsTypeReference type, string name) : base(flags, name)
+            protected IntermediateTypedMemberDefinition(MemberFlags flags, CsTypeReference type, string name) : base(flags, name)
             {
                 Type = type;
             }
@@ -168,7 +179,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
         {
             private CSharpCodeGenerator root { get; }
 
-            public IntermediatePropertyDefinition(CSharpCodeGenerator root, BindingFlags flags, CsTypeReference type, string name) : base(flags, type, name) 
+            public IntermediatePropertyDefinition(CSharpCodeGenerator root, MemberFlags flags, CsTypeReference type, string name) : base(flags, type, name) 
             {
                 this.root = root;
             }
@@ -176,7 +187,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public void Generate(CodeBuilder builder)
             {
                 builder
-                    .Append(MemberFlags)
+                    .Append(AppendMemberFlags)
                     .AppendWord(Type.Resolve(root))
                     .Append(MemberName)
                     .AppendLine("{ get; set; }");
@@ -217,7 +228,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public CodeBuilder Body { get; }
             public List<IntermediateArgumentDefinition> Arguments { get; } = new();
 
-            public IntermediateMethodDefinition(CSharpCodeGenerator root, BindingFlags flags, CsTypeReference type, string name) : base(flags, type, name)
+            public IntermediateMethodDefinition(CSharpCodeGenerator root, MemberFlags flags, CsTypeReference type, string name) : base(flags, type, name)
             {
                 Body = CodeBuilder.FromMemoryStream(out var stream);
                 BodyStream = stream;
@@ -238,7 +249,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 BodyStream.Position = 0;
 
                 builder
-                    .Append(MemberFlags).AppendWord(Type.Resolve(root)).Append(MemberName)
+                    .Append(AppendMemberFlags).AppendWord(Type.Resolve(root)).Append(MemberName)
                     .OpenParanthesis()
                         .Append((b, arg) => arg.Generate(b), Arguments)
                     .CloseParanthesis()
@@ -253,21 +264,21 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public Dictionary<string, IntermediatePropertyDefinition> Properties = new();
             public Dictionary<string, IntermediateMethodDefinition> Methods = new();
 
-            public IntermediateTypeDefinition(CSharpCodeGenerator root, BindingFlags flags, string name) : base(flags, name)
+            public IntermediateTypeDefinition(CSharpCodeGenerator root, MemberFlags flags, string name) : base(flags, name)
             {
                 this.root = root;
             }
 
-            public IntermediatePropertyDefinition Property(BindingFlags flags, CsTypeReference type, string name)
+            public IntermediatePropertyDefinition Property(MemberFlags flags, CsTypeReference type, string name)
             {
                 var definition = Properties.GetOrAdd(name, () => new(root, flags, type, name));
 
                 return definition;
             }
 
-            public IntermediateMethodDefinition Method(BindingFlags flags, CsTypeReference type, string name)
+            public IntermediateMethodDefinition Method(MemberFlags flags, CsTypeReference returnType, string name)
             {
-                var definition = Methods.GetOrAdd(name, () => new(root, flags, type, name));
+                var definition = Methods.GetOrAdd(name, () => new(root, flags, returnType, name));
 
                 return definition;
             }
@@ -275,12 +286,11 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public void Generate(CodeBuilder builder)
             {
                 builder
-                    .Append(MemberFlags)
+                    .Append(AppendMemberFlags)
                     .AppendWord("class")
                     .Append(MemberName)
                     .OpenBlock()
                         .Append((b, p) => p.Value.Generate(b), Properties)
-                        .NewLine()
                         .Append((b, p) => p.Value.Generate(b), Methods)
                     .CloseBlock();
             }

@@ -8,9 +8,9 @@ namespace data
 {
     public class Page
     {
-        [FromQuery]
+        [Microsoft.AspNetCore.Mvc.FromQuery]
         public required Int32 Size { get; set; }
-        [FromQuery]
+        [Microsoft.AspNetCore.Mvc.FromQuery]
         public required Int32 Index { get; set; }
     }
 }

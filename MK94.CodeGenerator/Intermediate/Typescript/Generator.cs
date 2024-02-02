@@ -166,7 +166,7 @@ namespace MK94.CodeGenerator.Intermediate.Typescript
         }
     }
 
-    public class TypescriptCodeGenerator
+    public class TypescriptCodeGenerator : IFileGenerator
     {
         public Dictionary<string, IntermediateFileDefinition> Files { get; } = new();
 
