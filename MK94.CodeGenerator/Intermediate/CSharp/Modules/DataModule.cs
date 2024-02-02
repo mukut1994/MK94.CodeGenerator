@@ -8,15 +8,14 @@ namespace MK94.CodeGenerator.Intermediate.CSharp.Modules;
 
 public class DataModule
 {
-    private readonly Project project;
-    private string Namespace = "Todo";
+    private readonly CSharpProject project;
 
-    private DataModule(Project project)
+    private DataModule(CSharpProject project)
     {
         this.project = project;
     }
 
-    public static DataModule Using(Project project)
+    public static DataModule Using(CSharpProject project)
     {
         return new DataModule(project);
     }
@@ -29,7 +28,7 @@ public class DataModule
 
             foreach(var typeDef in fileDef.Types)
             {
-                var ns = file.Namespace(Namespace);
+                var ns = file.Namespace(project.NamespaceResolver(typeDef));
                 var type = ns.Type(typeDef.Type.Name, MemberFlags.Public);
 
                 foreach(var propertyDef in typeDef.Properties)

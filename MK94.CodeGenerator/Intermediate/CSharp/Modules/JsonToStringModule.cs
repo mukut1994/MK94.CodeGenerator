@@ -8,15 +8,15 @@ namespace MK94.CodeGenerator.Intermediate.CSharp.Modules;
 
 public class JsonToStringModule
 {
-    private readonly Project project;
+    private readonly CSharpProject project;
     private string Namespace = "Todo";
 
-    private JsonToStringModule(Project project)
+    private JsonToStringModule(CSharpProject project)
     {
         this.project = project;
     }
 
-    public static JsonToStringModule Using(Project project)
+    public static JsonToStringModule Using(CSharpProject project)
     {
         return new JsonToStringModule(project);
     }
@@ -29,7 +29,7 @@ public class JsonToStringModule
 
             foreach (var typeDef in fileDef.Types)
             {
-                var ns = file.Namespace(Namespace);
+                var ns = file.Namespace(project.NamespaceResolver(typeDef));
                 var type = ns.Type(typeDef.Type.Name, MemberFlags.Public);
 
                 var method = type.Method(MemberFlags.Public | MemberFlags.Override, CsTypeReference.ToType<string>(), "ToString");

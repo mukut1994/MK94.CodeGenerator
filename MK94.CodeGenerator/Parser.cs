@@ -8,11 +8,6 @@ using System.Threading.Tasks;
 
 namespace MK94.CodeGenerator;
 
-public class Project
-{
-    public List<FileDefinition> Files { get; set; }
-}
-
 public class FileDefinition
 {
     public FileAttribute FileInfo { get; set; }

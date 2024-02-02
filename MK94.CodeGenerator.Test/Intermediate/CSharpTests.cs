@@ -61,7 +61,7 @@ public class CSharpTests
         // TODO cleaner parser syntax
         var controllerFeature = ControllerFeature.Parser.ParseFromAssemblyContainingType<DirectGeneratorTests>();
 
-        var project = new Project()
+        var project = new CSharpProject()
         {
             Files = controllerFeature.GetMethodDependencies(cache).ToFileDef(cache).ToList()
         };
@@ -74,20 +74,19 @@ public class CSharpTests
     }
 
     [Test]
-    public void DataAndSerializerMixedModuletest()
+    public void DataAndSerializerMixedModuleTest()
     {
         DiskAssert.EnableWriteMode();
 
-        var all = new Parser(null).ParseFromAssemblyContainingType<Page>();
-        var cache = all.BuildCache();
+        var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
-        var controllerFeature = ControllerFeature.Parser.ParseFromAssemblyContainingType<DirectGeneratorTests>();
+        var controllerFeature = ControllerFeature.Parser.ParseFromAssemblyContainingType<Page>();
 
-        var project = new Project()
-        {
-            Files = controllerFeature.GetMethodDependencies(cache).ToFileDef(cache).ToList()
-        };
+        var project = solution
+            .CSharpProject()
+            .WithData(controllerFeature.GetMethodDependencies(solution.LookupCache).ToFileDef(solution.LookupCache).ToList())
+            .WithNamespace("TestNameSpace");
 
         var csharpCode = new CSharpCodeGenerator();
 

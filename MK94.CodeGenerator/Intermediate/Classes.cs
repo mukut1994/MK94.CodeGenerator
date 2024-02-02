@@ -18,3 +18,20 @@ public enum MemberFlags
     Static = 2,
     Override = 4
 }
+
+public class Project
+{
+    public List<FileDefinition> Files { get; set; } = new();
+}
+
+
+public static class ProjectExtensions
+{
+    public static T WithData<T>(this T project, List<FileDefinition> files)
+        where T : Project
+    {
+        project.Files.AddRange(files);
+
+        return project;
+    }
+}
