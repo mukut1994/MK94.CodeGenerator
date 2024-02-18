@@ -15,24 +15,24 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
     {
         void Generate(CodeBuilder builder);
 
-        void GetRequiredReferences(HashSet<CsTypeReference> refs) { }
+        void GetRequiredReferences(HashSet<CsharpTypeReference> refs) { }
     }
 
-    public abstract record CsTypeReference
+    public abstract record CsharpTypeReference
     {
-        public static CsTypeReference ToRaw(string type)
+        public static CsharpTypeReference ToRaw(string type)
         {
             return new NamedTypeReference(type);
         }
 
-        public static CsTypeReference ToVoid() => ToRaw("void");
+        public static CsharpTypeReference ToVoid() => ToRaw("void");
 
-        public static CsTypeReference ToType<T>()
+        public static CsharpTypeReference ToType<T>()
         {
             return new NamedTypeReference(MK94.CodeGenerator.Generator.CSharpHelper.CSharpName(typeof(T)));
         }
 
-        public static CsTypeReference ToType(Type t)
+        public static CsharpTypeReference ToType(Type t)
         {
             return new NamedTypeReference(MK94.CodeGenerator.Generator.CSharpHelper.CSharpName(t));
         }
@@ -40,7 +40,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
         public abstract string Resolve(CSharpCodeGenerator root);
     }
 
-    internal record NamedTypeReference : CsTypeReference
+    internal record NamedTypeReference : CsharpTypeReference
     {
         public string Name { get; private init; }
 
@@ -82,13 +82,20 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
     public class IntermediateFileDefinition : IGenerator
     {
         private CSharpCodeGenerator root { get; }
+        public Dictionary<string, IntermediateNamespaceDefintion> Namespaces { get; } = new();
+
+        public HashSet<string> Usings { get; } = new();
 
         public IntermediateFileDefinition(CSharpCodeGenerator root)
         {
             this.root = root;
         }
 
-        public Dictionary<string, IntermediateNamespaceDefintion> Namespaces { get; } = new();
+        public IntermediateFileDefinition WithUsing(string @namespace)
+        {
+            Usings.Add(@namespace);
+            return this;
+        }
 
         public IntermediateNamespaceDefintion Namespace(string @namespace)
         {
@@ -98,6 +105,12 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
         }
         public void Generate(CodeBuilder builder)
         {
+            foreach (var usings in Usings.OrderByDescending(x => x, StringComparer.InvariantCultureIgnoreCase))
+                builder.AppendLine($"using {usings};");
+
+            if (Usings.Any())
+                builder.NewLine();
+
             foreach (var @namespace in Namespaces)
             {
                 @namespace.Value.Generate(builder);
@@ -146,7 +159,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 Flags = flags;
             }
 
-            public void AppendMemberFlags(CodeBuilder builder)
+            protected void AppendMemberFlags(CodeBuilder builder)
             {
                 if (Flags.HasFlag(MemberFlags.Public))
                     builder.AppendWord("public");
@@ -158,7 +171,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     builder.AppendWord("override");
             }
 
-            public void MemberName(CodeBuilder builder)
+            protected void MemberName(CodeBuilder builder)
             {
                 builder.AppendWord(Name);
             }
@@ -167,9 +180,9 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
         public abstract class IntermediateTypedMemberDefinition : IntermediateMemberDefinition
         {
-            public CsTypeReference Type { get; set; }
+            public CsharpTypeReference Type { get; set; }
 
-            protected IntermediateTypedMemberDefinition(MemberFlags flags, CsTypeReference type, string name) : base(flags, name)
+            protected IntermediateTypedMemberDefinition(MemberFlags flags, CsharpTypeReference type, string name) : base(flags, name)
             {
                 Type = type;
             }
@@ -179,7 +192,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
         {
             private CSharpCodeGenerator root { get; }
 
-            public IntermediatePropertyDefinition(CSharpCodeGenerator root, MemberFlags flags, CsTypeReference type, string name) : base(flags, type, name) 
+            public IntermediatePropertyDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name) : base(flags, type, name) 
             {
                 this.root = root;
             }
@@ -194,7 +207,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             }
 
 
-            public void GetRequiredReferences(HashSet<CsTypeReference> refs)
+            public void GetRequiredReferences(HashSet<CsharpTypeReference> refs)
             {
                 refs.Add(Type);
             }
@@ -206,9 +219,9 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public string Name { get; }
 
-            public CsTypeReference Type { get; }
+            public CsharpTypeReference Type { get; }
 
-            public IntermediateArgumentDefinition(CSharpCodeGenerator root, CsTypeReference type, string name)
+            public IntermediateArgumentDefinition(CSharpCodeGenerator root, CsharpTypeReference type, string name)
             {
                 Name = name;
                 Type = type;
@@ -228,14 +241,14 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public CodeBuilder Body { get; }
             public List<IntermediateArgumentDefinition> Arguments { get; } = new();
 
-            public IntermediateMethodDefinition(CSharpCodeGenerator root, MemberFlags flags, CsTypeReference type, string name) : base(flags, type, name)
+            public IntermediateMethodDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name) : base(flags, type, name)
             {
                 Body = CodeBuilder.FromMemoryStream(out var stream);
                 BodyStream = stream;
                 this.root = root;
             }
 
-            public IntermediateMethodDefinition WithArgument(CsTypeReference type, string name)
+            public IntermediateMethodDefinition WithArgument(CsharpTypeReference type, string name)
             {
                 Arguments.Add(new(root, type, name));
 
@@ -269,14 +282,14 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 this.root = root;
             }
 
-            public IntermediatePropertyDefinition Property(MemberFlags flags, CsTypeReference type, string name)
+            public IntermediatePropertyDefinition Property(MemberFlags flags, CsharpTypeReference type, string name)
             {
                 var definition = Properties.GetOrAdd(name, () => new(root, flags, type, name));
 
                 return definition;
             }
 
-            public IntermediateMethodDefinition Method(MemberFlags flags, CsTypeReference returnType, string name)
+            public IntermediateMethodDefinition Method(MemberFlags flags, CsharpTypeReference returnType, string name)
             {
                 var definition = Methods.GetOrAdd(name, () => new(root, flags, returnType, name));
 
@@ -290,7 +303,12 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .AppendWord("class")
                     .Append(MemberName)
                     .OpenBlock()
-                        .Append((b, p) => p.Value.Generate(b), Properties)
+                        .Append((b, p) => p.Value.Generate(b), Properties);
+
+                if (Properties.Any() && Methods.Any())
+                    builder.NewLine();
+
+                builder
                         .Append((b, p) => p.Value.Generate(b), Methods)
                     .CloseBlock();
             }

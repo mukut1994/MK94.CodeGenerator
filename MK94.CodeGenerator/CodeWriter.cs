@@ -196,7 +196,10 @@ public class CodeBuilder
     private void InternalAppend(string content)
     {
         if (!lineHasContent)
+        {
+            lineHasContent = true;
             lineBuilder.Append("".PadLeft(indent * 4, ' '));
+        }
 
         if (optionalComma)
         {

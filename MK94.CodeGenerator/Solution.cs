@@ -32,11 +32,8 @@ public class Solution
         return this;
     }
 
-    public CSharpProject CSharpProject(string? path = null)
+    public ICSharpProject CSharpProject(string? path = null)
     {
-        return new CSharpProject
-        {
-            RelativePath = Path.Combine(BasePath ?? string.Empty, path ?? string.Empty)
-        };
+        return new CSharpProject(this, Path.Combine(BasePath ?? string.Empty, path ?? string.Empty));
     }
 }

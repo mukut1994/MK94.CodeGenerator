@@ -6,19 +6,14 @@ using System.Threading.Tasks;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp.Modules;
 
-public class JsonToStringModule
+public class JsonToStringModule : IGeneratorModule<CSharpCodeGenerator>
 {
-    private readonly CSharpProject project;
+    private readonly ICSharpProject project;
     private string Namespace = "Todo";
 
-    private JsonToStringModule(CSharpProject project)
+    public JsonToStringModule(ICSharpProject project)
     {
         this.project = project;
-    }
-
-    public static JsonToStringModule Using(CSharpProject project)
-    {
-        return new JsonToStringModule(project);
     }
 
     public void AddTo(CSharpCodeGenerator codeGenerator)
@@ -29,14 +24,33 @@ public class JsonToStringModule
 
             foreach (var typeDef in fileDef.Types)
             {
+                if (!typeDef.Properties.Any())
+                    continue;
+
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
                 var type = ns.Type(typeDef.Type.Name, MemberFlags.Public);
 
-                var method = type.Method(MemberFlags.Public | MemberFlags.Override, CsTypeReference.ToType<string>(), "ToString");
+                var method = type.Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToType<string>(), "ToString");
 
                 // TODO add support for methods to import namespaces;
                 method.Body.Append("return System.Text.Json.JsonSerializer.Serialize(this);");
             }
         }
+    }
+}
+
+public static class JsonToStringModuleExtensions
+{
+    public static T WithJsonToStringGenerator<T>(this T project, Action<JsonToStringModule>? configure = null)
+        where T : ICSharpProject
+    {
+        var mod = new JsonToStringModule(project);
+
+        if (configure != null)
+            configure(mod);
+
+        project.GeneratorModules.Add(mod);
+
+        return project;
     }
 }

@@ -25,10 +25,10 @@ public class CSharpTests
             .Namespace("Namespace.A")
             .Type("TypeA", MemberFlags.Public);
 
-        t.Property(MemberFlags.Public, CsTypeReference.ToType<int>(), "PropA");
-        t.Method(MemberFlags.Public, CsTypeReference.ToType<int>(), "MethodA")
-            .WithArgument(CsTypeReference.ToType<int>(), "a")
-            .WithArgument(CsTypeReference.ToType<int>(), "b")
+        t.Property(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "PropA");
+        t.Method(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "MethodA")
+            .WithArgument(CsharpTypeReference.ToType<int>(), "a")
+            .WithArgument(CsharpTypeReference.ToType<int>(), "b")
             .Body
             .Append("return a + b;");
 
@@ -38,10 +38,10 @@ public class CSharpTests
             .Namespace("Namespace.B")
             .Type("TypeB", MemberFlags.Public);
 
-        t2.Property(MemberFlags.Public, CsTypeReference.ToType<int>(), "PropA");
-        t2.Method(MemberFlags.Public, CsTypeReference.ToType<int>(), "MethodA")
-            .WithArgument(CsTypeReference.ToType<int>(), "c")
-            .WithArgument(CsTypeReference.ToType<int>(), "d")
+        t2.Property(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "PropA");
+        t2.Method(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "MethodA")
+            .WithArgument(CsharpTypeReference.ToType<int>(), "c")
+            .WithArgument(CsharpTypeReference.ToType<int>(), "d")
             .Body
             .Append("return c + d;");
 
@@ -55,20 +55,21 @@ public class CSharpTests
     {
         DiskAssert.EnableWriteMode();
 
-        var all = new Parser(null).ParseFromAssemblyContainingType<Page>();
-        var cache = all.BuildCache();
+        var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
-        var controllerFeature = ControllerFeature.Parser.ParseFromAssemblyContainingType<DirectGeneratorTests>();
-
-        var project = new CSharpProject()
-        {
-            Files = controllerFeature.GetMethodDependencies(cache).ToFileDef(cache).ToList()
-        };
+        var controllerFeature = ControllerFeature.Parser.ParseFromAssemblyContainingType<Page>();
 
         var csharpCode = new CSharpCodeGenerator();
 
-        DataModule.Using(project).AddTo(csharpCode);
+        var project = solution
+            .CSharpProject()
+            .WhichImplements(controllerFeature)
+            .WithinNamespace("TestNameSpace")
+
+            .WithPropertiesGenerator()
+
+            .GenerateTo(csharpCode);
 
         csharpCode.AssertMatches();
     }
@@ -83,15 +84,18 @@ public class CSharpTests
         // TODO cleaner parser syntax
         var controllerFeature = ControllerFeature.Parser.ParseFromAssemblyContainingType<Page>();
 
-        var project = solution
-            .CSharpProject()
-            .WithData(controllerFeature.GetMethodDependencies(solution.LookupCache).ToFileDef(solution.LookupCache).ToList())
-            .WithNamespace("TestNameSpace");
-
         var csharpCode = new CSharpCodeGenerator();
 
-        DataModule.Using(project).AddTo(csharpCode);
-        JsonToStringModule.Using(project).AddTo(csharpCode);
+        var project = solution
+            .CSharpProject()
+            .WhichImplements(controllerFeature)
+            .WithinNamespace("TestNameSpace")
+            
+            .WithPropertiesGenerator()
+            .WithJsonToStringGenerator()
+            .WithFlurlClientGenerator()
+            
+            .GenerateTo(csharpCode);
 
         csharpCode.AssertMatches();
     }
