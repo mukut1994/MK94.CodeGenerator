@@ -19,12 +19,12 @@ public class PropertiesModule : IGeneratorModule<CSharpCodeGenerator>
     {
         foreach(var fileDef in project.Files)
         {
-            var file = codeGenerator.File($"{fileDef.Name}.cs");
-
             foreach(var typeDef in fileDef.Types)
             {
                 if (!typeDef.Properties.Any())
                     continue;
+
+                var file = codeGenerator.File($"{fileDef.Name}.cs");
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
                 var type = ns.Type(typeDef.Type.Name, MemberFlags.Public);

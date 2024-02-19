@@ -337,7 +337,7 @@ namespace MK94.CodeGenerator.Generator
                 {
                     var type = GetTypeText(prop.Type);
 
-                    builder.AppendLine($"{LowercaseFirst(prop.Name)}: {type} | null | undefined;");
+                    builder.AppendLine($"{prop.Name.ToLowercaseFirst()}: {type} | null | undefined;");
                 }
 
                 builder.CloseBlock();
@@ -354,7 +354,7 @@ namespace MK94.CodeGenerator.Generator
                     .AppendLine("@Injectable({")
                     .AppendLine("    providedIn: 'root',")
                     .AppendLine("})")
-                    .Append($"export class {UppercaseFirst(apiName)}Api")
+                    .Append($"export class {apiName.ToUppercaseFirst()}Api")
                     .OpenBlock()
                     .AppendLine("constructor(private http: HttpClient) { }");
 
@@ -389,7 +389,7 @@ namespace MK94.CodeGenerator.Generator
 
             builder
                 .NewLine()
-                .Append($"{LowercaseFirst(method.Name)}")
+                .Append($"{method.Name.ToLowercaseFirst()}")
                 .OpenParanthesis();
 
             foreach (var prop in method.Parameters)
@@ -513,20 +513,6 @@ namespace MK94.CodeGenerator.Generator
                 return $" extends {aggregated}";
 
             return aggregated;
-        }
-
-        private static string UppercaseFirst(string s)
-        {
-            char[] a = s.ToCharArray();
-            a[0] = char.ToUpper(a[0]);
-            return new string(a);
-        }
-
-        private static string LowercaseFirst(string s)
-        {
-            char[] a = s.ToCharArray();
-            a[0] = char.ToLower(a[0]);
-            return new string(a);
         }
 
         enum TypeText

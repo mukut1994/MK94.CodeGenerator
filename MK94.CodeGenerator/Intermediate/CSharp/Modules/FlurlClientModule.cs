@@ -1,6 +1,8 @@
-﻿using System;
+﻿using MK94.CodeGenerator.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,6 +10,27 @@ namespace MK94.CodeGenerator.Intermediate.CSharp.Modules;
 
 public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
 {
+    public static HashSet<Type> QueryFriendlyTypes = new()
+    {
+        typeof(bool),
+        typeof(byte),
+        typeof(sbyte),
+        typeof(char),
+        typeof(decimal),
+        typeof(double),
+        typeof(float),
+        typeof(int),
+        typeof(uint),
+        typeof(nint),
+        typeof(nuint),
+        typeof(long),
+        typeof(ulong),
+        typeof(short),
+        typeof(ushort),
+        typeof(string),
+        typeof(Guid),
+    };
+
     private readonly ICSharpProject project;
 
     public FlurlClientModule(ICSharpProject project)
@@ -38,16 +61,35 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
                         CsharpTypeReference.ToType(methodDef.ResponseType),
                         methodDef.Name);
 
-                    foreach(var argDef in methodDef.Parameters)
+                    foreach (var argDef in methodDef.Parameters)
                         method.WithArgument(CsharpTypeReference.ToType(argDef.Type), argDef.Name);
 
                     method.Body.AppendLine($@"return ""{method.Name}""");
 
-                    foreach(var queryDef in methodDef.Parameters.Where(x => x.FromQuery()))
-                        method.Body.AppendLine($@"  .SetQueryParam(""{queryDef.Name}"", {queryDef.Name})");
+                    SetQueryParams(methodDef, method);
 
                     method.Body.Append($@"  .ReceiveStringAsync();");
                 }
+            }
+        }
+    }
+
+    private static void SetQueryParams(MethodDefinition methodDef, IntermediateFileDefinition.IntermediateMethodDefinition method)
+    {
+        foreach (var queryDef in methodDef.Parameters.Where(x => x.FromQuery()))
+        {
+            if(QueryFriendlyTypes.Contains(queryDef.Type))
+            {
+                method.Body.AppendLine($@"  .SetQueryParam(""{queryDef.Name}"", {queryDef.Name})");
+                continue;
+            }
+
+            foreach(var property in queryDef.Parameter.ParameterType
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                var query = property.PropertyType.GetCustomAttributesUngrouped<QueryAttribute>();
+
+                method.Body.AppendLine($@"  .SetQueryParam(""{property.Name.ToLowercaseFirst()}"", {queryDef.Name}.{property.Name})");
             }
         }
     }

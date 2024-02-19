@@ -12,6 +12,41 @@ namespace MK94.CodeGenerator;
 
 public static class Extensions
 {
+    public static int GetStableHashCode(this string str)
+    {
+        // https://referencesource.microsoft.com/#mscorlib/system/string.cs,827
+        // T
+        unchecked
+        {
+            int hash1 = 5381;
+            int hash2 = hash1;
+
+            for (int i = 0; i < str.Length && str[i] != '\0'; i += 2)
+            {
+                hash1 = ((hash1 << 5) + hash1) ^ str[i];
+                if (i == str.Length - 1 || str[i + 1] == '\0')
+                    break;
+                hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
+            }
+
+            return hash1 + (hash2 * 1566083941);
+        }
+    }
+
+    public static string ToLowercaseFirst(this string s)
+    {
+        char[] a = s.ToCharArray();
+        a[0] = char.ToLower(a[0]);
+        return new string(a);
+    }
+
+    public static string ToUppercaseFirst(this string s)
+    {
+        char[] a = s.ToCharArray();
+        a[0] = char.ToUpper(a[0]);
+        return new string(a);
+    }
+
     public static IEnumerable<T> GetCustomAttributesUngrouped<T>(this MemberInfo memberInfo)
         where T : Attribute
     {

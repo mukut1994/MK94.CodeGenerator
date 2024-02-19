@@ -293,6 +293,10 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             {
                 var definition = Methods.GetOrAdd(name, () => new(root, flags, returnType, name));
 
+                definition.Flags = definition.Flags | flags;
+
+                // TODO throw exception if return types don't match
+
                 return definition;
             }
 
