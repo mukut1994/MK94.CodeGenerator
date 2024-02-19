@@ -133,6 +133,8 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public IntermediateTypeDefinition Type(string name, MemberFlags flags)
             {
+                flags = flags & MemberFlags.Type;
+
                 var definition = Types.GetOrAdd(name, () => new IntermediateTypeDefinition(root, flags: flags, name: name));
 
                 return definition;

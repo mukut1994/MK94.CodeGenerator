@@ -52,7 +52,10 @@ public enum MemberFlags
 {
     Public = 1,
     Static = 2,
-    Override = 4
+    Override = 4,
+
+    Type = 8,
+    Interface = 16,
 }
 
 public interface IProject

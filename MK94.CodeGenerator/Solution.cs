@@ -1,4 +1,5 @@
 ﻿using MK94.CodeGenerator.Intermediate.CSharp;
+using MK94.CodeGenerator.Intermediate.Typescript;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,5 +36,10 @@ public class Solution
     public ICSharpProject CSharpProject(string? path = null)
     {
         return new CSharpProject(this, Path.Combine(BasePath ?? string.Empty, path ?? string.Empty));
+    }
+
+    public ITypescriptProject TypescriptProject(string? path = null)
+    {
+        return new TypescriptProject(this, Path.Combine(BasePath ?? string.Empty, path ?? string.Empty));
     }
 }

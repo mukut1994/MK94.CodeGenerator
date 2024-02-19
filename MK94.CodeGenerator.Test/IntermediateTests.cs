@@ -1,5 +1,6 @@
 ﻿using MK94.Assert;
 using MK94.CodeGenerator.Generator;
+using MK94.CodeGenerator.Intermediate;
 using MK94.CodeGenerator.Intermediate.CSharp;
 using MK94.CodeGenerator.Intermediate.Typescript;
 using NUnit.Framework;
@@ -20,10 +21,10 @@ namespace MK94.CodeGenerator.Test
 
             var t = c
                 .File("filea.ts")
-                .Type("TypeA", System.Reflection.BindingFlags.Public);
+                .Type("TypeA", MemberFlags.Public);
 
-            t.Property(System.Reflection.BindingFlags.Public, TsTypeReference.ToType<int>(), "PropA");
-            t.Method(System.Reflection.BindingFlags.Public, TsTypeReference.ToType<int>(), "MethodA")
+            t.Property(MemberFlags.Public, TsTypeReference.ToType<int>(), "PropA");
+            t.Method(MemberFlags.Public, TsTypeReference.ToType<int>(), "MethodA")
                 .WithArgument(TsTypeReference.ToType<int>(), "a")
                 .WithArgument(TsTypeReference.ToType<int>(), "b")
                 .Body
@@ -32,10 +33,10 @@ namespace MK94.CodeGenerator.Test
 
             var t2 = c
                 .File("fileb.ts")
-                .Type("TypeB", System.Reflection.BindingFlags.Public);
+                .Type("TypeB", MemberFlags.Public);
 
-            t2.Property(System.Reflection.BindingFlags.Public, TsTypeReference.ToType<int>(), "PropA");
-            t2.Method(System.Reflection.BindingFlags.Public, TsTypeReference.ToType<int>(), "MethodA")
+            t2.Property(MemberFlags.Public, TsTypeReference.ToType<int>(), "PropA");
+            t2.Method(MemberFlags.Public, TsTypeReference.ToType<int>(), "MethodA")
                 .WithArgument(TsTypeReference.ToRaw("TypeA"), "c")
                 .WithArgument(TsTypeReference.ToRaw("TypeA"), "d")
                 .Body
