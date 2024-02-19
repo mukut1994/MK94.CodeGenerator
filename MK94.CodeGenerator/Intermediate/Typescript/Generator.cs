@@ -252,7 +252,7 @@ public class IntermediateFileDefinition : IGenerator
 
     public IntermediateTypeDefinition Type(string name, MemberFlags flags)
     {
-        flags = flags & MemberFlags.Type;
+        flags = flags | MemberFlags.Type;
 
         // TODO validation
         var definition = (IntermediateTypeDefinition) Members
