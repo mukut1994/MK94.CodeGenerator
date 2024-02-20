@@ -12,6 +12,12 @@ namespace MK94.CodeGenerator;
 
 public static class Extensions
 {
+    public static string AsClassName(this TypeDefinition typeDef)
+    {
+        return typeDef.Type.Name.StartsWith('I') && typeDef.Type.IsInterface ?
+            typeDef.Type.Name[1..] : typeDef.Type.Name;
+    }
+
     public static int GetStableHashCode(this string str)
     {
         // https://referencesource.microsoft.com/#mscorlib/system/string.cs,827

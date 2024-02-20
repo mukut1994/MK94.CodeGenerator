@@ -49,8 +49,7 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
 
             foreach (var typeDef in fileDef.Types)
             {
-                var name = typeDef.Type.Name.StartsWith('I') && typeDef.Type.IsInterface ?
-                    typeDef.Type.Name[1..] : typeDef.Type.Name;
+                string name = typeDef!.AsClassName();
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
                 var type = ns.Type(name, MemberFlags.Public);

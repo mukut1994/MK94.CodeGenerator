@@ -10,6 +10,8 @@ public class PropertiesModule : IGeneratorModule<TypescriptCodeGenerator>
 {
     private readonly ITypescriptProject project;
 
+    public bool LowercaseFirst = true;
+
     public PropertiesModule(ITypescriptProject project)
     {
         this.project = project;
@@ -30,13 +32,24 @@ public class PropertiesModule : IGeneratorModule<TypescriptCodeGenerator>
 
                 foreach(var propertyDef in typeDef.Properties)
                 {
+                    var name = propertyDef.Name;
+
+                    if (LowercaseFirst)
+                        name = name.ToLowercaseFirst();
+
                     type.Property(
                         MemberFlags.Public, 
                         TsTypeReference.ToType(propertyDef.Type),
-                        propertyDef.Name);
+                        name);
                 }
             }
         }
+    }
+
+    public PropertiesModule WithUnchangedPropertyNames()
+    {
+        LowercaseFirst = false;
+        return this;
     }
 }
 

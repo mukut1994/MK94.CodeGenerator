@@ -88,6 +88,7 @@ public class TypescriptTests
             .WhichImplements(controllerFeature)
             
             .WithPropertiesGenerator()
+            .WithHttpClientModuleGenerator()
 
             .GenerateTo(csharpCode);
 

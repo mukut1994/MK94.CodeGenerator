@@ -56,6 +56,8 @@ public enum MemberFlags
 
     Type = 8,
     Interface = 16,
+    Async = 32,
+    Method = 64,
 }
 
 public interface IProject

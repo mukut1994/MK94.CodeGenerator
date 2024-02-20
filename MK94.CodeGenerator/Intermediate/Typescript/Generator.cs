@@ -21,7 +21,7 @@ public interface IGenerator
 
 public record TypeResolveContext(TypescriptCodeGenerator Root, string FilePath, IntermediateFileDefinition File);
 
-public record TypeResolveMatch(string? import, string name);
+public record TypeResolveMatch(string? import, string? name);
 
 public abstract record TsTypeReference
 {
@@ -30,9 +30,14 @@ public abstract record TsTypeReference
         return new StringTypedTypeReference(type);
     }
 
-    public static TsTypeReference ToNamed(string name)
+    public static TsTypeReference ToNamed(string? importFrom, string name)
     {
-        return new NamedTypeReference(name);
+        return new NamedTypeReference(importFrom, name);
+    }
+
+    public static TsTypeReference ToAnonymous()
+    {
+        return new AnonymousReference();
     }
 
     public static TsTypeReference ToType<T>()
@@ -131,18 +136,28 @@ public abstract record TsTypeReference
     }
 }
 
+internal record AnonymousReference : TsTypeReference
+{
+    public override TypeResolveMatch Resolve(TypeResolveContext context)
+    {
+        return new(null, null);
+    }
+}
+
 internal record NamedTypeReference : TsTypeReference
 {
     public string Name { get; private init; }
+    public string? ImportFrom { get; private init; }
 
-    public NamedTypeReference(string name)
+    public NamedTypeReference(string? importFrom, string name)
     {
         Name = name;
+        ImportFrom = importFrom;
     }
 
     public override TypeResolveMatch Resolve(TypeResolveContext context)
     {
-        return new(null, Name);
+        return new(ImportFrom, Name);
     }
 }
 
@@ -160,7 +175,7 @@ internal record TypedTypeReference : TsTypeReference
         if (context.Root.TypeNameLookups.TryGetValue(type, out var lookup))
             return new(null, lookup);
 
-        throw new NotImplementedException();
+        return new(null, "TODO");
     }
 }
 
@@ -316,6 +331,9 @@ public abstract class IntermediateMemberDefinition : IGenerator
 
         if (Flags.HasFlag(MemberFlags.Static))
             builder.AppendWord("static");
+
+        if (Flags.HasFlag(MemberFlags.Async) && Flags.HasFlag(MemberFlags.Method))
+            builder.AppendWord("async");
     }
 
     public void MemberName(CodeBuilder builder)
@@ -349,11 +367,18 @@ public class IntermediatePropertyDefinition : IntermediateTypedMemberDefinition,
 
     public override void Generate(CodeBuilder builder)
     {
+        var type = Type.Resolve(context).name;
+
         builder
             .Append(WriteMemberFlags)
-            .Append(MemberName)
-            .Append(": ")
-            .Append(Type.Resolve(context).name)
+            .Append(MemberName);
+
+        if (type != null)
+            builder
+                .Append(": ")
+                .Append(type);
+
+        builder
             .Append(";")
             .NewLine();
     }
@@ -378,16 +403,30 @@ public class IntermediateArgumentDefinition : IGenerator
 
     public TsTypeReference Type { get; }
 
-    public IntermediateArgumentDefinition(TypeResolveContext context, TsTypeReference type, string name)
+    public string? Default { get; set; }
+
+    public IntermediateArgumentDefinition(TypeResolveContext context, TsTypeReference type, string name, string? @default)
     {
         Name = name;
         Type = type;
+        Default = @default;
+
         this.context = context;
     }
 
     public void Generate(CodeBuilder builder)
     {
-        builder.AppendWord(Type.Resolve(context).name).AppendWord(Name).AppendOptionalComma();
+        builder.Append(Name);
+
+        var typeName = Type.Resolve(context).name;
+
+        if (typeName != null)
+            builder.AppendWord(":").AppendWord(typeName);
+
+        if (Default != null)
+            builder.AppendWord(" =").Append(Default);
+
+        builder.AppendOptionalComma();
     }
 }
 
@@ -398,16 +437,19 @@ public class IntermediateMethodDefinition : IntermediateTypedMemberDefinition, I
     public CodeBuilder Body { get; }
     public List<IntermediateArgumentDefinition> Arguments { get; } = new();
 
-    public IntermediateMethodDefinition(TypeResolveContext context, MemberFlags flags, TsTypeReference type, string name) : base(flags, type, name)
+    public IntermediateMethodDefinition(TypeResolveContext context, MemberFlags flags, TsTypeReference type, string name) 
+        : base(flags, type, name)
     {
+        Flags |= MemberFlags.Method;
+
         Body = CodeBuilder.FromMemoryStream(out var stream);
         BodyStream = stream;
         this.context = context;
     }
 
-    public IntermediateMethodDefinition WithArgument(TsTypeReference type, string name)
+    public IntermediateMethodDefinition WithArgument(TsTypeReference type, string name, string? @default = null)
     {
-        Arguments.Add(new(context, type, name));
+        Arguments.Add(new(context, type, name, @default));
 
         return this;
     }
@@ -418,13 +460,19 @@ public class IntermediateMethodDefinition : IntermediateTypedMemberDefinition, I
         BodyStream.Flush();
         BodyStream.Position = 0;
 
+        var retTypeName = Type.Resolve(context).name;
+
         builder
-            .Append(WriteMemberFlags).AppendWord(Type.Resolve(context).name).Append(MemberName)
+            .Append(WriteMemberFlags).Append(MemberName)
             .OpenParanthesis()
                 .Append((b, arg) => arg.Generate(b), Arguments)
-            .CloseParanthesis()
-            .WithBlock(b => b.Append(BodyStream))
-            ;
+            .CloseParanthesis();
+
+        if (retTypeName != null)
+            builder.Append(": ").Append(retTypeName);
+
+        builder
+            .WithBlock(b => b.Append(BodyStream));
     }
 
     public override IEnumerable<TypeResolveMatch> ResolveReferences(TypeResolveContext context)
