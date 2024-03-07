@@ -51,7 +51,7 @@ public class TypescriptTests
     [Test]
     public void DataModuletest()
     {
-        DiskAssert.EnableWriteMode();
+        // DiskAssert.EnableWriteMode();
 
         var solution = Solution.FromAssemblyContaining<Page>();
 
@@ -74,7 +74,7 @@ public class TypescriptTests
     [Test]
     public void DataAndSerializerMixedModuleTest()
     {
-        DiskAssert.EnableWriteMode();
+        // DiskAssert.EnableWriteMode();
 
         var solution = Solution.FromAssemblyContaining<Page>();
 
