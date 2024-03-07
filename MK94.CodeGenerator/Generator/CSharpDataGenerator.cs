@@ -11,7 +11,7 @@ namespace MK94.CodeGenerator.Generator;
 
 public class CSharpDataGenerator
 {
-    private bool AspNetCompatability;
+    private readonly bool AspNetCompatability;
 
     public CSharpDataGenerator(bool aspNetCompatability = false)
     {
@@ -90,7 +90,7 @@ public class CSharpDataGenerator
             .AppendOptionalComma();
     }
 
-    private string Extensions(TypeDefinition type)
+    private static string Extensions(TypeDefinition type)
     {
         var extensions = GetTypeExtensions(type.Type).Select(x => CSharpName(x));
 
