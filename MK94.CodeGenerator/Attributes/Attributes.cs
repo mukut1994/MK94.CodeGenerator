@@ -60,6 +60,9 @@ namespace MK94.CodeGenerator.Attributes
         }
     }
 
+    /// <summary>
+    /// The file name where this class is located.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface | AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
     public class FileAttribute : Attribute
     {
