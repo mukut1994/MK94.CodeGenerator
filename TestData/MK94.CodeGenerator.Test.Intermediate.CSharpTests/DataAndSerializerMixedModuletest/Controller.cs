@@ -5,11 +5,11 @@ namespace TestNameSpace;
 
 public class PizzaController
 {
-    public static Task PizzaList(Int32 page, Int32 count)
+    public static Task PizzaList(Page page)
     {
         return "PizzaList"
-          .SetQueryParam("page", page)
-          .SetQueryParam("count", count)
+          .SetQueryParam("size", page.Size)
+          .SetQueryParam("index", page.Index)
           .ReceiveStringAsync();
     }
 }

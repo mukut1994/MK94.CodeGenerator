@@ -1,7 +1,7 @@
-public class TypeA {
-    public System.Int32 PropA { get; set; }
+export class TypeA {
+    PropA: number;
 
-    public System.Int32 MethodA(System.Int32 a, System.Int32 b) {
+    MethodA(a: number, b: number): number {
         return a + b;
     }
 }

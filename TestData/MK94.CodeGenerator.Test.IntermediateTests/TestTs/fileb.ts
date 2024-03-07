@@ -3,10 +3,10 @@ import {
 }
 from "filea.ts";
 
- public class TypeB {
-    public System.Int32 PropA { get; set; }
+ export class TypeB {
+    PropA: number;
 
-    public System.Int32 MethodA(TypeA c, TypeA d) {
+    MethodA(c: TypeA, d: TypeA): number {
         return c + d;
     }
 }
