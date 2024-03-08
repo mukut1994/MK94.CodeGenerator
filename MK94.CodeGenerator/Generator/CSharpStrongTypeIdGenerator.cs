@@ -24,11 +24,8 @@ namespace MK94.CodeGenerator.Generator.Generators
         private void Generate(CodeBuilder builder, string @namespace, FileDefinition file)
         {
             builder
-                .AppendLine("using System;")
-                .AppendLine("using System.Text.Json;")
-                .AppendLine("using System.Text.Json.Serialization; ")
-                .NewLine()
-                .AppendLine($"namespace {@namespace};")
+                .AppendUsings("System", "System.Text.Json", "System.Text.Json.Serialization")
+                .AppendNamespace(@namespace)
                 .NewLine()
                 .Append(Generate, file.Types);
         }

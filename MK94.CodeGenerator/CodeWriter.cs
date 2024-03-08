@@ -255,6 +255,24 @@ public class CodeBuilder
         return this;
     }
 
+    public CodeBuilder AppendUsings(params string[] content)
+    {
+        foreach (var c in content)
+        {
+            InternalAppend($"using {c};");
+            NewLine();
+        }
+
+        NewLine();
+
+        return this;
+    }
+
+    public CodeBuilder AppendNamespace(string content)
+    {
+        return AppendLine($"namespace {content}");
+    }
+
     public CodeBuilder AppendLine(string content)
     {
         InternalAppend(content);

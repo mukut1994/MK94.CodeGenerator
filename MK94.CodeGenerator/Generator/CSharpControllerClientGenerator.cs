@@ -26,18 +26,8 @@ namespace MK94.CodeGenerator.Generator
         private void Generate(CodeBuilder builder, string @namespace, FileDefinition fileDefinition)
         {
             builder
-                .AppendLine("using System;")
-                .AppendLine("using System.Collections.Generic;")
-                .AppendLine("using System.Linq;")
-                .AppendLine("using System.Text;")
-                .AppendLine("using System.IO;")
-                .AppendLine("using Flurl;")
-                .AppendLine("using Flurl.Http;")
-                .AppendLine("using System.Threading.Tasks;")
-                .NewLine();
-
-            builder
-                .AppendLine($"namespace {@namespace}")
+                .AppendUsings("System", "System.Collections.Generic", "System.Linq", "System.Text", "System.IO", "System.Threading.Tasks", "Flurl", "Flurl.Http")
+                .AppendNamespace(@namespace)
                 .WithBlock(Generate, fileDefinition.Types);
         }
 

@@ -30,23 +30,14 @@ public class CSharpDataGenerator
 
     public void Generate(CodeBuilder builder, string @namespace, FileDefinition fileDefinition, params string[] additionalNamespaces)
     {
-        builder.AppendLine("using System;")
-            .AppendLine("using System.Collections.Generic;")
-            .AppendLine("using System.Linq;")
-            .AppendLine("using System.Text;")
-            .AppendLine("using System.Numerics;");
+        builder.AppendUsings("System", "System.Collections.Generic", "System.Linq", "System.Text", "System.Numerics");
 
         foreach (var n in additionalNamespaces)
-            builder.AppendLine($"using {n};");
+            builder.AppendUsings(n);
 
         builder
-            .NewLine();
-
-        builder
-            .AppendLine($"namespace {@namespace}")
-            .OpenBlock()
-            .Append(Generate, fileDefinition)
-            .CloseBlock();
+            .AppendNamespace(@namespace)
+            .WithBlock(Generate, fileDefinition);
 
         builder.Flush();
     }

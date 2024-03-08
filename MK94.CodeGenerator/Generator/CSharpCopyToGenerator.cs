@@ -29,13 +29,12 @@ namespace MK94.CodeGenerator.Generator.Generators
         private void Generate(CodeBuilder builder, string @namespace, FileDefinition file)
         {
             builder
-                .AppendLine("using System;")
-                .AppendLine("using System.Collections.Generic;")
-                .NewLine()
-                .AppendLine($"namespace {@namespace};")
-                .NewLine()
+                .AppendUsings("System", "System.Collections.Generic")
+                .AppendNamespace(@namespace)
+                .OpenBlock()
                 .AppendLine($"public static partial class CopyExtensions")
-                .WithBlock(Generate, file);
+                .WithBlock(Generate, file)
+                .CloseBlock();
         }
 
         private void Generate(CodeBuilder builder, FileDefinition file)

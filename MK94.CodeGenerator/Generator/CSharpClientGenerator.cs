@@ -23,19 +23,10 @@ namespace MK94.CodeGenerator.Generator
 
         public void Generate(CodeBuilder builder, string @namespace, FileDefinition fileDefinition)
         {
-            builder.AppendLine("using System;")
-                .AppendLine("using System.Collections.Generic;")
-                .AppendLine("using System.Linq;")
-                .AppendLine("using System.Text;")
-                .AppendLine("using System.IO;")
-                .AppendLine("using System.Threading.Tasks;")
-                .NewLine();
-
             builder
-                .AppendLine($"namespace {@namespace}")
-                .OpenBlock()
-                .Append(Generate, fileDefinition)
-                .CloseBlock();
+                .AppendUsings("System", "System.Collections.Generic", "System.Linq", "System.Text", "System.IO", "System.Threading.Tasks")
+                .AppendNamespace(@namespace)
+                .WithBlock(Generate, fileDefinition);
 
             builder.Flush();
         }
