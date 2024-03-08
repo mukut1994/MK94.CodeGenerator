@@ -35,7 +35,41 @@ namespace MK94.CodeGenerator.Generator.Generators
                 .AppendLine($"namespace {@namespace};")
                 .NewLine()
                 .AppendLine($"public static partial class CopyExtensions")
-                .WithBlock(Generate, file.Types);
+                .WithBlock(Generate, file);
+        }
+
+        private void Generate(CodeBuilder builder, FileDefinition file)
+        {
+            builder.Append(Generate, file.EnumTypes);
+            builder.Append(Generate, file.Types);
+        }
+
+        private void Generate(CodeBuilder builder, EnumDefintion type)
+        {
+            var genericPart = type.Type  
+                .GetGenericArguments()  
+                .Select(x => x.Name)  
+                .Aggregate((a, b) => $"{a}, {b}");  
+
+            var generic = type.Type.IsGenericType ? $"<{genericPart}>" : "";
+        
+            var typeName = CSharpHelper.CSharpName(type.Type);
+            var targetName = $"{targetNamespace}.{typeName}";
+            var sourceName = $"{sourceNamespace}.{typeName}";
+        
+            // async value
+            builder
+                .AppendLine($"public static async Task<{targetName}> CopyTo{toName}{generic}Async(this Task<{sourceName}> value)")
+                .OpenBlock()
+                    .AppendLine($"return (await value).CopyTo{toName}();")
+                .CloseBlock();
+        
+            // value
+            builder
+                .AppendLine($"public static {targetName} CopyTo{toName}{generic}(this {sourceName} value)")
+                .OpenBlock()
+                    .AppendLine($"return ({targetName})value;")
+                .CloseBlock();
         }
 
         private void Generate(CodeBuilder builder, TypeDefinition type)
