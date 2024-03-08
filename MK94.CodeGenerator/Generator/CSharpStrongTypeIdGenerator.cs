@@ -15,7 +15,7 @@ namespace MK94.CodeGenerator.Generator.Generators
         {
             foreach (var file in files)
             {
-                var output = builderFactory(file.Name + ".cs");
+                var output = builderFactory(file.Name + ".g.cs");
                 Generate(output, @namespace, file);
                 output.Flush();
             }

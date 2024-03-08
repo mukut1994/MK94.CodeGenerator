@@ -22,7 +22,7 @@ public class CSharpDataGenerator
     {
         foreach (var file in files)
         {
-            var output = builderFactory(file.Name + ".cs");
+            var output = builderFactory(file.Name + ".g.cs");
             Generate(output, @namespace, file, additionalNamespaces);
             output.Flush();
         }

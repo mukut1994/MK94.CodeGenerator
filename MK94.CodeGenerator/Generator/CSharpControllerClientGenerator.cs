@@ -17,7 +17,7 @@ namespace MK94.CodeGenerator.Generator
                 if (file.Types.All(t => !t.Methods.Any()))
                     continue;
 
-                var output = builderFactory(file.Name + ".cs");
+                var output = builderFactory(file.Name + ".g.cs");
                 Generate(output, @namespace, file);
                 output.Flush();
             }

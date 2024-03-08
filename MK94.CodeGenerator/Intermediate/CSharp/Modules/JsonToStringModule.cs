@@ -25,7 +25,7 @@ public class JsonToStringModule : IGeneratorModule<CSharpCodeGenerator>
                 if (!typeDef.Properties.Any())
                     continue;
 
-                var file = codeGenerator.File($"{fileDef.Name}.cs");
+                var file = codeGenerator.File($"{fileDef.Name}.g.cs");
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
                 var type = ns.Type(typeDef.Type.Name, MemberFlags.Public);

@@ -17,7 +17,7 @@ namespace MK94.CodeGenerator.Generator
                 if (file.Types.All(t => !t.Methods.Any()))
                     return;
 
-                var output = builderFactory(file.Name + ".cs");
+                var output = builderFactory(file.Name + ".g.cs");
                 Generate(output, @namespace, file);
                 output.Flush();
             }
@@ -44,6 +44,8 @@ namespace MK94.CodeGenerator.Generator
 
         private void Generate(CodeBuilder builder, MethodDefinition method)
         {
+            var httpMethodName = 
+
             builder
                 .AppendLine(method.IsGetRequest() ? @"[HttpGet]" : @"[HttpPost]")
                 .Append($"public partial {GetTypeText(method.ResponseType)} {method.Name}")
