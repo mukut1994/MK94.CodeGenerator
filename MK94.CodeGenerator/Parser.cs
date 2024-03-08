@@ -75,9 +75,9 @@ public class Parser
 {
     private ParserConfig config;
 
-    public Parser(ParserConfig config)
+    public Parser(ParserConfig? config)
     {
-        this.config = config;
+        this.config = config ?? new ParserConfig();
     }
 
     public List<FileDefinition> ParseFromAssemblyContainingType<T>() => ParseFromAssembly(typeof(T).Assembly);
