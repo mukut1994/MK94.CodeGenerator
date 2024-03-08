@@ -17,6 +17,8 @@ public class FileDefinition
     public List<EnumDefintion> EnumTypes { get; set; }
 
     public List<TypeDefinition> Types { get; set; }
+
+    public bool FileScopedNamespace { get; set; }
 }
 
 public class EnumDefintion
@@ -108,6 +110,7 @@ public class Parser
             Name = types.Key,
             EnumTypes = enumTypes.Select(ParseEnumType).ToList(),
             Types = allTypes.Select(ParseDataClass).ToList(),
+            FileScopedNamespace = false
         };
     }
 

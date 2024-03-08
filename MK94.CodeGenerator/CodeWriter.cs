@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text;
 using System;
 using System.Linq;
+using System.Reflection.Metadata;
 
 namespace MK94.CodeGenerator;
 
@@ -17,7 +18,7 @@ public enum IndentStyle
 
 public class CodeBuilder
 {
-    private record OutputContext(string Path, MemoryStream Stream, StreamWriter writer, SHA256 Hash);
+    private record OutputContext(string Path, MemoryStream Stream, StreamWriter Writer, SHA256 Hash);
 
     private static readonly List<OutputContext> files = new();
 
@@ -113,8 +114,8 @@ public class CodeBuilder
         foreach (var kv in files)
         {
             var file = kv.Path;
-            kv.writer.Flush();
-            kv.writer.Close();
+            kv.Writer.Flush();
+            kv.Writer.Close();
 
             toDelete.Remove(file);
 
@@ -268,11 +269,6 @@ public class CodeBuilder
         return this;
     }
 
-    public CodeBuilder AppendNamespace(string content)
-    {
-        return AppendLine($"namespace {content}");
-    }
-
     public CodeBuilder AppendLine(string content)
     {
         InternalAppend(content);
@@ -416,6 +412,22 @@ public class CodeBuilder
     public CodeBuilder WithBlock<T>(Action<CodeBuilder, T> blockContent, T item)
     {
         return this.OpenBlock().Append(blockContent, item).CloseBlock();
+    }
+
+    public CodeBuilder WithBlockedNamespace<T>(string @namespace, Action<CodeBuilder, T> blockContent, IEnumerable<T> item)
+    {
+        return this
+            .AppendLine($"namespace {@namespace}")
+            .OpenBlock()
+            .Append(blockContent, item)
+            .CloseBlock();
+    }
+
+    public CodeBuilder WithFileScopedNamespace<T>(string @namespace, Action<CodeBuilder, T> blockContent, IEnumerable<T> item)
+    {
+        return this
+            .AppendLine($"namespace {@namespace};")
+            .Append(blockContent, item);
     }
 
     public CodeBuilder WithBlock<T>(Action<CodeBuilder, T> blockContent, IEnumerable<T> item)

@@ -30,7 +30,7 @@ namespace MK94.CodeGenerator.Generator.Generators
         {
             builder
                 .AppendUsings("System", "System.Collections.Generic")
-                .AppendNamespace(@namespace)
+                .AppendLine($"namespace {@namespace}")
                 .OpenBlock()
                 .AppendLine($"public static partial class CopyExtensions")
                 .WithBlock(Generate, file)

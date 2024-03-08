@@ -35,11 +35,14 @@ public class CSharpDataGenerator
         foreach (var n in additionalNamespaces)
             builder.AppendUsings(n);
 
-        builder
-            .AppendNamespace(@namespace)
-            .WithBlock(Generate, fileDefinition);
-
-        builder.Flush();
+        if (!fileDefinition.FileScopedNamespace)
+        {
+            builder.WithBlockedNamespace(@namespace, Generate, fileDefinition.Types);
+        }
+        else
+        {
+            builder.WithFileScopedNamespace(@namespace, Generate, fileDefinition.Types);
+        }
     }
 
     private void Generate(CodeBuilder builder, FileDefinition fileDefinition)

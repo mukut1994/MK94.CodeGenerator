@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,12 +24,19 @@ namespace MK94.CodeGenerator.Generator
             }
         }
 
-        private void Generate(CodeBuilder builder, string @namespace, FileDefinition file)
+        private void Generate(CodeBuilder builder, string @namespace, FileDefinition fileDefinition)
         {
             builder
-                .AppendUsings("System", "System.Threading.Tasks", "System.Collections.Generic", "Microsoft.AspNetCore.Mvc")
-                .AppendNamespace(@namespace)
-                .WithBlock(Generate, file.Types);
+                .AppendUsings("System", "System.Threading.Tasks", "System.Collections.Generic", "Microsoft.AspNetCore.Mvc");
+
+            if (!fileDefinition.FileScopedNamespace)
+            {
+                builder.WithBlockedNamespace(@namespace, Generate, fileDefinition.Types);
+            }
+            else
+            {
+                builder.WithFileScopedNamespace(@namespace, Generate, fileDefinition.Types);
+            }
         }
 
         private void Generate(CodeBuilder builder, TypeDefinition type)

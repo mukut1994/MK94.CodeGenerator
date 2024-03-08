@@ -24,17 +24,16 @@ namespace MK94.CodeGenerator.Generator
         public void Generate(CodeBuilder builder, string @namespace, FileDefinition fileDefinition)
         {
             builder
-                .AppendUsings("System", "System.Collections.Generic", "System.Linq", "System.Text", "System.IO", "System.Threading.Tasks")
-                .AppendNamespace(@namespace)
-                .WithBlock(Generate, fileDefinition);
+                .AppendUsings("System", "System.Collections.Generic", "System.Linq", "System.Text", "System.IO", "System.Threading.Tasks");
 
-            builder.Flush();
-        }
-
-        private void Generate(CodeBuilder builder, FileDefinition fileDefinition)
-        {
-            builder
-                .Append(Generate, fileDefinition.Types);
+            if (!fileDefinition.FileScopedNamespace)
+            {
+                builder.WithBlockedNamespace(@namespace, Generate, fileDefinition.Types);
+            }
+            else
+            {
+                builder.WithFileScopedNamespace(@namespace, Generate, fileDefinition.Types);
+            }
         }
 
         private void Generate(CodeBuilder builder, TypeDefinition type)

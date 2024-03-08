@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -21,13 +22,19 @@ namespace MK94.CodeGenerator.Generator.Generators
             }
         }
 
-        private void Generate(CodeBuilder builder, string @namespace, FileDefinition file)
+        private void Generate(CodeBuilder builder, string @namespace, FileDefinition fileDefinition)
         {
             builder
-                .AppendUsings("System", "System.Text.Json", "System.Text.Json.Serialization")
-                .AppendNamespace(@namespace)
-                .NewLine()
-                .Append(Generate, file.Types);
+                .AppendUsings("System", "System.Text.Json", "System.Text.Json.Serialization");
+
+            if (!fileDefinition.FileScopedNamespace)
+            {
+                builder.WithBlockedNamespace(@namespace, Generate, fileDefinition.Types);
+            }
+            else
+            {
+                builder.WithFileScopedNamespace(@namespace, Generate, fileDefinition.Types);
+            }
         }
 
         private void Generate(CodeBuilder builder, TypeDefinition type)
