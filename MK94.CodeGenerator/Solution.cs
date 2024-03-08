@@ -18,7 +18,7 @@ public class Solution
 
     public static Solution FromAssemblyContaining<Type>()
     {
-        var all = new Parser(null).ParseFromAssemblyContainingType<Type>();
+        var all = new Parser().ParseFromAssemblyContainingType<Type>();
 
         return new Solution
         {

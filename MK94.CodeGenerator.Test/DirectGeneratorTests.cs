@@ -36,7 +36,7 @@ namespace MK94.CodeGenerator.Test
         {
             var controllerFeature = ControllerFeature.Parser.ParseFromAssemblyContainingType<DirectGeneratorTests>();
 
-            var all = new Parser(null).ParseFromAssemblyContainingType<Page>();
+            var all = new Parser().ParseFromAssemblyContainingType<Page>();
             var cache = all.BuildCache();
 
             new CSharpDataGenerator(true).Generate(CodeBuilder.FactoryFromMemoryStream(out var files), @"data",
