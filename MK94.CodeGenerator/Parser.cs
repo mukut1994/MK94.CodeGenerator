@@ -64,13 +64,20 @@ public class ParameterDefinition
     public ParameterInfo Parameter { get; set; }
 }
 
+public class ParserConfig
+{
+    public string? Project { get; set; }
+
+    public bool MandatoryFileAttribute { get; set; }
+}
+
 public class Parser
 {
-    private string? project;
+    private ParserConfig config;
 
-    public Parser(string? project)
+    public Parser(ParserConfig config)
     {
-        this.project = project;
+        this.config = config;
     }
 
     public List<FileDefinition> ParseFromAssemblyContainingType<T>() => ParseFromAssembly(typeof(T).Assembly);
@@ -84,7 +91,7 @@ public class Parser
             .ToDictionary(
                 x => x,
                 x => GetAttributeForCurrentProject(x))
-            .Where(x => (project == null && x.Key.GetCustomAttribute<FileAttribute>() != null) || x.Value != null);
+            .Where(x => (config.Project == null && x.Key.GetCustomAttribute<FileAttribute>() != null) || x.Value != null);
 
         var typesGroupedByOutputFile = typesForProject.GroupBy(x => GetFilePath(x.Key), x => x.Key);
 
@@ -179,12 +186,12 @@ public class Parser
     {
         var onlyOnAttr = property.GetCustomAttributesUngrouped<OnlyOnAttribute>();
 
-        if (onlyOnAttr.Any() && onlyOnAttr.All(a => a.Project != project))
+        if (onlyOnAttr.Any() && onlyOnAttr.All(a => a.Project != config.Project))
             return false;
 
         var projAttr = property.GetCustomAttributesUngrouped<ProjectAttribute>();
 
-        if (projAttr.Any() && projAttr.All(p => p.Project != project))
+        if (projAttr.Any() && projAttr.All(p => p.Project != config.Project))
             return false;
 
         return true;
@@ -194,17 +201,22 @@ public class Parser
     {
         return type
                 .GetCustomAttributesUngrouped<ProjectAttribute>()
-                .FirstOrDefault(p => project != "*" && p.Project == project);
+                .FirstOrDefault(p => config.Project != "*" && p.Project == config.Project);
     }
 
     private string GetFilePath(Type type)
     {
         var attr = type.GetCustomAttribute<FileAttribute>();
 
-        if (attr == null)
-            throw new InvalidProgramException($"Type {type} is missing the File attribute");
+        if (config.MandatoryFileAttribute)
+        {
+            if (attr == null)
+                throw new InvalidProgramException($"Type {type} is missing the File attribute");
 
-        return attr.Name;
+            return attr.Name;
+        }
+
+        return type.Name;
     }
 }
 
