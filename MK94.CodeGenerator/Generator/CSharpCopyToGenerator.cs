@@ -46,10 +46,12 @@ namespace MK94.CodeGenerator.Generator.Generators
 
         private void Generate(CodeBuilder builder, EnumDefintion type)
         {
-            var generic = type.Type.IsGenericType ? $"<{type.Type
-                .GetGenericArguments()
-                .Select(x => x.Name)
-                .Aggregate((a, b) => $"{a}, {b}")}>" : "";
+            var genericPart = type.Type  
+                .GetGenericArguments()  
+                .Select(x => x.Name)  
+                .Aggregate((a, b) => $"{a}, {b}");  
+
+            var generic = type.Type.IsGenericType ? $"<{genericPart}>" : "";
         
             var typeName = CSharpHelper.CSharpName(type.Type);
             var targetName = $"{targetNamespace}.{typeName}";
