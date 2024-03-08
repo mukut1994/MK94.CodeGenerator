@@ -82,6 +82,9 @@ public class Parser
 
     public Parser(ParserConfig config)
     {
+        if (config  == null) 
+            throw new InvalidProgramException("Config for the parser must not be null. Either pass in a config or remove the `null` parameter being passed in.");
+
         this.config = config;
     }
 
