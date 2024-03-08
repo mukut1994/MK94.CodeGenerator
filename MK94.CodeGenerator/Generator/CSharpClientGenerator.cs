@@ -23,7 +23,9 @@ namespace MK94.CodeGenerator.Generator
 
         public void Generate(CodeBuilder builder, string @namespace, FileDefinition fileDefinition)
         {
-            builder.AppendLine("using System;")
+            builder
+                .AppendAutomaticallyGeneratedFileComment()
+                .AppendLine("using System;")
                 .AppendLine("using System.Collections.Generic;")
                 .AppendLine("using System.Linq;")
                 .AppendLine("using System.Text;")

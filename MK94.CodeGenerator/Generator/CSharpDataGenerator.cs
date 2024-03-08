@@ -30,7 +30,9 @@ public class CSharpDataGenerator
 
     public void Generate(CodeBuilder builder, string @namespace, FileDefinition fileDefinition, params string[] additionalNamespaces)
     {
-        builder.AppendLine("using System;")
+        builder
+            .AppendAutomaticallyGeneratedFileComment()
+            .AppendLine("using System;")
             .AppendLine("using System.Collections.Generic;")
             .AppendLine("using System.Linq;")
             .AppendLine("using System.Text;")

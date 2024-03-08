@@ -26,6 +26,7 @@ namespace MK94.CodeGenerator.Generator
         private void Generate(CodeBuilder builder, string @namespace, FileDefinition file)
         {
             builder
+                .AppendAutomaticallyGeneratedFileComment()
                 .AppendLine($"using System; ")
                 .AppendLine($"using System.Threading.Tasks; ")
                 .AppendLine($"using System.Collections.Generic; ")
