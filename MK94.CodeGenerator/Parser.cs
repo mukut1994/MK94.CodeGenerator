@@ -216,13 +216,11 @@ public class Parser
     {
         var attr = type.GetCustomAttribute<FileAttribute>();
 
-        if (config.MandatoryFileAttribute)
-        {
-            if (attr == null)
-                throw new InvalidProgramException($"Type {type} is missing the File attribute");
-
+        if (attr != null)
             return attr.Name;
-        }
+
+        if (config.MandatoryFileAttribute && attr == null)
+            throw new InvalidProgramException($"Type {type} is missing the File attribute");
 
         return type.Name;
     }
