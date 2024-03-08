@@ -44,8 +44,6 @@ namespace MK94.CodeGenerator.Generator
 
         private void Generate(CodeBuilder builder, MethodDefinition method)
         {
-            var httpMethodName = 
-
             builder
                 .AppendLine(method.IsGetRequest() ? @"[HttpGet]" : @"[HttpPost]")
                 .Append($"public partial {GetTypeText(method.ResponseType)} {method.Name}")
