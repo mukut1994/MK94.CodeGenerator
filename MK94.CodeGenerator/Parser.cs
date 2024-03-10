@@ -71,6 +71,8 @@ public class ParserConfig
     public string? Project { get; set; }
 
     public bool MandatoryFileAttribute { get; set; }
+
+    public bool FileScopedNamespace { get; set; }
 }
 
 public class Parser
@@ -125,7 +127,7 @@ public class Parser
             Name = types.Key,
             EnumTypes = enumTypes.Select(ParseEnumType).ToList(),
             Types = allTypes.Select(ParseDataClass).ToList(),
-            FileScopedNamespace = false
+            FileScopedNamespace = config.FileScopedNamespace
         };
     }
 
