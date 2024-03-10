@@ -8,7 +8,7 @@ namespace MK94.CodeGenerator.Attributes
     {
         private const string Name = "IdFeature";
 
-        public static Parser Parser { get; } = new Parser(Name);
+        public static Parser Parser { get; } = new Parser(new ParserConfig { Project = Name });
         public IdFeature() : base(Name)
         {
         }
