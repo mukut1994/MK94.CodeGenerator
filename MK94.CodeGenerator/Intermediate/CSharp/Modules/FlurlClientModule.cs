@@ -42,7 +42,7 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
     {
         foreach (var fileDef in project.Files)
         {
-            var file = codeGenerator.File($"{fileDef.Name}.cs");
+            var file = codeGenerator.File($"{fileDef.Name}.g.cs");
 
             file.Usings.Add("Flurl");
             file.Usings.Add("System.Threading.Task");
