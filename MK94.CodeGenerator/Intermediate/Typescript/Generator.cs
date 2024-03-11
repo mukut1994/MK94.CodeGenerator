@@ -1,14 +1,9 @@
 ﻿using MK94.CodeGenerator.Attributes;
-using MK94.CodeGenerator.Generator.Generators;
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace MK94.CodeGenerator.Intermediate.Typescript;
 
