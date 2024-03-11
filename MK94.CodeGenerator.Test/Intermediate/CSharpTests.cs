@@ -24,6 +24,7 @@ public class CSharpTests
 
         var t = c
             .File("file.cs")
+            .WithUsing("System")
             .Namespace("Namespace.A")
             .Type("TypeA", MemberFlags.Public);
 
