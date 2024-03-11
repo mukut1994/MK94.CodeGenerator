@@ -4,6 +4,7 @@ namespace Namespace.A;
 
 public class TypeA
 {
+    [StronglyTypedId]
     public Int32 PropA { get; set; }
 
     public Int32 MethodA(Int32 a, Int32 b)

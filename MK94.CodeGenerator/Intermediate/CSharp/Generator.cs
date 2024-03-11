@@ -188,14 +188,26 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
         {
             private CSharpCodeGenerator root { get; }
 
+            private List<IntermediateAttributeDefinition> attributes { get; set; } = new();
+
             public IntermediatePropertyDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name) : base(flags, type, name) 
             {
                 this.root = root;
             }
 
+            public IntermediateAttributeDefinition Attribute(CsharpTypeReference attribute)
+            {
+                var ret = new IntermediateAttributeDefinition(root, attribute);
+                
+                attributes.Add(ret);
+
+                return ret;
+            }
+
             public void Generate(CodeBuilder builder)
             {
                 builder
+                    .Append((b, a) => a.Generate(b), attributes)
                     .Append(AppendMemberFlags)
                     .AppendWord(Type.Resolve(root))
                     .Append(MemberName)
@@ -206,6 +218,34 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public void GetRequiredReferences(HashSet<CsharpTypeReference> refs)
             {
                 refs.Add(Type);
+            }
+        }
+
+        public class IntermediateAttributeDefinition : IGenerator
+        {
+            private CSharpCodeGenerator root { get; }
+
+            public CsharpTypeReference type { get; }
+
+            public IntermediateAttributeDefinition(CSharpCodeGenerator root, CsharpTypeReference type)
+            {
+                this.type = type;
+                this.root = root;
+            }
+
+            public void Generate(CodeBuilder builder)
+            {
+                var attributeName = type.Resolve(root);
+
+                if (attributeName.EndsWith("Attribute"))
+                    attributeName = attributeName[..^"Attribute".Length];
+
+                builder.AppendLine($"[{attributeName}]");
+            }
+
+            public void GetRequiredReferences(HashSet<CsharpTypeReference> refs)
+            {
+                refs.Add(type);
             }
         }
 
