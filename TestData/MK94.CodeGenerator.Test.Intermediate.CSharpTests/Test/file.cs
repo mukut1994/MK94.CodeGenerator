@@ -1,3 +1,5 @@
+using System;
+
 namespace Namespace.A;
 
 public class TypeA

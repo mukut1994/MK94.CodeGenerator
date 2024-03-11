@@ -18,10 +18,13 @@ public class CSharpTests
     [Test]
     public void Test()
     {
+        // DiskAssert.EnableWriteMode();
+
         var c = new CSharpCodeGenerator();
 
         var t = c
             .File("file.cs")
+            .WithUsing("System")
             .Namespace("Namespace.A")
             .Type("TypeA", MemberFlags.Public);
 
