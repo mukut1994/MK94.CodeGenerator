@@ -4,9 +4,10 @@ namespace Namespace.A;
 
 public class TypeA
 {
-    [StronglyTypedId]
+    [Example]
     public Int32 PropA { get; set; }
 
+    [Example]
     public Int32 MethodA(Int32 a, Int32 b)
     {
         return a + b;

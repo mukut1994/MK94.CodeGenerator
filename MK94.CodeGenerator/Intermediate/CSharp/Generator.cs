@@ -97,6 +97,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             return definition;
         }
+        
         public void Generate(CodeBuilder builder)
         {
             foreach (var usings in Usings.OrderByDescending(x => x, StringComparer.InvariantCultureIgnoreCase))
@@ -214,7 +215,6 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .AppendLine("{ get; set; }");
             }
 
-
             public void GetRequiredReferences(HashSet<CsharpTypeReference> refs)
             {
                 refs.Add(Type);
@@ -272,10 +272,15 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
         public class IntermediateMethodDefinition : IntermediateTypedMemberDefinition, IGenerator
         {
-            private CSharpCodeGenerator root { get; }
             public MemoryStream BodyStream { get; }
+
             public CodeBuilder Body { get; }
+
             public List<IntermediateArgumentDefinition> Arguments { get; } = new();
+
+            private CSharpCodeGenerator root { get; }
+            
+            private List<IntermediateAttributeDefinition> attributes { get; set; } = new();
 
             public IntermediateMethodDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name) : base(flags, type, name)
             {
@@ -298,12 +303,21 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 BodyStream.Position = 0;
 
                 builder
+                    .Append((b, a) => a.Generate(b), attributes)
                     .Append(AppendMemberFlags).AppendWord(Type.Resolve(root)).Append(MemberName)
                     .OpenParanthesis()
                         .Append((b, arg) => arg.Generate(b), Arguments)
                     .CloseParanthesis()
-                    .WithBlock(b => b.Append(BodyStream))
-                    ;
+                    .WithBlock(b => b.Append(BodyStream));
+            }
+
+            public IntermediateAttributeDefinition Attribute(CsharpTypeReference attribute)
+            {
+                var ret = new IntermediateAttributeDefinition(root, attribute);
+
+                attributes.Add(ret);
+
+                return ret;
             }
         }
 
