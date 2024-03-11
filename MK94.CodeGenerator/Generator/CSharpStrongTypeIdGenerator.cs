@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace MK94.CodeGenerator.Generator.Generators
+namespace MK94.CodeGenerator.Generator
 {
     public class CSharpStrongTypeIdGenerator
     {

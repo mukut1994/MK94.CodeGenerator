@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MK94.CodeGenerator.Generator.Generators
+namespace MK94.CodeGenerator.Generator
 {
     public class CSharpCopyToGenerator
     {
@@ -16,7 +16,7 @@ namespace MK94.CodeGenerator.Generator.Generators
         {
             this.toName = toName;
             this.targetNamespace = targetNamespace;
-            this.sourceNamespace = @namespace;
+            sourceNamespace = @namespace;
 
             foreach (var file in files)
             {
@@ -81,12 +81,12 @@ namespace MK94.CodeGenerator.Generator.Generators
                     .AppendLine($"var ret = new {targetNamespace}.{type.Type.Name}();")
                     .Append((b, x) => Generate(b, x, type), type.Properties)
                     .AppendLine("return ret;")
-                .CloseBlock();;
+                .CloseBlock();
         }
 
         private void Generate(CodeBuilder builder, PropertyDefinition p, TypeDefinition type)
         {
-            if(p.Type.IsPrimitive || p.Type.IsValueType || p.Type == typeof(string))
+            if (p.Type.IsPrimitive || p.Type.IsValueType || p.Type == typeof(string))
             {
                 builder
                     .AppendLine($"ret.{p.Name} = value.{p.Name};");
@@ -94,7 +94,7 @@ namespace MK94.CodeGenerator.Generator.Generators
                 return;
             }
 
-            if(p.Type.IsGenericType && p.Type.GetGenericTypeDefinition() == typeof(List<>))
+            if (p.Type.IsGenericType && p.Type.GetGenericTypeDefinition() == typeof(List<>))
             {
                 var genDef = p.Type.GetGenericArguments()[0];
 
