@@ -16,7 +16,7 @@ namespace MK94.CodeGenerator.Generator
         {
             this.toName = toName;
             this.targetNamespace = targetNamespace;
-            this.sourceNamespace = @namespace;
+            sourceNamespace = @namespace;
 
             foreach (var file in files)
             {
