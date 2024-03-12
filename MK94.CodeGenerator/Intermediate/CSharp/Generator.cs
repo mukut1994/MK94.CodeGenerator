@@ -188,7 +188,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
         {
             private CSharpCodeGenerator root { get; }
 
-            private List<IntermediateAttributeDefinition> attributes { get; set; } = new();
+            private List<IntermediateAttributeDefinition> attributes { get; } = new();
 
             public IntermediatePropertyDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name) : base(flags, type, name) 
             {
@@ -213,7 +213,6 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .Append(MemberName)
                     .AppendLine("{ get; set; }");
             }
-
 
             public void GetRequiredReferences(HashSet<CsharpTypeReference> refs)
             {
@@ -312,10 +311,20 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             private CSharpCodeGenerator root { get; }
             public Dictionary<string, IntermediatePropertyDefinition> Properties = new();
             public Dictionary<string, IntermediateMethodDefinition> Methods = new();
+            private List<IntermediateAttributeDefinition> attributes { get; } = new();
 
             public IntermediateTypeDefinition(CSharpCodeGenerator root, MemberFlags flags, string name) : base(flags, name)
             {
                 this.root = root;
+            }
+
+            public IntermediateAttributeDefinition Attribute(CsharpTypeReference attribute)
+            {
+                var ret = new IntermediateAttributeDefinition(root, attribute);
+
+                attributes.Add(ret);
+
+                return ret;
             }
 
             public IntermediatePropertyDefinition Property(MemberFlags flags, CsharpTypeReference type, string name)
@@ -339,6 +348,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public void Generate(CodeBuilder builder)
             {
                 builder
+                    .Append((b, a) => a.Generate(b), attributes)
                     .Append(AppendMemberFlags)
                     .AppendWord("class")
                     .Append(MemberName)

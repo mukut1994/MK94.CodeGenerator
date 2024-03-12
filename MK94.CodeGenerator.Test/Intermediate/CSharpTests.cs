@@ -28,6 +28,8 @@ public class CSharpTests
             .Namespace("Namespace.A")
             .Type("TypeA", MemberFlags.Public);
 
+        t.Attribute(CsharpTypeReference.ToType<StronglyTypedIdAttribute>());
+
         t.Property(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "PropA")
             .Attribute(CsharpTypeReference.ToType<StronglyTypedIdAttribute>());
         t.Method(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "MethodA")
