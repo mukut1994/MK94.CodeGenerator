@@ -27,9 +27,9 @@ public class CSharpTests
             .WithUsing("System")
             .Namespace("Namespace.A");
 
-        namespaceA.Type("StructA", MemberFlags.Public, IntermediateFileDefinition.DefinitionType.Struct);
+        namespaceA.Type("StructA", MemberFlags.Public, DefinitionType.Struct);
 
-        var t = namespaceA.Type("TypeA", MemberFlags.Public);
+        var t = namespaceA.Type("TypeA", MemberFlags.Public, DefinitionType.Class);
 
         t.Attribute(CsharpTypeReference.ToType<ExampleAttribute>());
 
@@ -45,12 +45,12 @@ public class CSharpTests
         method.Body
             .Append("return a + b;");
 
-        t.Type("TypeASubType", MemberFlags.Public);
+        t.Type("TypeASubType", MemberFlags.Public, DefinitionType.Class);
 
         var t2 = c
             .File("file.cs")
             .Namespace("Namespace.B")
-            .Type("TypeB", MemberFlags.Public);
+            .Type("TypeB", MemberFlags.Public, DefinitionType.Class);
 
         t2.Property(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "PropA");
         t2.Method(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "MethodA")
