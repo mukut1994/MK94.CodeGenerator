@@ -4,6 +4,10 @@ namespace Namespace.A;
 
 public class TypeA
 {
+    public class TypeASubType
+    {
+    }
+
     [StronglyTypedId]
     public Int32 PropA { get; set; }
 

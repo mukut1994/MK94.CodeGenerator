@@ -36,6 +36,7 @@ public class CSharpTests
             .Body
             .Append("return a + b;");
 
+        t.Type("TypeASubType", MemberFlags.Public);
 
         var t2 = c
             .File("file.cs")
