@@ -31,14 +31,18 @@ public class CSharpTests
 
         var t = namespaceA.Type("TypeA", MemberFlags.Public);
 
-        t.Attribute(CsharpTypeReference.ToType<StronglyTypedIdAttribute>());
+        t.Attribute(CsharpTypeReference.ToType<ExampleAttribute>());
 
         t.Property(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "PropA")
-            .Attribute(CsharpTypeReference.ToType<StronglyTypedIdAttribute>());
-        t.Method(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "MethodA")
+            .Attribute(CsharpTypeReference.ToType<ExampleAttribute>());
+
+        var method = t.Method(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "MethodA")
             .WithArgument(CsharpTypeReference.ToType<int>(), "a")
-            .WithArgument(CsharpTypeReference.ToType<int>(), "b")
-            .Body
+            .WithArgument(CsharpTypeReference.ToType<int>(), "b");
+
+        method.Attribute(CsharpTypeReference.ToType<ExampleAttribute>());
+
+        method.Body
             .Append("return a + b;");
 
         t.Type("TypeASubType", MemberFlags.Public);

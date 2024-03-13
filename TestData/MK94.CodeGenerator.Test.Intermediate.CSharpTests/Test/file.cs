@@ -5,16 +5,17 @@ namespace Namespace.A;
 public struct StructA
 {
 }
-[StronglyTypedId]
+[Example]
 public class TypeA
 {
     public class TypeASubType
     {
     }
 
-    [StronglyTypedId]
+    [Example]
     public Int32 PropA { get; set; }
 
+    [Example]
     public Int32 MethodA(Int32 a, Int32 b)
     {
         return a + b;
