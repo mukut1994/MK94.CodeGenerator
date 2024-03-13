@@ -60,6 +60,14 @@ public enum MemberFlags
     Method = 64,
 }
 
+[Flags]
+public enum DefinitionType
+{
+    Class = 1,
+    Record = 2,
+    Struct = 4,
+}
+
 public interface IProject
 {
     Solution Solution { get; init; }
