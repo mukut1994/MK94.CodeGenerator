@@ -2,6 +2,7 @@ using System;
 
 namespace Namespace.A;
 
+[StronglyTypedId]
 public class TypeA
 {
     public class TypeASubType
