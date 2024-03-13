@@ -16,8 +16,8 @@ namespace MK94.CodeGenerator.Test
         public ControllerFeature() : base(Name) { }
     }
 
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
-    public class StronglyTypedIdAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Class)]
+    public class ExampleAttribute : Attribute
     {
     }
 }
