@@ -16,7 +16,7 @@ namespace MK94.CodeGenerator.Test
         public ControllerFeature() : base(Name) { }
     }
 
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Class)]
     public class ExampleAttribute : Attribute
     {
     }

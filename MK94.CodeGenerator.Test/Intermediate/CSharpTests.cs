@@ -28,6 +28,8 @@ public class CSharpTests
             .Namespace("Namespace.A")
             .Type("TypeA", MemberFlags.Public);
 
+        t.Attribute(CsharpTypeReference.ToType<ExampleAttribute>());
+
         t.Property(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "PropA")
             .Attribute(CsharpTypeReference.ToType<ExampleAttribute>());
 
@@ -40,6 +42,7 @@ public class CSharpTests
         method.Body
             .Append("return a + b;");
 
+        t.Type("TypeASubType", MemberFlags.Public);
 
         var t2 = c
             .File("file.cs")

@@ -2,8 +2,13 @@ using System;
 
 namespace Namespace.A;
 
+[Example]
 public class TypeA
 {
+    public class TypeASubType
+    {
+    }
+
     [Example]
     public Int32 PropA { get; set; }
 
