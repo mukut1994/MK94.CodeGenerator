@@ -66,6 +66,7 @@ public enum DefinitionType
     Class = 1,
     Record = 2,
     Struct = 4,
+    Interface = 8,
 }
 
 public interface IProject
