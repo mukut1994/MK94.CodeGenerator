@@ -328,6 +328,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             Class = 1,
             Record = 2,
             Struct = 3,
+            RecordStruct = 4
         }
 
         public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerator
@@ -425,6 +426,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     DefinitionType.Class => "class",
                     DefinitionType.Record => "record",
                     DefinitionType.Struct => "struct",
+                    DefinitionType.RecordStruct => "record struct",
                     _ => throw new NotImplementedException(),
                 };
             }
