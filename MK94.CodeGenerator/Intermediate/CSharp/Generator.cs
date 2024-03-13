@@ -419,6 +419,9 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
                 if (DefinitionType.HasFlag(DefinitionType.Struct))
                     builder.AppendWord("struct");
+
+                if (DefinitionType.HasFlag(DefinitionType.Interface))
+                    builder.AppendWord("interface");
             }
         }
     }

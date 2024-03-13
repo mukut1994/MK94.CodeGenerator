@@ -27,7 +27,9 @@ public class CSharpTests
             .WithUsing("System")
             .Namespace("Namespace.A");
 
-        namespaceA.Type("StructA", MemberFlags.Public, DefinitionType.Struct);
+        namespaceA.Type("IId", MemberFlags.Public, DefinitionType.Interface);
+
+        namespaceA.Type("StructA", MemberFlags.Public, DefinitionType.Record | DefinitionType.Struct);
 
         var t = namespaceA.Type("TypeA", MemberFlags.Public, DefinitionType.Class);
 
