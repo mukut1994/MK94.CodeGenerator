@@ -2,17 +2,19 @@ using System;
 
 namespace Namespace.A;
 
-[Example]
+public struct StructA
+{
+}
+[StronglyTypedId]
 public class TypeA
 {
     public class TypeASubType
     {
     }
 
-    [Example]
+    [StronglyTypedId]
     public Int32 PropA { get; set; }
 
-    [Example]
     public Int32 MethodA(Int32 a, Int32 b)
     {
         return a + b;
