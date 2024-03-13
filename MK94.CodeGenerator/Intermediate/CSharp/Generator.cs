@@ -126,11 +126,11 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 this.root = root;
             }
 
-            public IntermediateTypeDefinition Type(string name, MemberFlags flags)
+            public IntermediateTypeDefinition Type(string name, MemberFlags flags, DefinitionType definitionType = DefinitionType.Class)
             {
                 flags = flags | MemberFlags.Type;
 
-                var definition = Types.GetOrAdd(name, () => new IntermediateTypeDefinition(root, flags: flags, name: name));
+                var definition = Types.GetOrAdd(name, () => new IntermediateTypeDefinition(root, flags: flags, name: name, definitionType: definitionType));
 
                 return definition;
             }
@@ -307,6 +307,14 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             }
         }
 
+        public enum DefinitionType
+        {
+            None = 0,
+            Class = 1,
+            Record = 2,
+            Struct = 3,
+        }
+
         public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerator
         {
             private CSharpCodeGenerator root { get; }
@@ -317,10 +325,13 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public Dictionary<string, IntermediateMethodDefinition> Methods = new();
             private List<IntermediateAttributeDefinition> attributes { get; } = new();
+            
+            private DefinitionType DefinitionType { get; set; }
 
-            public IntermediateTypeDefinition(CSharpCodeGenerator root, MemberFlags flags, string name) : base(flags, name)
+            public IntermediateTypeDefinition(CSharpCodeGenerator root, MemberFlags flags, string name, DefinitionType definitionType = DefinitionType.Class) : base(flags, name)
             {
                 this.root = root;
+                DefinitionType = definitionType;
             }
 
             public IntermediateAttributeDefinition Attribute(CsharpTypeReference attribute)
@@ -364,7 +375,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 builder
                     .Append((b, a) => a.Generate(b), attributes)
                     .Append(AppendMemberFlags)
-                    .AppendWord("class")
+                    .AppendWord(GetDefinitionType())
                     .Append(MemberName)
                     .OpenBlock();
 
@@ -390,6 +401,17 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 }
 
                 builder.CloseBlock();
+            }
+
+            private string GetDefinitionType()
+            {
+                return DefinitionType switch
+                {
+                    DefinitionType.Class => "class",
+                    DefinitionType.Record => "record",
+                    DefinitionType.Struct => "struct",
+                    _ => throw new NotImplementedException(),
+                };
             }
         }
     }

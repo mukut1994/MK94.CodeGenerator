@@ -2,6 +2,9 @@ using System;
 
 namespace Namespace.A;
 
+public struct StructA
+{
+}
 [StronglyTypedId]
 public class TypeA
 {
