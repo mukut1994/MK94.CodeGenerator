@@ -127,11 +127,11 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 this.root = root;
             }
 
-            public IntermediateTypeDefinition Type(string name, MemberFlags flags, DefinitionType definitionType)
+            public IntermediateTypeDefinition Type(string name, MemberFlags flags)
             {
                 flags = flags | MemberFlags.Type;
 
-                var definition = Types.GetOrAdd(name, () => new IntermediateTypeDefinition(root, flags: flags, name: name, definitionType: definitionType));
+                var definition = Types.GetOrAdd(name, () => new IntermediateTypeDefinition(root, flags: flags, name: name));
 
                 return definition;
             }
@@ -334,10 +334,10 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             
             private DefinitionType DefinitionType { get; set; }
 
-            public IntermediateTypeDefinition(CSharpCodeGenerator root, MemberFlags flags, string name, DefinitionType definitionType) : base(flags, name)
+            public IntermediateTypeDefinition(CSharpCodeGenerator root, MemberFlags flags, string name) : base(flags, name)
             {
                 this.root = root;
-                DefinitionType |= definitionType;
+                DefinitionType |= DefinitionType.Class;
             }
 
             public IntermediateAttributeDefinition Attribute(CsharpTypeReference attribute)
@@ -367,13 +367,41 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 return definition;
             }
 
-            public IntermediateTypeDefinition Type(string name, MemberFlags flags, DefinitionType definitionType)
+            public IntermediateTypeDefinition Type(string name, MemberFlags flags)
             {
                 flags |= MemberFlags.Type;
 
-                var definition = Types.GetOrAdd(name, () => new IntermediateTypeDefinition(root, flags: flags, name: name, definitionType: definitionType));
+                var definition = Types.GetOrAdd(name, () => new IntermediateTypeDefinition(root, flags: flags, name: name));
 
                 return definition;
+            }
+
+            public IntermediateTypeDefinition WithTypeAsRecord()
+            {
+                DefinitionType = DefinitionType.Record;
+
+                return this;
+            }
+
+            public IntermediateTypeDefinition WithTypeAsStruct()
+            {
+                DefinitionType = DefinitionType.Struct;
+
+                return this;
+            }
+
+            public IntermediateTypeDefinition WithTypeAsInterface()
+            {
+                DefinitionType = DefinitionType.Interface;
+
+                return this;
+            }
+
+            public IntermediateTypeDefinition WithTypeAsRecordStruct()
+            {
+                DefinitionType = DefinitionType.Record | DefinitionType.Struct;
+
+                return this;
             }
 
             public void Generate(CodeBuilder builder)

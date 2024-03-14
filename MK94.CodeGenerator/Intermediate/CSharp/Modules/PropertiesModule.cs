@@ -27,7 +27,7 @@ public class PropertiesModule : IGeneratorModule<CSharpCodeGenerator>
                 var file = codeGenerator.File($"{fileDef.Name}.g.cs");
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
-                var type = ns.Type(typeDef.Type.Name, MemberFlags.Public, DefinitionType.Class);
+                var type = ns.Type(typeDef.Type.Name, MemberFlags.Public);
 
                 foreach(var propertyDef in typeDef.Properties)
                 {
