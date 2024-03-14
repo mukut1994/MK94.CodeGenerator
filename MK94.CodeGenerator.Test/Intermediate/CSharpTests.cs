@@ -27,7 +27,11 @@ public class CSharpTests
             .WithUsing("System")
             .Namespace("Namespace.A");
 
-        namespaceA.Type("IId", MemberFlags.Public).WithTypeAsInterface();
+        namespaceA
+            .Type("IId", MemberFlags.Public)
+            .WithTypeAsInterface()
+            .Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id")
+            .WithGetterOnly();
 
         namespaceA.Type("StructA", MemberFlags.Public).WithTypeAsRecordStruct();
 

@@ -191,8 +191,12 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             private List<IntermediateAttributeDefinition> attributes { get; } = new();
 
+            public PropertyType PropertyType { get; set; }
+
             public IntermediatePropertyDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name) : base(flags, type, name) 
             {
+                PropertyType = PropertyType.Getter | PropertyType.Setter;
+
                 this.root = root;
             }
 
@@ -212,12 +216,47 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .Append(AppendMemberFlags)
                     .AppendWord(Type.Resolve(root))
                     .Append(MemberName)
-                    .AppendLine("{ get; set; }");
+                    .Append(AppendPropertyType)
+                    .AppendLine(string.Empty);
             }
 
             public void GetRequiredReferences(HashSet<CsharpTypeReference> refs)
             {
                 refs.Add(Type);
+            }
+
+            public void AppendPropertyType(CodeBuilder builder)
+            {
+                if (PropertyType.HasFlag(PropertyType.Getter) && PropertyType.HasFlag(PropertyType.Setter))
+                    builder.AppendWord("{ get; set; }");
+                else if (PropertyType.HasFlag(PropertyType.Getter))
+                    builder.AppendWord("{ get; }");
+                else if (PropertyType.HasFlag(PropertyType.Setter))
+                    builder.AppendWord("{ set; }");
+
+                if (PropertyType.HasFlag(PropertyType.Initialise))
+                    builder.AppendWord(" = new();");
+            }
+
+            public IntermediatePropertyDefinition WithGetterOnly()
+            {
+                PropertyType = PropertyType.Getter;
+
+                return this;
+            }
+
+            public IntermediatePropertyDefinition WithSetterOnly()
+            {
+                PropertyType = PropertyType.Setter;
+
+                return this;
+            }
+
+            public IntermediatePropertyDefinition WithPropertyInitialise()
+            {
+                PropertyType |= PropertyType.Initialise;
+
+                return this;
             }
         }
 

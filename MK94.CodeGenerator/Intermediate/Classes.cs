@@ -69,6 +69,15 @@ public enum DefinitionType
     Interface = 8,
 }
 
+
+[Flags]
+public enum PropertyType
+{
+    Getter = 1,
+    Setter = 2,
+    Initialise = 4,
+}
+
 public interface IProject
 {
     Solution Solution { get; init; }
