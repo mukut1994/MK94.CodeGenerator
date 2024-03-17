@@ -36,28 +36,18 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
                 IntermediateFileDefinition.IntermediateTypeDefinition type = CreateStronglyTypedIdInterface(ns);
 
-
-
                 foreach (var property in propertiesWithStronglyTypedAttribute)
                 {
                     var stronglyTypedId = ns
                         .Type(property.Name, MemberFlags.Public)
                         .WithTypeAsRecord()
                         .WithTypeAsStruct()
-                        .WithInheritsFrom("IId");
+                        .WithInheritsFrom(CsharpTypeReference.ToRaw("IId"));
+
+                    stronglyTypedId.Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id");
 
                     property.Type = stronglyTypedId.GetType();
-
-                    //type.Property(MemberFlags.Public, CS)
                 }
-
-                //foreach (var propertyDef in typeDef.Properties)
-                //{
-                //    type.Property(
-                //        MemberFlags.Public,
-                //        CsharpTypeReference.ToType(propertyDef.Type),
-                //        propertyDef.Name);
-                //}
             }
         }
     }
@@ -67,6 +57,7 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
         var type = ns.Type("IId", MemberFlags.Public).WithTypeAsInterface();
 
         type.Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id").WithGetter();
+
         return type;
     }
 }

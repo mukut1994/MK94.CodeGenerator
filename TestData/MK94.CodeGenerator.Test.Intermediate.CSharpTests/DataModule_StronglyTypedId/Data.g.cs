@@ -12,4 +12,5 @@ public interface IId
 }
 public record struct PageId : IId
 {
+    public Guid Id { get; set; } 
 }

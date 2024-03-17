@@ -49,7 +49,7 @@ public class TypescriptTests
 
 
     [Test]
-    public void DataModuletest()
+    public void DataModuleTest()
     {
         // DiskAssert.EnableWriteMode();
 
