@@ -33,16 +33,20 @@ public class CSharpTests
             .Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id")
             .WithGetter();
 
-        namespaceA.Type("StructA", MemberFlags.Public).WithTypeAsRecord().WithTypeAsStruct();
+        namespaceA
+            .Type("StructA", MemberFlags.Public)
+            .WithTypeAsRecord()
+            .WithTypeAsStruct();
 
-        var t = namespaceA.Type("TypeA", MemberFlags.Public);
+        var typeA = namespaceA.Type("TypeA", MemberFlags.Public);
 
-        t.Attribute(CsharpTypeReference.ToType<ExampleAttribute>());
+        typeA.Attribute(CsharpTypeReference.ToType<ExampleAttribute>());
 
-        t.Property(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "PropA")
-            .Attribute(CsharpTypeReference.ToType<ExampleAttribute>());
+        var propA = typeA.Property(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "PropA");
+        propA.WithDefaultExpression(" = 0;");
+        propA.Attribute(CsharpTypeReference.ToType<ExampleAttribute>());
 
-        var method = t.Method(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "MethodA")
+        var method = typeA.Method(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "MethodA")
             .WithArgument(CsharpTypeReference.ToType<int>(), "a")
             .WithArgument(CsharpTypeReference.ToType<int>(), "b");
 
@@ -51,7 +55,7 @@ public class CSharpTests
         method.Body
             .Append("return a + b;");
 
-        t.Type("TypeASubType", MemberFlags.Public);
+        typeA.Type("TypeASubType", MemberFlags.Public);
 
         var t2 = c
             .File("file.cs")

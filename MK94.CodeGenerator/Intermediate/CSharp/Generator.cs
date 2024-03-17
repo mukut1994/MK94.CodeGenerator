@@ -193,6 +193,8 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public PropertyType PropertyType { get; set; }
 
+            public string NewExpression { get; set; } = string.Empty;
+
             public IntermediatePropertyDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name) : base(flags, type, name) 
             {
                 PropertyType |= PropertyType.Default;
@@ -217,6 +219,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .AppendWord(Type.Resolve(root))
                     .Append(MemberName)
                     .Append(AppendPropertyType)
+                    .AppendWord(NewExpression)
                     .AppendLine(string.Empty);
             }
 
@@ -267,6 +270,15 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
                 return this;
             }
+
+            public IntermediatePropertyDefinition WithDefaultNew() => WithDefaultExpression("= new();");
+
+            public IntermediatePropertyDefinition WithDefaultExpression(string newExpression)
+            {
+                NewExpression = newExpression;
+
+                return this;
+            } 
         }
 
         public class IntermediateAttributeDefinition : IGenerator
@@ -379,6 +391,8 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public Dictionary<string, IntermediateMethodDefinition> Methods = new();
             private List<IntermediateAttributeDefinition> attributes { get; } = new();
+
+            public List<string> InheritsFrom { get; } = new();
             
             private DefinitionType DefinitionType { get; set; }
 
@@ -464,6 +478,13 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 return this;
             }
 
+            public IntermediateTypeDefinition WithInheritsFrom(string inheritsFrom)
+            {
+                InheritsFrom.Add(inheritsFrom);
+
+                return this;
+            }
+
             public void Generate(CodeBuilder builder)
             {
                 builder
@@ -471,6 +492,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .Append(AppendMemberFlags)
                     .Append(AppendDefinitionFlags)
                     .Append(MemberName)
+                    .Append(AppendInheritsFrom)
                     .OpenBlock();
 
                 if (Types.Any())
@@ -510,6 +532,30 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
                 if (DefinitionType.HasFlag(DefinitionType.Interface))
                     builder.AppendWord("interface");
+            }
+
+            private void AppendInheritsFrom(CodeBuilder builder)
+            {
+                if (InheritsFrom.Count == 0)
+                    return;
+
+                builder.AppendWord(":");
+
+                int i = 0;
+
+                while(i < InheritsFrom.Count)
+                {
+                    if (i == InheritsFrom.Count - 1)
+                    {
+                        builder.AppendWord(InheritsFrom[i]);
+                    }
+                    else
+                    {
+                        builder.AppendWord($"{InheritsFrom[i]}, ");
+                    }
+
+                    i++;
+                }
             }
         }
     }
