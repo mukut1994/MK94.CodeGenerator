@@ -18,7 +18,7 @@ public class CSharpTests
     [Test]
     public void Test()
     {
-        DiskAssert.EnableWriteMode();
+        // DiskAssert.EnableWriteMode();
 
         var c = new CSharpCodeGenerator();
 
