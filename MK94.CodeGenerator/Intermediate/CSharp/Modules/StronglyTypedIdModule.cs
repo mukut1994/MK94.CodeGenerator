@@ -42,7 +42,8 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
                 {
                     var stronglyTypedId = ns
                         .Type(property.Name, MemberFlags.Public)
-                        .WithTypeAsRecordStruct()
+                        .WithTypeAsRecord()
+                        .WithTypeAsStruct()
                         .WithInheritsFrom("IId");
 
                     property.Type = stronglyTypedId.GetType();
@@ -65,7 +66,7 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
     {
         var type = ns.Type("IId", MemberFlags.Public).WithTypeAsInterface();
 
-        type.Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id").WithGetterOnly();
+        type.Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id").WithGetter();
         return type;
     }
 }
