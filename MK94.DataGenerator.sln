@@ -5,7 +5,12 @@ VisualStudioVersion = 17.0.31612.314
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MK94.CodeGenerator", "MK94.CodeGenerator\MK94.CodeGenerator.csproj", "{DF0E3B82-0E87-4D6D-B99A-41640A26F380}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MK94.CodeGenerator.Test", "MK94.CodeGenerator.Test\MK94.CodeGenerator.Test.csproj", "{CEA74623-26F9-4FE4-BADB-D56B54480E08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MK94.CodeGenerator.Test", "MK94.CodeGenerator.Test\MK94.CodeGenerator.Test.csproj", "{CEA74623-26F9-4FE4-BADB-D56B54480E08}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A9165E45-90B2-40BE-85B7-AF72F88DBAE1}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.md = Readme.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
