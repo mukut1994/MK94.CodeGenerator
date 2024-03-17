@@ -227,15 +227,18 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public void AppendPropertyType(CodeBuilder builder)
             {
-                if (PropertyType.HasFlag(PropertyType.Getter) && PropertyType.HasFlag(PropertyType.Setter))
-                    builder.AppendWord("{ get; set; }");
-                else if (PropertyType.HasFlag(PropertyType.Getter))
-                    builder.AppendWord("{ get; }");
-                else if (PropertyType.HasFlag(PropertyType.Setter))
-                    builder.AppendWord("{ set; }");
+                builder.AppendWord("{");
 
-                if (PropertyType.HasFlag(PropertyType.Initialise))
-                    builder.AppendWord(" = new();");
+                if (PropertyType.HasFlag(PropertyType.Getter))
+                    builder.AppendWord("get;");
+
+                if (PropertyType.HasFlag(PropertyType.Setter))
+                    builder.AppendWord("set;");
+
+                if (PropertyType.HasFlag(PropertyType.Init))
+                    builder.AppendWord("init;");
+
+                builder.AppendWord("}");
             }
 
             public IntermediatePropertyDefinition WithGetterOnly()
@@ -254,7 +257,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public IntermediatePropertyDefinition WithPropertyInitialise()
             {
-                PropertyType |= PropertyType.Initialise;
+                PropertyType |= PropertyType.Init;
 
                 return this;
             }
