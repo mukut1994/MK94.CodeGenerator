@@ -396,6 +396,8 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             
             private DefinitionType DefinitionType { get; set; }
 
+            private bool PrimaryConstructor { get; set; }
+
             public IntermediateTypeDefinition(CSharpCodeGenerator root, MemberFlags flags, string name) : base(flags, name)
             {
                 this.root = root;
@@ -485,6 +487,13 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 return this;
             }
 
+            public IntermediateTypeDefinition WithPrimaryConstructor()
+            {
+                PrimaryConstructor = true;
+
+                return this;
+            }
+
             public void Generate(CodeBuilder builder)
             {
                 builder
@@ -492,6 +501,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .Append(AppendMemberFlags)
                     .Append(AppendDefinitionFlags)
                     .Append(MemberName)
+                    .Append(AppendPrimaryConstructor)
                     .Append(AppendInheritsFrom)
                     .OpenBlock();
 
@@ -500,7 +510,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     builder.Append((b, p) => p.Value.Generate(b), Types);
                 }
 
-                if (Properties.Any())
+                if (!PrimaryConstructor && Properties.Any())
                 {
                     if (Types.Any())
                         builder.NewLine();
@@ -552,6 +562,26 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                         builder.AppendWord($"{InheritsFrom[i]}, ");
                     }
                 }
+            }
+
+            private void AppendPrimaryConstructor(CodeBuilder builder)
+            {
+                if (!PrimaryConstructor)
+                    return;
+
+                builder.OpenParanthesis();
+
+                foreach (var property in Properties)
+                {
+                    if (property.Value.Flags.HasFlag(MemberFlags.Public))
+                    {
+                        builder.AppendWord(property.Value.Type.Resolve(root));
+                        builder.AppendWord(property.Key);
+                    }
+                }
+
+                builder.CloseParanthesis();
+
             }
         }
     }
