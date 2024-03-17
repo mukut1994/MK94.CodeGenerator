@@ -18,6 +18,8 @@ public class TypescriptTests
     [Test]
     public void Test()
     {
+        // DiskAssert.EnableWriteMode();
+
         var c = new TypescriptCodeGenerator();
 
         var t = c
@@ -49,7 +51,7 @@ public class TypescriptTests
 
 
     [Test]
-    public void DataModuletest()
+    public void DataModuleTest()
     {
         // DiskAssert.EnableWriteMode();
 

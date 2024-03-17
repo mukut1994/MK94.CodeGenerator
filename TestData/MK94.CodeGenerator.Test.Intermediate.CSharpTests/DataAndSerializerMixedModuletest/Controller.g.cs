@@ -8,6 +8,7 @@ public class PizzaController
     public static Task PizzaList(Page page)
     {
         return "PizzaList"
+          .SetQueryParam("pageId", page.PageId)
           .SetQueryParam("size", page.Size)
           .SetQueryParam("index", page.Index)
           .ReceiveStringAsync();
