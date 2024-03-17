@@ -10,7 +10,6 @@ public interface IId
 {
     public Guid Id { get; } 
 }
-public record struct PageId : IId
+public record struct PageId(Guid Id): IId
 {
-    public Guid Id { get; set; } 
 }

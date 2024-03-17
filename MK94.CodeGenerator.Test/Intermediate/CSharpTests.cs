@@ -118,7 +118,6 @@ public class CSharpTests
             .CSharpProject()
             .WhichImplements(controllerFeature)
             .WithinNamespace("TestNameSpace")
-
             .WithPropertiesGenerator()
             .WithStronglyTypedIdGenerator()
 
