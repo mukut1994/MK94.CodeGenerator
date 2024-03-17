@@ -18,7 +18,7 @@ public class CSharpTests
     [Test]
     public void Test()
     {
-        // DiskAssert.EnableWriteMode();
+        DiskAssert.EnableWriteMode();
 
         var c = new CSharpCodeGenerator();
 
@@ -33,11 +33,14 @@ public class CSharpTests
             .Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id")
             .WithGetter();
 
-        namespaceA
-            .Type("StructA", MemberFlags.Public)
+        var recordStruct = namespaceA
+            .Type("RecordStructA", MemberFlags.Public)
             .WithTypeAsRecord()
             .WithTypeAsStruct()
-            .WithInheritsFrom(CsharpTypeReference.ToRaw("IId"));
+            .WithInheritsFrom(CsharpTypeReference.ToRaw("IId"))
+            .WithPrimaryConstructor();
+
+        recordStruct.Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id");
 
         var typeA = namespaceA.Type("TypeA", MemberFlags.Public);
 
