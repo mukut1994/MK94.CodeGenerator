@@ -193,6 +193,8 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public PropertyType PropertyType { get; set; }
 
+            public string NewExpression { get; set; } = string.Empty;
+
             public IntermediatePropertyDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name) : base(flags, type, name) 
             {
                 PropertyType |= PropertyType.Default;
@@ -217,6 +219,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .AppendWord(Type.Resolve(root))
                     .Append(MemberName)
                     .Append(AppendPropertyType)
+                    .Append(NewExpression)
                     .AppendLine(string.Empty);
             }
 
@@ -267,6 +270,15 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
                 return this;
             }
+
+            public IntermediatePropertyDefinition WithDefaultNew() => WithDefaultExpression("= new();");
+
+            public IntermediatePropertyDefinition WithDefaultExpression(string newExpression)
+            {
+                NewExpression = newExpression;
+
+                return this;
+            } 
         }
 
         public class IntermediateAttributeDefinition : IGenerator
