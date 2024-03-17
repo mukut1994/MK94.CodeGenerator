@@ -36,7 +36,8 @@ public class CSharpTests
         namespaceA
             .Type("StructA", MemberFlags.Public)
             .WithTypeAsRecord()
-            .WithTypeAsStruct();
+            .WithTypeAsStruct()
+            .WithInheritsFrom(CsharpTypeReference.ToRaw("IId"));
 
         var typeA = namespaceA.Type("TypeA", MemberFlags.Public);
 
