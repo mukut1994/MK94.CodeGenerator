@@ -219,7 +219,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .AppendWord(Type.Resolve(root))
                     .Append(MemberName)
                     .Append(AppendPropertyType)
-                    .AppendWord(NewExpression)
+                    .Append(NewExpression)
                     .AppendLine(string.Empty);
             }
 
