@@ -105,7 +105,7 @@ public class CSharpTests
     [Test]
     public void DataModule_StronglyTypedId()
     {
-        DiskAssert.EnableWriteMode();
+        // DiskAssert.EnableWriteMode();
 
         var solution = Solution.FromAssemblyContaining<Page>();
 
