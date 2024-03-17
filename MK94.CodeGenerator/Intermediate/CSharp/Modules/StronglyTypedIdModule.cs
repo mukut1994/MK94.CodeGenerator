@@ -34,42 +34,62 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
                     continue;
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
-                var type = CreateStronglyTypedIdInterface(ns);
+                CreateStronglyTypedIdInterface(ns, propertiesWithStronglyTypedAttribute);
 
                 foreach (var property in propertiesWithStronglyTypedAttribute)
                 {
-                    var stronglyTypedId = ns
-                        .Type(property.Name, MemberFlags.Public)
-                        .WithTypeAsRecord()
-                        .WithTypeAsStruct()
-                        .WithInheritsFrom(CsharpTypeReference.ToRaw("IId"))
-                        .WithPrimaryConstructor();
+                    switch (property.Type)
+                    {
+                        case Type guidType when guidType == typeof(Guid):
+                            CreateGuidId(ns, property);
+                            break;
 
-                    stronglyTypedId.Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id");
-
-                    stronglyTypedId
-                        .Method(MemberFlags.Public | MemberFlags.Static, CsharpTypeReference.ToType<Guid>(), "Empty")
-                        .Body.Append("return new(Guid.Empty);");
-
-                    stronglyTypedId
-                        .Method(MemberFlags.Public | MemberFlags.Static, CsharpTypeReference.ToType<Guid>(), "New")
-                        .Body.Append("return new(Guid.NewGuid());");
-
-                    stronglyTypedId
-                        .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToType<string>(), "ToString")
-                        .Body.Append("return Id.ToString();");
+                        default:
+                            throw new NotImplementedException();
+                    }
                 }
             }
         }
     }
 
-    private static IntermediateFileDefinition.IntermediateTypeDefinition CreateStronglyTypedIdInterface(IntermediateFileDefinition.IntermediateNamespaceDefintion ns)
+    private static void CreateGuidId(IntermediateFileDefinition.IntermediateNamespaceDefintion ns, PropertyDefinition property)
     {
-        var type = ns.Type("IId", MemberFlags.Public).WithTypeAsInterface();
+        var stronglyTypedId = ns
+                                .Type(property.Name, MemberFlags.Public)
+                                .WithTypeAsRecord()
+                                .WithTypeAsStruct()
+                                .WithInheritsFrom(CsharpTypeReference.ToRaw($"{property.Type.Name}Id"))
+                                .WithPrimaryConstructor();
 
-        type.Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id").WithGetter();
+        stronglyTypedId.Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id");
 
-        return type;
+        stronglyTypedId
+            .Method(MemberFlags.Public | MemberFlags.Static, CsharpTypeReference.ToType<Guid>(), "Empty")
+            .Body.Append("return new(Guid.Empty);");
+
+        stronglyTypedId
+            .Method(MemberFlags.Public | MemberFlags.Static, CsharpTypeReference.ToType<Guid>(), "New")
+            .Body.Append("return new(Guid.NewGuid());");
+
+        stronglyTypedId
+            .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToType<string>(), "ToString")
+            .Body.Append("return Id.ToString();");
+    }
+
+    private static void CreateStronglyTypedIdInterface(IntermediateFileDefinition.IntermediateNamespaceDefintion ns, List<PropertyDefinition> propertiesWithStronglyTypedAttribute)
+    {
+        var uniquePropertyTypes = propertiesWithStronglyTypedAttribute.Select(x => x.Type).Distinct().ToList();
+
+        foreach (var uniquePropertyType in uniquePropertyTypes)
+        {
+            var type = ns
+                .Type($"{uniquePropertyType.Name}Id", MemberFlags.Public)
+                .WithTypeAsInterface();
+
+            type
+                .Property(MemberFlags.Public, CsharpTypeReference.ToType(uniquePropertyType), "Id")
+                .WithGetter();
+        }
     }
 }
 
