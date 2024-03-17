@@ -12,4 +12,17 @@ public interface IId
 }
 public record struct PageId(Guid Id): IId
 {
+
+    public static Guid Empty()
+    {
+        return new(Guid.Empty);
+    }
+    public static Guid New()
+    {
+        return new(Guid.NewGuid());
+    }
+    public override String ToString()
+    {
+        return Id.ToString();
+    }
 }
