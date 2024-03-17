@@ -1,5 +1,4 @@
-﻿using MK94.CodeGenerator.Intermediate.Typescript;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
