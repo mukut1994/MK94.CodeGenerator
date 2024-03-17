@@ -195,7 +195,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public IntermediatePropertyDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name) : base(flags, type, name) 
             {
-                PropertyType = PropertyType.Getter | PropertyType.Setter;
+                PropertyType |= PropertyType.Default;
 
                 this.root = root;
             }
@@ -227,34 +227,43 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public void AppendPropertyType(CodeBuilder builder)
             {
-                if (PropertyType.HasFlag(PropertyType.Getter) && PropertyType.HasFlag(PropertyType.Setter))
-                    builder.AppendWord("{ get; set; }");
-                else if (PropertyType.HasFlag(PropertyType.Getter))
-                    builder.AppendWord("{ get; }");
-                else if (PropertyType.HasFlag(PropertyType.Setter))
-                    builder.AppendWord("{ set; }");
+                builder.AppendWord("{");
 
-                if (PropertyType.HasFlag(PropertyType.Initialise))
-                    builder.AppendWord(" = new();");
+                if (PropertyType == 0 || PropertyType.HasFlag(PropertyType.Getter))
+                    builder.AppendWord("get;");
+
+                if (PropertyType == 0 || PropertyType.HasFlag(PropertyType.Setter))
+                    builder.AppendWord("set;");
+
+                if (PropertyType.HasFlag(PropertyType.Init))
+                    builder.AppendWord("init;");
+
+                builder.AppendWord("}");
             }
 
-            public IntermediatePropertyDefinition WithGetterOnly()
+            public IntermediatePropertyDefinition WithGetter()
             {
-                PropertyType = PropertyType.Getter;
+                PropertyType |= PropertyType.Getter;
 
                 return this;
             }
 
-            public IntermediatePropertyDefinition WithSetterOnly()
+            public IntermediatePropertyDefinition WithSetter()
             {
-                PropertyType = PropertyType.Setter;
+                if (PropertyType.HasFlag(PropertyType.Init))
+                    throw new InvalidOperationException("Property has `init` set up already.");
+
+                PropertyType |= PropertyType.Setter;
 
                 return this;
             }
 
-            public IntermediatePropertyDefinition WithPropertyInitialise()
+            public IntermediatePropertyDefinition WithInit()
             {
-                PropertyType |= PropertyType.Initialise;
+                if (PropertyType.HasFlag(PropertyType.Setter))
+                    throw new InvalidOperationException("Property has `set` set up already.");
+
+                PropertyType |= PropertyType.Init;
 
                 return this;
             }
@@ -378,7 +387,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public IntermediateTypeDefinition(CSharpCodeGenerator root, MemberFlags flags, string name) : base(flags, name)
             {
                 this.root = root;
-                DefinitionType |= DefinitionType.Class;
+                DefinitionType |= DefinitionType.Default;
             }
 
             public IntermediateAttributeDefinition Attribute(CsharpTypeReference attribute)
@@ -401,7 +410,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             {
                 var definition = Methods.GetOrAdd(name, () => new(root, flags, returnType, name));
 
-                definition.Flags = definition.Flags | flags;
+                definition.Flags |= flags;
 
                 // TODO throw exception if return types don't match
 
@@ -417,30 +426,42 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 return definition;
             }
 
+            public IntermediateTypeDefinition WithTypeAsClass()
+            {
+                if (DefinitionType != DefinitionType.Default)
+                    throw new InvalidOperationException("The type has already been defined.");
+
+                DefinitionType |= DefinitionType.Class;
+
+                return this;
+            }
+
             public IntermediateTypeDefinition WithTypeAsRecord()
             {
-                DefinitionType = DefinitionType.Record;
+                if (DefinitionType.HasFlag(DefinitionType.Class) || DefinitionType.HasFlag(DefinitionType.Interface))
+                    throw new InvalidOperationException("The type has already been defined.");
+
+                DefinitionType |= DefinitionType.Record;
 
                 return this;
             }
 
             public IntermediateTypeDefinition WithTypeAsStruct()
             {
-                DefinitionType = DefinitionType.Struct;
+                if (DefinitionType.HasFlag(DefinitionType.Class) || DefinitionType.HasFlag(DefinitionType.Interface))
+                    throw new InvalidOperationException("The type has already been defined.");
+
+                DefinitionType |= DefinitionType.Struct;
 
                 return this;
             }
 
             public IntermediateTypeDefinition WithTypeAsInterface()
             {
+                if (DefinitionType.HasFlag(DefinitionType.Class) || DefinitionType.HasFlag(DefinitionType.Struct) || DefinitionType.HasFlag(DefinitionType.Record))
+                    throw new InvalidOperationException("The type cannot be defined as an interface.");
+
                 DefinitionType = DefinitionType.Interface;
-
-                return this;
-            }
-
-            public IntermediateTypeDefinition WithTypeAsRecordStruct()
-            {
-                DefinitionType = DefinitionType.Record | DefinitionType.Struct;
 
                 return this;
             }
@@ -488,7 +509,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             private void AppendDefinitionFlags(CodeBuilder builder)
             {
-                if (DefinitionType.HasFlag(DefinitionType.Class))
+                if (DefinitionType == DefinitionType.Default || DefinitionType.HasFlag(DefinitionType.Class))
                     builder.AppendWord("class");
 
                 if (DefinitionType.HasFlag(DefinitionType.Record))

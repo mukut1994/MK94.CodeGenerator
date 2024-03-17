@@ -63,6 +63,7 @@ public enum MemberFlags
 [Flags]
 public enum DefinitionType
 {
+    Default = 0,
     Class = 1,
     Record = 2,
     Struct = 4,
@@ -73,9 +74,10 @@ public enum DefinitionType
 [Flags]
 public enum PropertyType
 {
+    Default = 0,
     Getter = 1,
     Setter = 2,
-    Initialise = 4,
+    Init = 4,
 }
 
 public interface IProject
