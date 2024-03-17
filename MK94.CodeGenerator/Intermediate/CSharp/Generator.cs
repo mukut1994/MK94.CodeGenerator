@@ -391,6 +391,8 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public Dictionary<string, IntermediateMethodDefinition> Methods = new();
             private List<IntermediateAttributeDefinition> attributes { get; } = new();
+
+            private List<CsharpTypeReference> InheritsFrom { get; } = new();
             
             private DefinitionType DefinitionType { get; set; }
 
@@ -476,6 +478,13 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 return this;
             }
 
+            public IntermediateTypeDefinition WithInheritsFrom(CsharpTypeReference inheritsFrom)
+            {
+                InheritsFrom.Add(inheritsFrom);
+
+                return this;
+            }
+
             public void Generate(CodeBuilder builder)
             {
                 builder
@@ -483,6 +492,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .Append(AppendMemberFlags)
                     .Append(AppendDefinitionFlags)
                     .Append(MemberName)
+                    .Append(AppendInheritsFrom)
                     .OpenBlock();
 
                 if (Types.Any())
@@ -522,6 +532,26 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
                 if (DefinitionType.HasFlag(DefinitionType.Interface))
                     builder.AppendWord("interface");
+            }
+
+            private void AppendInheritsFrom(CodeBuilder builder)
+            {
+                if (InheritsFrom.Count == 0)
+                    return;
+
+                builder.AppendWord(":");
+
+                for (int i = 0; i < InheritsFrom.Count; i++)
+                {
+                    if (i == InheritsFrom.Count - 1)
+                    {
+                        builder.AppendWord(InheritsFrom[i].Resolve(root));
+                    }
+                    else
+                    {
+                        builder.AppendWord($"{InheritsFrom[i]}, ");
+                    }
+                }
             }
         }
     }

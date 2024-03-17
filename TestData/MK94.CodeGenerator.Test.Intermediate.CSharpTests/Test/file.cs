@@ -6,7 +6,7 @@ public interface IId
 {
     public Guid Id { get; } 
 }
-public record struct StructA
+public record struct StructA : IId
 {
 }
 [Example]
