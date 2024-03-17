@@ -63,6 +63,7 @@ public enum MemberFlags
 [Flags]
 public enum DefinitionType
 {
+    Default = 0,
     Class = 1,
     Record = 2,
     Struct = 4,
