@@ -1,3 +1,6 @@
+using System.Text.Json.Serialization;
+using System.Text.Json;
+
 namespace TestNameSpace;
 
 public class Page
@@ -24,5 +27,16 @@ public record struct PageId(Guid Id): GuidId
     public override String ToString()
     {
         return Id.ToString();
+    }
+}
+public class PageIdConverter : JsonConverter<PageId>
+{
+    public override PageId Read(Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        return new PageId(Guid.Parse(reader.GetString()!));
+    }
+    public override void Write(Utf8JsonWriter writer, PageId value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.Id);
     }
 }
