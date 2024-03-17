@@ -46,6 +46,18 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
                         .WithPrimaryConstructor();
 
                     stronglyTypedId.Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id");
+
+                    stronglyTypedId
+                        .Method(MemberFlags.Public | MemberFlags.Static, CsharpTypeReference.ToType<Guid>(), "Empty")
+                        .Body.Append("return new(Guid.Empty);");
+
+                    stronglyTypedId
+                        .Method(MemberFlags.Public | MemberFlags.Static, CsharpTypeReference.ToType<Guid>(), "New")
+                        .Body.Append("return new(Guid.NewGuid());");
+
+                    stronglyTypedId
+                        .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToType<string>(), "ToString")
+                        .Body.Append("return Id.ToString();");
                 }
             }
         }
