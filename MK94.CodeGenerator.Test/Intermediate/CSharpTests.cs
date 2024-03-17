@@ -22,11 +22,20 @@ public class CSharpTests
 
         var c = new CSharpCodeGenerator();
 
-        var t = c
+        var namespaceA = c
             .File("file.cs")
             .WithUsing("System")
-            .Namespace("Namespace.A")
-            .Type("TypeA", MemberFlags.Public);
+            .Namespace("Namespace.A");
+
+        namespaceA
+            .Type("IId", MemberFlags.Public)
+            .WithTypeAsInterface()
+            .Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id")
+            .WithGetter();
+
+        namespaceA.Type("StructA", MemberFlags.Public).WithTypeAsRecord().WithTypeAsStruct();
+
+        var t = namespaceA.Type("TypeA", MemberFlags.Public);
 
         t.Attribute(CsharpTypeReference.ToType<ExampleAttribute>());
 

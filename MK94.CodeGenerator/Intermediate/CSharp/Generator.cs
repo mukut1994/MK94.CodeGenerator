@@ -175,7 +175,6 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             }
         }
 
-
         public abstract class IntermediateTypedMemberDefinition : IntermediateMemberDefinition
         {
             public CsharpTypeReference Type { get; set; }
@@ -192,8 +191,12 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             private List<IntermediateAttributeDefinition> attributes { get; } = new();
 
+            public PropertyType PropertyType { get; set; }
+
             public IntermediatePropertyDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name) : base(flags, type, name) 
             {
+                PropertyType |= PropertyType.Default;
+
                 this.root = root;
             }
 
@@ -213,12 +216,56 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .Append(AppendMemberFlags)
                     .AppendWord(Type.Resolve(root))
                     .Append(MemberName)
-                    .AppendLine("{ get; set; }");
+                    .Append(AppendPropertyType)
+                    .AppendLine(string.Empty);
             }
 
             public void GetRequiredReferences(HashSet<CsharpTypeReference> refs)
             {
                 refs.Add(Type);
+            }
+
+            public void AppendPropertyType(CodeBuilder builder)
+            {
+                builder.AppendWord("{");
+
+                if (PropertyType == 0 || PropertyType.HasFlag(PropertyType.Getter))
+                    builder.AppendWord("get;");
+
+                if (PropertyType == 0 || PropertyType.HasFlag(PropertyType.Setter))
+                    builder.AppendWord("set;");
+
+                if (PropertyType.HasFlag(PropertyType.Init))
+                    builder.AppendWord("init;");
+
+                builder.AppendWord("}");
+            }
+
+            public IntermediatePropertyDefinition WithGetter()
+            {
+                PropertyType |= PropertyType.Getter;
+
+                return this;
+            }
+
+            public IntermediatePropertyDefinition WithSetter()
+            {
+                if (PropertyType.HasFlag(PropertyType.Init))
+                    throw new InvalidOperationException("Property has `init` set up already.");
+
+                PropertyType |= PropertyType.Setter;
+
+                return this;
+            }
+
+            public IntermediatePropertyDefinition WithInit()
+            {
+                if (PropertyType.HasFlag(PropertyType.Setter))
+                    throw new InvalidOperationException("Property has `set` set up already.");
+
+                PropertyType |= PropertyType.Init;
+
+                return this;
             }
         }
 
@@ -332,10 +379,13 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public Dictionary<string, IntermediateMethodDefinition> Methods = new();
             private List<IntermediateAttributeDefinition> attributes { get; } = new();
+            
+            private DefinitionType DefinitionType { get; set; }
 
             public IntermediateTypeDefinition(CSharpCodeGenerator root, MemberFlags flags, string name) : base(flags, name)
             {
                 this.root = root;
+                DefinitionType |= DefinitionType.Default;
             }
 
             public IntermediateAttributeDefinition Attribute(CsharpTypeReference attribute)
@@ -358,7 +408,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             {
                 var definition = Methods.GetOrAdd(name, () => new(root, flags, returnType, name));
 
-                definition.Flags = definition.Flags | flags;
+                definition.Flags |= flags;
 
                 // TODO throw exception if return types don't match
 
@@ -367,11 +417,51 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public IntermediateTypeDefinition Type(string name, MemberFlags flags)
             {
-                flags = flags | MemberFlags.Type;
+                flags |= MemberFlags.Type;
 
                 var definition = Types.GetOrAdd(name, () => new IntermediateTypeDefinition(root, flags: flags, name: name));
 
                 return definition;
+            }
+
+            public IntermediateTypeDefinition WithTypeAsClass()
+            {
+                if (DefinitionType != DefinitionType.Default)
+                    throw new InvalidOperationException("The type has already been defined.");
+
+                DefinitionType |= DefinitionType.Class;
+
+                return this;
+            }
+
+            public IntermediateTypeDefinition WithTypeAsRecord()
+            {
+                if (DefinitionType.HasFlag(DefinitionType.Class) || DefinitionType.HasFlag(DefinitionType.Interface))
+                    throw new InvalidOperationException("The type has already been defined.");
+
+                DefinitionType |= DefinitionType.Record;
+
+                return this;
+            }
+
+            public IntermediateTypeDefinition WithTypeAsStruct()
+            {
+                if (DefinitionType.HasFlag(DefinitionType.Class) || DefinitionType.HasFlag(DefinitionType.Interface))
+                    throw new InvalidOperationException("The type has already been defined.");
+
+                DefinitionType |= DefinitionType.Struct;
+
+                return this;
+            }
+
+            public IntermediateTypeDefinition WithTypeAsInterface()
+            {
+                if (DefinitionType.HasFlag(DefinitionType.Class) || DefinitionType.HasFlag(DefinitionType.Struct) || DefinitionType.HasFlag(DefinitionType.Record))
+                    throw new InvalidOperationException("The type cannot be defined as an interface.");
+
+                DefinitionType = DefinitionType.Interface;
+
+                return this;
             }
 
             public void Generate(CodeBuilder builder)
@@ -379,7 +469,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 builder
                     .Append((b, a) => a.Generate(b), attributes)
                     .Append(AppendMemberFlags)
-                    .AppendWord("class")
+                    .Append(AppendDefinitionFlags)
                     .Append(MemberName)
                     .OpenBlock();
 
@@ -405,6 +495,21 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 }
 
                 builder.CloseBlock();
+            }
+
+            private void AppendDefinitionFlags(CodeBuilder builder)
+            {
+                if (DefinitionType == DefinitionType.Default || DefinitionType.HasFlag(DefinitionType.Class))
+                    builder.AppendWord("class");
+
+                if (DefinitionType.HasFlag(DefinitionType.Record))
+                    builder.AppendWord("record");
+
+                if (DefinitionType.HasFlag(DefinitionType.Struct))
+                    builder.AppendWord("struct");
+
+                if (DefinitionType.HasFlag(DefinitionType.Interface))
+                    builder.AppendWord("interface");
             }
         }
     }
