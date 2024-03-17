@@ -25,5 +25,7 @@
   "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataAndSerializerMixedModuleTest/Data.g.cs": "mrlxr0-f5nvgngjzp3q65gvohsunau1f6zoewyxen2y=",
   "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataAndSerializerMixedModuleTest/Controller.g.cs": "lj4mr5yfixmhkkpsfxockmusvvrsjvpkqshmyoy8i3e=",
   "MK94.CodeGenerator.Test.DirectGeneratorTests/Test1/Controller.g.cs": "rgfps\u002Boumequ3mamy5qzxd1g-bf6h2qr-anyxbngapu=",
-  "MK94.CodeGenerator.Test.DirectGeneratorTests/Test2/Data.g.cs": "lojb2zwm8xurk0vneyjqkxgc\u002Brjvnwvmcbg\u002Bkgwvnqq="
+  "MK94.CodeGenerator.Test.DirectGeneratorTests/Test2/Data.g.cs": "lojb2zwm8xurk0vneyjqkxgc\u002Brjvnwvmcbg\u002Bkgwvnqq=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModule_StronglyTypedId/Data.g.cs": "e5anmhpat6ul3ztxt-sv9a9-pl57i1lfmkcg2l8tzdu=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModule_StronglyTypedId/Controller.g.cs": "47deqpj8hbsa\u002B-timw\u002B5jceuqerkm5nmpjwzg3hsufu="
 }

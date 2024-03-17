@@ -95,6 +95,31 @@ public class CSharpTests
     }
 
     [Test]
+    public void DataModule_StronglyTypedId()
+    {
+        DiskAssert.EnableWriteMode();
+
+        var solution = Solution.FromAssemblyContaining<Page>();
+
+        // TODO cleaner parser syntax
+        var controllerFeature = ControllerFeature.Parser.ParseFromAssemblyContainingType<Page>();
+
+        var csharpCode = new CSharpCodeGenerator();
+
+        var project = solution
+            .CSharpProject()
+            .WhichImplements(controllerFeature)
+            .WithinNamespace("TestNameSpace")
+
+            .WithPropertiesGenerator()
+            .WithStronglyTypedIdGenerator()
+
+            .GenerateTo(csharpCode);
+
+        csharpCode.AssertMatches();
+    }
+
+    [Test]
     public void DataAndSerializerMixedModuleTest()
     {
         // DiskAssert.EnableWriteMode();
