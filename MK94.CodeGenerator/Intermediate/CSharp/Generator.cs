@@ -193,6 +193,8 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public PropertyType PropertyType { get; set; }
 
+            public string NewExpression { get; set; } = string.Empty;
+
             public IntermediatePropertyDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name) : base(flags, type, name) 
             {
                 PropertyType |= PropertyType.Default;
@@ -217,6 +219,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .AppendWord(Type.Resolve(root))
                     .Append(MemberName)
                     .Append(AppendPropertyType)
+                    .Append(NewExpression)
                     .AppendLine(string.Empty);
             }
 
@@ -267,6 +270,15 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
                 return this;
             }
+
+            public IntermediatePropertyDefinition WithDefaultNew() => WithDefaultExpression("= new();");
+
+            public IntermediatePropertyDefinition WithDefaultExpression(string newExpression)
+            {
+                NewExpression = newExpression;
+
+                return this;
+            } 
         }
 
         public class IntermediateAttributeDefinition : IGenerator
@@ -380,7 +392,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public Dictionary<string, IntermediateMethodDefinition> Methods = new();
             private List<IntermediateAttributeDefinition> attributes { get; } = new();
 
-            public List<string> InheritsFrom { get; } = new();
+            private List<CsharpTypeReference> InheritsFrom { get; } = new();
             
             private DefinitionType DefinitionType { get; set; }
 
@@ -466,7 +478,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 return this;
             }
 
-            public IntermediateTypeDefinition WithInheritsFrom(string inheritsFrom)
+            public IntermediateTypeDefinition WithInheritsFrom(CsharpTypeReference inheritsFrom)
             {
                 InheritsFrom.Add(inheritsFrom);
 
@@ -529,20 +541,16 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
                 builder.AppendWord(":");
 
-                int i = 0;
-
-                while(i < InheritsFrom.Count)
+                for (int i = 0; i < InheritsFrom.Count; i++)
                 {
                     if (i == InheritsFrom.Count - 1)
                     {
-                        builder.AppendWord(InheritsFrom[i]);
+                        builder.AppendWord(InheritsFrom[i].Resolve(root));
                     }
                     else
                     {
                         builder.AppendWord($"{InheritsFrom[i]}, ");
                     }
-
-                    i++;
                 }
             }
         }

@@ -6,7 +6,7 @@ public interface IId
 {
     public Guid Id { get; } 
 }
-public record struct StructA
+public record struct StructA : IId
 {
 }
 [Example]
@@ -17,7 +17,7 @@ public class TypeA
     }
 
     [Example]
-    public Int32 PropA { get; set; } 
+    public Int32 PropA { get; set; }  = 0;
 
     [Example]
     public Int32 MethodA(Int32 a, Int32 b)
