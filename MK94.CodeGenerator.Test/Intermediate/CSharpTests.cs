@@ -31,7 +31,7 @@ public class CSharpTests
             .Type("IId", MemberFlags.Public)
             .WithTypeAsInterface()
             .Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id")
-            .WithGetterOnly();
+            .WithGetter();
 
         namespaceA.Type("StructA", MemberFlags.Public).WithTypeAsRecord().WithTypeAsStruct();
 

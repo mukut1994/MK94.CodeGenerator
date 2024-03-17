@@ -74,6 +74,7 @@ public enum DefinitionType
 [Flags]
 public enum PropertyType
 {
+    Default = 0,
     Getter = 1,
     Setter = 2,
     Init = 4,

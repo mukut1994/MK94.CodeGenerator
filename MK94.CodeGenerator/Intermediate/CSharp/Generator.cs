@@ -195,7 +195,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public IntermediatePropertyDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name) : base(flags, type, name) 
             {
-                PropertyType = PropertyType.Getter | PropertyType.Setter;
+                PropertyType |= PropertyType.Default;
 
                 this.root = root;
             }
@@ -229,10 +229,10 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             {
                 builder.AppendWord("{");
 
-                if (PropertyType.HasFlag(PropertyType.Getter))
+                if (PropertyType == 0 || PropertyType.HasFlag(PropertyType.Getter))
                     builder.AppendWord("get;");
 
-                if (PropertyType.HasFlag(PropertyType.Setter))
+                if (PropertyType == 0 || PropertyType.HasFlag(PropertyType.Setter))
                     builder.AppendWord("set;");
 
                 if (PropertyType.HasFlag(PropertyType.Init))
@@ -241,22 +241,28 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 builder.AppendWord("}");
             }
 
-            public IntermediatePropertyDefinition WithGetterOnly()
+            public IntermediatePropertyDefinition WithGetter()
             {
-                PropertyType = PropertyType.Getter;
+                PropertyType |= PropertyType.Getter;
 
                 return this;
             }
 
-            public IntermediatePropertyDefinition WithSetterOnly()
+            public IntermediatePropertyDefinition WithSetter()
             {
-                PropertyType = PropertyType.Setter;
+                if (PropertyType.HasFlag(PropertyType.Init))
+                    throw new InvalidOperationException("Property has `init` set up already.");
+
+                PropertyType |= PropertyType.Setter;
 
                 return this;
             }
 
-            public IntermediatePropertyDefinition WithPropertyInitialise()
+            public IntermediatePropertyDefinition WithInit()
             {
+                if (PropertyType.HasFlag(PropertyType.Setter))
+                    throw new InvalidOperationException("Property has `set` set up already.");
+
                 PropertyType |= PropertyType.Init;
 
                 return this;
@@ -420,6 +426,9 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public IntermediateTypeDefinition WithTypeAsClass()
             {
+                if (DefinitionType != DefinitionType.Default)
+                    throw new InvalidOperationException("The type has already been defined.");
+
                 DefinitionType |= DefinitionType.Class;
 
                 return this;
@@ -427,8 +436,8 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public IntermediateTypeDefinition WithTypeAsRecord()
             {
-                if (DefinitionType.HasFlag(DefinitionType.Class))
-                    throw new InvalidOperationException("The type has been defined as class. It can either be a class or a record.");
+                if (DefinitionType.HasFlag(DefinitionType.Class) || DefinitionType.HasFlag(DefinitionType.Interface))
+                    throw new InvalidOperationException("The type has already been defined.");
 
                 DefinitionType |= DefinitionType.Record;
 
@@ -437,8 +446,8 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public IntermediateTypeDefinition WithTypeAsStruct()
             {
-                if (DefinitionType.HasFlag(DefinitionType.Class))
-                    throw new InvalidOperationException("The type has been defined as class. It can either be a class or a record.");
+                if (DefinitionType.HasFlag(DefinitionType.Class) || DefinitionType.HasFlag(DefinitionType.Interface))
+                    throw new InvalidOperationException("The type has already been defined.");
 
                 DefinitionType |= DefinitionType.Struct;
 
