@@ -287,10 +287,19 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public CsharpTypeReference type { get; }
 
+            private List<CsharpTypeReference> parameters { get; } = new();
+
             public IntermediateAttributeDefinition(CSharpCodeGenerator root, CsharpTypeReference type)
             {
                 this.type = type;
                 this.root = root;
+            }
+
+            public IntermediateAttributeDefinition WithParam(CsharpTypeReference parameter)
+            {
+                parameters.Add(parameter);
+
+                return this;
             }
 
             public void Generate(CodeBuilder builder)
@@ -300,12 +309,41 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 if (attributeName.EndsWith("Attribute"))
                     attributeName = attributeName[..^"Attribute".Length];
 
-                builder.AppendLine($"[{attributeName}]");
+                builder
+                    .OpenSquareParanthesis()
+                    .Append(attributeName)
+                    .Append(AppendParameters)
+                    .CloseSquareParanthesis()
+                    .AppendLine(string.Empty);
             }
 
             public void GetRequiredReferences(HashSet<CsharpTypeReference> refs)
             {
                 refs.Add(type);
+            }
+
+            private void AppendParameters(CodeBuilder builder)
+            {
+                if (parameters.Count == 0)
+                    return;
+
+                builder.OpenParanthesis();
+
+                for (int i = 0; i < parameters.Count; i++)
+                {
+                    if (i == parameters.Count - 1)
+                    {
+                        builder.Append(parameters[i].Resolve(root));
+                    }
+                    else
+                    {
+                        builder
+                            .Append(parameters[i].Resolve(root))
+                            .AppendComma();
+                    }
+                }
+
+                builder.CloseParanthesis();
             }
         }
 
