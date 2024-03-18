@@ -41,3 +41,6 @@ public class PageIdConverter : JsonConverter<PageId>
         writer.WriteStringValue(value.Id);
     }
 }
+public class PageIdEfCoreValueConverter : global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<PageId, global::System.Guid>
+{
+}

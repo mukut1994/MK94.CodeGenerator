@@ -1,35 +1,32 @@
-﻿using MK94.CodeGenerator.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
-namespace MK94.CodeGenerator.Intermediate.CSharp.Modules;
+namespace MK94.CodeGenerator.Intermediate.CSharp.Modules.StronglyTypedId;
 
-public class JsonConverterModule : IGeneratorModule<CSharpCodeGenerator>
+public class StronglyTypedIdJsonConverterModule : IGeneratorModule<CSharpCodeGenerator>
 {
     private readonly ICSharpProject project;
 
-    public JsonConverterModule(ICSharpProject project)
+    public StronglyTypedIdJsonConverterModule(ICSharpProject project)
     {
         this.project = project;
     }
 
     public void AddTo(CSharpCodeGenerator codeGenerator)
     {
-        foreach(var fileDef in project.Files)
+        foreach (var fileDef in project.Files)
         {
             var file = codeGenerator.File($"{fileDef.Name}.g.cs");
 
-            foreach(var typeDef in fileDef.Types)
+            foreach (var typeDef in fileDef.Types)
             {
                 if (typeDef.Properties.Count == 0)
                     continue;
 
-                var propertiesWithJsonConverterAttribute = typeDef.Properties.Where(x => x.Info.GetCustomAttributes<JsonConverterAttribute>().Any()).ToList();
+                var propertiesWithJsonConverterAttribute = typeDef
+                    .Properties
+                    .Where(x => x.Info.GetCustomAttributes<StronglyTypedIdAttribute>().Any(y => y.IncludeJsonConverter))
+                    .ToList();
 
                 if (propertiesWithJsonConverterAttribute.Count == 0)
                     continue;
@@ -39,7 +36,7 @@ public class JsonConverterModule : IGeneratorModule<CSharpCodeGenerator>
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
 
-                foreach(var property in propertiesWithJsonConverterAttribute)
+                foreach (var property in propertiesWithJsonConverterAttribute)
                 {
                     var converterClass = ns
                         .Type($"{property.Name}Converter", MemberFlags.Public)
@@ -64,25 +61,4 @@ public class JsonConverterModule : IGeneratorModule<CSharpCodeGenerator>
             }
         }
     }
-}
-
-public static class JsonConverterModuleExtensions
-{
-    public static T WithJsonConverterGenerator<T>(this T project, Action<JsonConverterModule>? configure = null)
-        where T : ICSharpProject
-    {
-        var mod = new JsonConverterModule(project);
-
-        if (configure != null)
-            configure(mod);
-
-        project.GeneratorModules.Add(mod);
-
-        return project;
-    }
-}
-
-[AttributeUsage(AttributeTargets.Property)]
-public class JsonConverterAttribute : Attribute
-{
 }

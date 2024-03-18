@@ -3,6 +3,7 @@ using MK94.CodeGenerator.Generator;
 using MK94.CodeGenerator.Intermediate;
 using MK94.CodeGenerator.Intermediate.CSharp;
 using MK94.CodeGenerator.Intermediate.CSharp.Modules;
+using MK94.CodeGenerator.Intermediate.CSharp.Modules.StronglyTypedId;
 using MK94.CodeGenerator.Test.Controller;
 using NUnit.Framework;
 using System;
@@ -105,7 +106,7 @@ public class CSharpTests
     [Test]
     public void DataModule_StronglyTypedId()
     {
-        // DiskAssert.EnableWriteMode();
+        DiskAssert.EnableWriteMode();
 
         var solution = Solution.FromAssemblyContaining<Page>();
 
@@ -121,6 +122,7 @@ public class CSharpTests
             .WithPropertiesGenerator()
             .WithStronglyTypedIdGenerator()
             .WithJsonConverterGenerator()
+            .WithEfCoreValueConverterGenerator()
             .GenerateTo(csharpCode);
 
         csharpCode.AssertMatches();

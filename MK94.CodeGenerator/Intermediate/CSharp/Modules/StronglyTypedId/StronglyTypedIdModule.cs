@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace MK94.CodeGenerator.Intermediate.CSharp.Modules;
+namespace MK94.CodeGenerator.Intermediate.CSharp.Modules.StronglyTypedId;
 
 public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
 {
@@ -19,11 +20,11 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
 
     public void AddTo(CSharpCodeGenerator codeGenerator)
     {
-        foreach(var fileDef in project.Files)
+        foreach (var fileDef in project.Files)
         {
             var file = codeGenerator.File($"{fileDef.Name}.g.cs");
 
-            foreach(var typeDef in fileDef.Types)
+            foreach (var typeDef in fileDef.Types)
             {
                 if (typeDef.Properties.Count == 0)
                     continue;
@@ -61,7 +62,7 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
                                 .WithInheritsFrom(CsharpTypeReference.ToRaw($"{property.Type.Name}Id"))
                                 .WithPrimaryConstructor();
 
-        if (property.Info.GetCustomAttribute<JsonConverterAttribute>() != null)
+        if (property.Info.GetCustomAttribute<StronglyTypedIdAttribute>()!.IncludeJsonConverter)
         {
             stronglyTypedId.Attribute(CsharpTypeReference.ToType<JsonConverterAttribute>()).WithParam($"typeof({property.Name}Converter)");
         }
@@ -112,9 +113,47 @@ public static class StronglyTypedIdModuleExtensions
 
         return project;
     }
+
+    public static T WithJsonConverterGenerator<T>(this T project, Action<StronglyTypedIdJsonConverterModule>? configure = null)
+        where T : ICSharpProject
+    {
+        if (!project.GeneratorModules.Any(x => x.GetType() == typeof(StronglyTypedIdModule)))
+            throw new InvalidProgramException("Cannot add JsonConverterGenerator when StronglyTypedIdGenerator is not added");
+
+        var mod = new StronglyTypedIdJsonConverterModule(project);
+
+        if (configure != null)
+            configure(mod);
+
+        project.GeneratorModules.Add(mod);
+
+        return project;
+    }
+
+    public static T WithEfCoreValueConverterGenerator<T>(this T project, Action<EfCoreValueConverterModule>? configure = null)
+        where T : ICSharpProject
+    {
+        if (!project.GeneratorModules.Any(x => x.GetType() == typeof(StronglyTypedIdModule)))
+            throw new InvalidProgramException("Cannot add EfCoreValueConverter when StronglyTypedIdGenerator is not added");
+
+        var mod = new EfCoreValueConverterModule(project);
+
+        if (configure != null)
+            configure(mod);
+
+        project.GeneratorModules.Add(mod);
+
+        return project;
+    }
 }
 
 [AttributeUsage(AttributeTargets.Property)]
 public class StronglyTypedIdAttribute : Attribute
 {
+    public bool IncludeJsonConverter { get; set; }
+
+    public StronglyTypedIdAttribute(bool includeJsonConverter = false)
+    {
+        IncludeJsonConverter = includeJsonConverter;
+    }
 }
