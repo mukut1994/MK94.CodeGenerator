@@ -28,6 +28,7 @@ public class CodeBuilder
     private bool lineHasContent = false;
     private int indent = 0;
     private int parenthesisOpenCount = 0;
+    private int squareParenthesisOpenCount = 0;
     private bool optionalComma = false;
     private bool optionalSpace = false;
 
@@ -351,6 +352,30 @@ public class CodeBuilder
 
         InternalAppend(")");
         indent--;
+
+        return this;
+    }
+
+    public CodeBuilder OpenSquareParanthesis()
+    {
+        optionalSpace = false;
+        optionalComma = false;
+        squareParenthesisOpenCount++;
+        InternalAppend("[");
+
+        return this;
+    }
+
+    public CodeBuilder CloseSquareParanthesis()
+    {
+        optionalSpace = false;
+        optionalComma = false;
+        squareParenthesisOpenCount--;
+
+        if (squareParenthesisOpenCount < 0)
+            throw new InvalidOperationException("Closing too many square parenthesis");
+
+        InternalAppend("]");
 
         return this;
     }
