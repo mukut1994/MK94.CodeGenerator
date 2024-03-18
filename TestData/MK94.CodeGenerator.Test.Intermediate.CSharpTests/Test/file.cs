@@ -12,6 +12,11 @@ public record struct RecordStructA(Guid Id): IId
 [Example]
 public class TypeA
 {
+    public TypeA()
+    {
+        
+    }
+
     public class TypeASubType
     {
     }

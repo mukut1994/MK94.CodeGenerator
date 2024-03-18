@@ -44,6 +44,8 @@ public class CSharpTests
 
         var typeA = namespaceA.Type("TypeA", MemberFlags.Public);
 
+        var constructorA = typeA.Constructor(MemberFlags.Public);
+
         typeA.Attribute(CsharpTypeReference.ToType<ExampleAttribute>());
 
         var propA = typeA.Property(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "PropA");
