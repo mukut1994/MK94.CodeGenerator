@@ -419,6 +419,46 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             }
         }
 
+        public class IntermediateConstructorDefinition : IntermediateMemberDefinition, IGenerator
+        {
+            public MemoryStream BodyStream { get; }
+
+            public CodeBuilder Body { get; }
+
+            public List<IntermediateArgumentDefinition> Arguments { get; } = new();
+
+            private CSharpCodeGenerator root { get; }
+
+            public IntermediateConstructorDefinition(CSharpCodeGenerator root, MemberFlags flags, string name) : base(flags, name)
+            {
+                Body = CodeBuilder.FromMemoryStream(out var stream);
+                BodyStream = stream;
+                this.root = root;
+            }
+
+            public IntermediateConstructorDefinition WithArgument(CsharpTypeReference type, string name)
+            {
+                Arguments.Add(new(root, type, name));
+
+                return this;
+            }
+
+            public void Generate(CodeBuilder builder)
+            {
+                Body.Flush();
+                BodyStream.Flush();
+                BodyStream.Position = 0;
+
+                builder
+                    .Append(AppendMemberFlags)
+                    .Append(MemberName)
+                    .OpenParanthesis()
+                        .Append((b, arg) => arg.Generate(b), Arguments)
+                    .CloseParanthesis()
+                    .WithBlock(b => b.Append(BodyStream));
+            }
+        }
+
         public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerator
         {
             private CSharpCodeGenerator root { get; }
@@ -430,6 +470,8 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public Dictionary<string, IntermediateMethodDefinition> Methods = new();
             private List<IntermediateAttributeDefinition> attributes { get; } = new();
 
+            private List<IntermediateConstructorDefinition> constructors { get; } = new();
+
             private List<CsharpTypeReference> InheritsFrom { get; } = new();
             
             private DefinitionType DefinitionType { get; set; }
@@ -440,6 +482,15 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             {
                 this.root = root;
                 DefinitionType |= DefinitionType.Default;
+            }
+
+            public IntermediateConstructorDefinition Constructor(MemberFlags flags)
+            {
+                var definition = new IntermediateConstructorDefinition(root, flags, Name);
+
+                constructors.Add(definition);
+
+                return definition;
             }
 
             public IntermediateAttributeDefinition Attribute(CsharpTypeReference attribute)
@@ -543,14 +594,22 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .Append(AppendInheritsFrom)
                     .OpenBlock();
 
+                if (constructors.Any())
+                {
+                    builder.Append((b, p) => p.Generate(b), constructors);
+                }
+
                 if (Types.Any())
                 {
+                    if (constructors.Any())
+                        builder.NewLine();
+
                     builder.Append((b, p) => p.Value.Generate(b), Types);
                 }
 
                 if (!PrimaryConstructor && Properties.Any())
                 {
-                    if (Types.Any())
+                    if (constructors.Any() || Types.Any())
                         builder.NewLine();
 
                     builder.Append((b, p) => p.Value.Generate(b), Properties);
@@ -558,7 +617,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
                 if (Methods.Any())
                 {
-                    if (Types.Any() || Properties.Any())
+                    if (constructors.Any() || Types.Any() || Properties.Any())
                         builder.NewLine();
 
                     builder.Append((b, p) => p.Value.Generate(b), Methods);
