@@ -13,6 +13,7 @@ public interface GuidId
 {
     public Guid Id { get; } 
 }
+[JsonConverter(typeof(PageIdConverter))]
 public record struct PageId(Guid Id): GuidId
 {
 
