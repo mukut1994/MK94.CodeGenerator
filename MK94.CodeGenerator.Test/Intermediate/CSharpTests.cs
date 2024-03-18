@@ -120,7 +120,7 @@ public class CSharpTests
             .WithinNamespace("TestNameSpace")
             .WithPropertiesGenerator()
             .WithStronglyTypedIdGenerator()
-
+            .WithJsonConverterGenerator()
             .GenerateTo(csharpCode);
 
         csharpCode.AssertMatches();
@@ -142,7 +142,6 @@ public class CSharpTests
             .CSharpProject()
             .WhichImplements(controllerFeature)
             .WithinNamespace("TestNameSpace")
-            
             .WithPropertiesGenerator()
             .WithJsonToStringGenerator()
             .WithFlurlClientGenerator()

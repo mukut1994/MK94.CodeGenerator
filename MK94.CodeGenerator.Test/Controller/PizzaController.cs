@@ -12,6 +12,7 @@ namespace MK94.CodeGenerator.Test.Controller;
 public class Page
 {
     [StronglyTypedId]
+    [JsonConverter]
     public Guid PageId { get; set; }
 
     [Query]
