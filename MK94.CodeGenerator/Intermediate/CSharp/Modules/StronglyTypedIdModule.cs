@@ -63,7 +63,7 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
 
         if (property.Info.GetCustomAttribute<JsonConverterAttribute>() != null)
         {
-            stronglyTypedId.Attribute(CsharpTypeReference.ToType<JsonConverterAttribute>()).WithParam("typeof(PageIdConverter)");
+            stronglyTypedId.Attribute(CsharpTypeReference.ToType<JsonConverterAttribute>()).WithParam($"typeof({property.Name}Converter)");
         }
 
         stronglyTypedId.Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id");
