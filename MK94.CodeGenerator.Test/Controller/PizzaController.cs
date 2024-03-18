@@ -13,6 +13,7 @@ public class Page
 {
     [StronglyTypedId]
     [JsonConverter]
+    [Query]
     public Guid PageId { get; set; }
 
     [Query]

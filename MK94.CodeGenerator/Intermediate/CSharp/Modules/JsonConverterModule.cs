@@ -29,9 +29,9 @@ public class JsonConverterModule : IGeneratorModule<CSharpCodeGenerator>
                 if (typeDef.Properties.Count == 0)
                     continue;
 
-                var propertiesWithStronglyTypedAttribute = typeDef.Properties.Where(x => x.Info.GetCustomAttributes<JsonConverterAttribute>().Any()).ToList();
+                var propertiesWithJsonConverterAttribute = typeDef.Properties.Where(x => x.Info.GetCustomAttributes<JsonConverterAttribute>().Any()).ToList();
 
-                if (propertiesWithStronglyTypedAttribute.Count == 0)
+                if (propertiesWithJsonConverterAttribute.Count == 0)
                     continue;
 
                 file.WithUsing("System.Text.Json");
@@ -39,7 +39,7 @@ public class JsonConverterModule : IGeneratorModule<CSharpCodeGenerator>
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
 
-                foreach(var property in propertiesWithStronglyTypedAttribute)
+                foreach(var property in propertiesWithJsonConverterAttribute)
                 {
                     var converterClass = ns
                         .Type($"{property.Name}Converter", MemberFlags.Public)

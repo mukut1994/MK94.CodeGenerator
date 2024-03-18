@@ -9,6 +9,7 @@ namespace data
 {
     public class Page
     {
+        [Microsoft.AspNetCore.Mvc.FromQuery]
         public required Guid PageId { get; set; }
         [Microsoft.AspNetCore.Mvc.FromQuery]
         public required Int32 Size { get; set; }
