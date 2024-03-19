@@ -10,10 +10,13 @@ namespace data
     public class Page
     {
         [Microsoft.AspNetCore.Mvc.FromQuery]
-        public required Guid PageId { get; set; }
+        public required PageId PageId { get; set; }
         [Microsoft.AspNetCore.Mvc.FromQuery]
         public required Int32 Size { get; set; }
         [Microsoft.AspNetCore.Mvc.FromQuery]
         public required Int32 Index { get; set; }
+    }
+    public class PageId : ValueType
+    {
     }
 }

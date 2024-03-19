@@ -26,46 +26,35 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
 
             foreach (var typeDef in fileDef.Types)
             {
-                if (typeDef.Properties.Count == 0)
-                    continue;
+                var attribute = typeDef.Type.GetCustomAttribute<StronglyTypedIdAttribute>();
 
-                var propertiesWithStronglyTypedAttribute = typeDef.Properties.Where(x => x.Info.GetCustomAttributes<StronglyTypedIdAttribute>().Any()).ToList();
-
-                if (propertiesWithStronglyTypedAttribute.Count == 0)
-                    continue;
+                if (attribute is null) continue;
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
-                CreateStronglyTypedIdInterface(ns, propertiesWithStronglyTypedAttribute);
 
-                foreach (var property in propertiesWithStronglyTypedAttribute)
+                CreateStronglyTypedIdInterface(ns, attribute);
+
+                switch (attribute.Type)
                 {
-                    switch (property.Type)
-                    {
-                        case Type guidType when guidType == typeof(Guid):
-                            CreateGuidId(ns, property);
-                            break;
+                    case Type guidType when guidType == typeof(Guid):
+                        CreateGuidId(ns, typeDef.Type.Name, attribute.Type.Name);
+                        break;
 
-                        default:
-                            throw new NotImplementedException();
-                    }
+                    default:
+                        throw new NotImplementedException();
                 }
             }
         }
     }
 
-    private static void CreateGuidId(IntermediateFileDefinition.IntermediateNamespaceDefintion ns, PropertyDefinition property)
+    private static void CreateGuidId(IntermediateFileDefinition.IntermediateNamespaceDefintion ns, string typeName, string backingType)
     {
         var stronglyTypedId = ns
-                                .Type(property.Name, MemberFlags.Public)
+                                .Type(typeName, MemberFlags.Public)
                                 .WithTypeAsRecord()
                                 .WithTypeAsStruct()
-                                .WithInheritsFrom(CsharpTypeReference.ToRaw($"{property.Type.Name}Id"))
+                                .WithInheritsFrom(CsharpTypeReference.ToRaw($"{backingType}Id"))
                                 .WithPrimaryConstructor();
-
-        if (property.Info.GetCustomAttribute<StronglyTypedIdAttribute>()!.IncludeJsonConverter)
-        {
-            stronglyTypedId.Attribute(CsharpTypeReference.ToType<JsonConverterAttribute>()).WithParam($"typeof({property.Name}Converter)");
-        }
 
         stronglyTypedId.Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id");
 
@@ -82,20 +71,15 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
             .Body.Append("return Id.ToString();");
     }
 
-    private static void CreateStronglyTypedIdInterface(IntermediateFileDefinition.IntermediateNamespaceDefintion ns, List<PropertyDefinition> propertiesWithStronglyTypedAttribute)
+    private static void CreateStronglyTypedIdInterface(IntermediateFileDefinition.IntermediateNamespaceDefintion ns, StronglyTypedIdAttribute attribute)
     {
-        var uniquePropertyTypes = propertiesWithStronglyTypedAttribute.Select(x => x.Type).Distinct().ToList();
+        var type = ns
+            .Type($"{attribute.Type.Name}Id", MemberFlags.Public)
+            .WithTypeAsInterface();
 
-        foreach (var uniquePropertyType in uniquePropertyTypes)
-        {
-            var type = ns
-                .Type($"{uniquePropertyType.Name}Id", MemberFlags.Public)
-                .WithTypeAsInterface();
-
-            type
-                .Property(MemberFlags.Public, CsharpTypeReference.ToType(uniquePropertyType), "Id")
-                .WithGetter();
-        }
+        type
+            .Property(MemberFlags.Public, CsharpTypeReference.ToType(attribute.Type), "Id")
+            .WithGetter();
     }
 }
 
@@ -114,7 +98,7 @@ public static class StronglyTypedIdModuleExtensions
         return project;
     }
 
-    public static T WithJsonConverterGenerator<T>(this T project, Action<StronglyTypedIdJsonConverterModule>? configure = null)
+    public static T WithJsonConverterForStronglyTypedIdGenerator<T>(this T project, Action<StronglyTypedIdJsonConverterModule>? configure = null)
         where T : ICSharpProject
     {
         if (!project.GeneratorModules.Any(x => x.GetType() == typeof(StronglyTypedIdModule)))
@@ -130,7 +114,7 @@ public static class StronglyTypedIdModuleExtensions
         return project;
     }
 
-    public static T WithEfCoreValueConverterGenerator<T>(this T project, Action<EfCoreValueConverterModule>? configure = null)
+    public static T WithEfCoreValueConverterForStronglyTypedIdGenerator<T>(this T project, Action<EfCoreValueConverterModule>? configure = null)
         where T : ICSharpProject
     {
         if (!project.GeneratorModules.Any(x => x.GetType() == typeof(StronglyTypedIdModule)))

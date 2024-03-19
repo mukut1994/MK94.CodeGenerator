@@ -108,7 +108,7 @@ public class CSharpTests
     [Test]
     public void DataModule_StronglyTypedId()
     {
-        DiskAssert.EnableWriteMode();
+        // DiskAssert.EnableWriteMode();
 
         var solution = Solution.FromAssemblyContaining<Page>();
 
@@ -123,8 +123,8 @@ public class CSharpTests
             .WithinNamespace("TestNameSpace")
             .WithPropertiesGenerator()
             .WithStronglyTypedIdGenerator()
-            .WithJsonConverterGenerator()
-            .WithEfCoreValueConverterGenerator()
+            .WithJsonConverterForStronglyTypedIdGenerator()
+            .WithEfCoreValueConverterForStronglyTypedIdGenerator()
             .GenerateTo(csharpCode);
 
         csharpCode.AssertMatches();

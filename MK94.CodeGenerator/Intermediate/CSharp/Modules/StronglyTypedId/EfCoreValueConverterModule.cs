@@ -26,47 +26,19 @@ public class EfCoreValueConverterModule : IGeneratorModule<CSharpCodeGenerator>
 
             foreach (var typeDef in fileDef.Types)
             {
-                if (typeDef.Properties.Count == 0)
-                    continue;
-
-                var propertiesWithStronglyTypedIdAttribute = typeDef.Properties.Where(x => x.Info.GetCustomAttributes<StronglyTypedIdAttribute>().Any(x => x.IncludeJsonConverter)).ToList();
-
-                if (propertiesWithStronglyTypedIdAttribute.Count == 0)
-                    continue;
-
-                file.WithUsing("System.Text.Json");
-                file.WithUsing("System.Text.Json.Serialization");
+                if (typeDef.Type.GetCustomAttribute<StronglyTypedIdAttribute>() == null) continue;
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
 
-                foreach (var property in propertiesWithStronglyTypedIdAttribute)
-                {
-                    var converterClass = ns
-                        .Type($"{property.Name}EfCoreValueConverter", MemberFlags.Public | MemberFlags.Partial)
-                        .WithInheritsFrom(CsharpTypeReference.ToRaw($"global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<{property.Name}, global::System.Guid>"));
+                var converterClass = ns
+                    .Type($"{typeDef.Type.Name}EfCoreValueConverter", MemberFlags.Public | MemberFlags.Partial)
+                    .WithInheritsFrom(CsharpTypeReference.ToRaw($"global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<{typeDef.Type.Name}, global::System.Guid>"));
 
-                    converterClass
-                        .Constructor(MemberFlags.Public)
-                        .WithBaseConstructorCall($"id => id.Id, value => new {property.Name}(value), mappingHints")
-                        .WithArgument(CsharpTypeReference.ToRaw("global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ConverterMappingHints?"), "mappingHints")
-                        .DefaultValue("null");
-
-                    //converterClass
-                    //    .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToRaw(property.Name), "Read")
-                    //    .WithArgument(CsharpTypeReference.ToRaw("Utf8JsonReader"), "reader")
-                    //    .WithArgument(CsharpTypeReference.ToRaw("Type"), "typeToConvert")
-                    //    .WithArgument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options")
-                    //    .Body
-                    //    .Append($"return new {property.Name}(Guid.Parse(reader.GetString()!));");
-
-                    //converterClass
-                    //    .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToVoid(), "Write")
-                    //    .WithArgument(CsharpTypeReference.ToRaw("Utf8JsonWriter"), "writer")
-                    //    .WithArgument(CsharpTypeReference.ToRaw(property.Name), "value")
-                    //    .WithArgument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options")
-                    //    .Body
-                    //    .Append("writer.WriteStringValue(value.Id);");
-                }
+                converterClass
+                    .Constructor(MemberFlags.Public)
+                    .WithBaseConstructorCall($"id => id.Id, value => new {typeDef.Type.Name}(value), mappingHints")
+                    .WithArgument(CsharpTypeReference.ToRaw("global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ConverterMappingHints?"), "mappingHints")
+                    .DefaultValue("null");
             }
         }
     }

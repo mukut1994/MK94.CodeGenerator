@@ -5,7 +5,7 @@ namespace TestNameSpace;
 
 public class Page
 {
-    public Guid PageId { get; set; } 
+    public PageId PageId { get; set; } 
     public Int32 Size { get; set; } 
     public Int32 Index { get; set; } 
 
@@ -13,4 +13,7 @@ public class Page
     {
         return System.Text.Json.JsonSerializer.Serialize(this);
     }
+}
+public class PageId
+{
 }

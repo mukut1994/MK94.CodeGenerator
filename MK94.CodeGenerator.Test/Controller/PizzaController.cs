@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace MK94.CodeGenerator.Test.Controller;
 
+[File("Data")]
 [StronglyTypedId]
 public struct PageId { }
 

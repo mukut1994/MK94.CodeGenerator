@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp.Modules.StronglyTypedId;
 
@@ -20,44 +21,36 @@ public class StronglyTypedIdJsonConverterModule : IGeneratorModule<CSharpCodeGen
 
             foreach (var typeDef in fileDef.Types)
             {
-                if (typeDef.Properties.Count == 0)
-                    continue;
-
-                var propertiesWithJsonConverterAttribute = typeDef
-                    .Properties
-                    .Where(x => x.Info.GetCustomAttributes<StronglyTypedIdAttribute>().Any(y => y.IncludeJsonConverter))
-                    .ToList();
-
-                if (propertiesWithJsonConverterAttribute.Count == 0)
-                    continue;
+                if (typeDef.Type.GetCustomAttribute<StronglyTypedIdAttribute>() == null) continue;
 
                 file.WithUsing("System.Text.Json");
                 file.WithUsing("System.Text.Json.Serialization");
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
 
-                foreach (var property in propertiesWithJsonConverterAttribute)
-                {
-                    var converterClass = ns
-                        .Type($"{property.Name}Converter", MemberFlags.Public)
-                        .WithInheritsFrom(CsharpTypeReference.ToRaw($"JsonConverter<{property.Name}>"));
+                var originalType = ns.Type(typeDef.Type.Name, MemberFlags.Public);
 
-                    converterClass
-                        .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToRaw(property.Name), "Read")
-                        .WithArgument(CsharpTypeReference.ToRaw("Utf8JsonReader"), "reader")
-                        .WithArgument(CsharpTypeReference.ToRaw("Type"), "typeToConvert")
-                        .WithArgument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options")
-                        .Body
-                        .Append($"return new {property.Name}(Guid.Parse(reader.GetString()!));");
+                originalType.Attribute(CsharpTypeReference.ToType<JsonConverterAttribute>()).WithParam($"typeof({originalType.Name}Converter)");
 
-                    converterClass
-                        .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToVoid(), "Write")
-                        .WithArgument(CsharpTypeReference.ToRaw("Utf8JsonWriter"), "writer")
-                        .WithArgument(CsharpTypeReference.ToRaw(property.Name), "value")
-                        .WithArgument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options")
-                        .Body
-                        .Append("writer.WriteStringValue(value.Id);");
-                }
+                var converterClass = ns
+                    .Type($"{originalType.Name}Converter", MemberFlags.Public)
+                    .WithInheritsFrom(CsharpTypeReference.ToRaw($"JsonConverter<{originalType.Name}>"));
+
+                converterClass
+                    .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToRaw(originalType.Name), "Read")
+                    .WithArgument(CsharpTypeReference.ToRaw("Utf8JsonReader"), "reader")
+                    .WithArgument(CsharpTypeReference.ToRaw("Type"), "typeToConvert")
+                    .WithArgument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options")
+                    .Body
+                    .Append($"return new {originalType.Name}(Guid.Parse(reader.GetString()!));");
+
+                converterClass
+                    .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToVoid(), "Write")
+                    .WithArgument(CsharpTypeReference.ToRaw("Utf8JsonWriter"), "writer")
+                    .WithArgument(CsharpTypeReference.ToRaw(originalType.Name), "value")
+                    .WithArgument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options")
+                    .Body
+                    .Append("writer.WriteStringValue(value.Id);");
             }
         }
     }
