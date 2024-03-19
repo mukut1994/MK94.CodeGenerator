@@ -47,6 +47,7 @@ public class EfCoreValueConverterModule : IGeneratorModule<CSharpCodeGenerator>
 
                     converterClass
                         .Constructor(MemberFlags.Public)
+                        .WithBaseConstructorCall("id => id.Id, value => new ConfigId(value), mappingHints")
                         .WithArgument(CsharpTypeReference.ToRaw("global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ConverterMappingHints?"), "mappingHints")
                         .DefaultValue("null");
 
