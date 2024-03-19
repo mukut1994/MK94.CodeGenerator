@@ -45,6 +45,11 @@ public class EfCoreValueConverterModule : IGeneratorModule<CSharpCodeGenerator>
                         .Type($"{property.Name}EfCoreValueConverter", MemberFlags.Public)
                         .WithInheritsFrom(CsharpTypeReference.ToRaw($"global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<{property.Name}, global::System.Guid>"));
 
+                    converterClass
+                        .Constructor(MemberFlags.Public)
+                        .WithArgument(CsharpTypeReference.ToRaw("global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ConverterMappingHints?"), "mappingHints")
+                        .DefaultValue("null");
+
                     //converterClass
                     //    .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToRaw(property.Name), "Read")
                     //    .WithArgument(CsharpTypeReference.ToRaw("Utf8JsonReader"), "reader")

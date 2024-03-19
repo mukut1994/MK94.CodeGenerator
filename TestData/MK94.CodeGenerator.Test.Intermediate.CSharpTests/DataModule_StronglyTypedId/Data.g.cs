@@ -43,4 +43,8 @@ public class PageIdConverter : JsonConverter<PageId>
 }
 public class PageIdEfCoreValueConverter : global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<PageId, global::System.Guid>
 {
+    public PageIdEfCoreValueConverter(global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ConverterMappingHints? mappingHints = null)
+    {
+        
+    }
 }
