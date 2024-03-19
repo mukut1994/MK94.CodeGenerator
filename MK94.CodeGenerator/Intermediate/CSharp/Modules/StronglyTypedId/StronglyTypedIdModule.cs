@@ -1,13 +1,14 @@
-﻿using MK94.CodeGenerator.Attributes;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp.Modules.StronglyTypedId;
+
+[AttributeUsage(AttributeTargets.Struct)]
+public class StronglyTypedIdAttribute(Type? type = null) : Attribute
+{
+    public Type Type { get; set; } = type ?? typeof(Guid);
+}
 
 public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
 {
@@ -128,16 +129,5 @@ public static class StronglyTypedIdModuleExtensions
         project.GeneratorModules.Add(mod);
 
         return project;
-    }
-}
-
-[AttributeUsage(AttributeTargets.Struct)]
-public class StronglyTypedIdAttribute : Attribute
-{
-    public Type Type { get; set; }
-
-    public StronglyTypedIdAttribute(Type? type = null)
-    {
-        Type = type ?? typeof(Guid);
     }
 }
