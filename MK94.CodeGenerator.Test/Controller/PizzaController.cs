@@ -8,12 +8,14 @@ using System.Threading.Tasks;
 
 namespace MK94.CodeGenerator.Test.Controller;
 
+[StronglyTypedId]
+public struct PageId { }
+
 [File("Data")]
 public class Page
 {
-    [StronglyTypedId(true)]
     [Query]
-    public Guid PageId { get; set; }
+    public PageId PageId { get; set; }
 
     [Query]
     public int Size { get; set; }

@@ -162,6 +162,9 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 if (Flags.HasFlag(MemberFlags.Public))
                     builder.AppendWord("public");
 
+                if (Flags.HasFlag(MemberFlags.Partial))
+                    builder.AppendWord("partial");
+
                 if (Flags.HasFlag(MemberFlags.Static))
                     builder.AppendWord("static");
 

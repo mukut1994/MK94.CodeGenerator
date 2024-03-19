@@ -5,7 +5,7 @@ namespace TestNameSpace;
 
 public class Page
 {
-    public Guid PageId { get; set; } 
+    public Guid PageId2 { get; set; } 
     public Int32 Size { get; set; } 
     public Int32 Index { get; set; } 
 }
@@ -13,8 +13,8 @@ public interface GuidId
 {
     public Guid Id { get; } 
 }
-[JsonConverter(typeof(PageIdConverter))]
-public record struct PageId(Guid Id): GuidId
+[JsonConverter(typeof(PageId2Converter))]
+public record struct PageId2(Guid Id): GuidId
 {
 
     public static Guid Empty()
@@ -30,20 +30,20 @@ public record struct PageId(Guid Id): GuidId
         return Id.ToString();
     }
 }
-public class PageIdConverter : JsonConverter<PageId>
+public class PageId2Converter : JsonConverter<PageId2>
 {
-    public override PageId Read(Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override PageId2 Read(Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        return new PageId(Guid.Parse(reader.GetString()!));
+        return new PageId2(Guid.Parse(reader.GetString()!));
     }
-    public override void Write(Utf8JsonWriter writer, PageId value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, PageId2 value, JsonSerializerOptions options)
     {
         writer.WriteStringValue(value.Id);
     }
 }
-public class PageIdEfCoreValueConverter : global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<PageId, global::System.Guid>
+public partial class PageId2EfCoreValueConverter : global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<PageId2, global::System.Guid>
 {
-    public PageIdEfCoreValueConverter(global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ConverterMappingHints? mappingHints = null): base(id => id.Id, value => new ConfigId(value), mappingHints)
+    public PageId2EfCoreValueConverter(global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ConverterMappingHints? mappingHints = null): base(id => id.Id, value => new PageId2(value), mappingHints)
     {
         
     }

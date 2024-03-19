@@ -29,9 +29,9 @@ public class EfCoreValueConverterModule : IGeneratorModule<CSharpCodeGenerator>
                 if (typeDef.Properties.Count == 0)
                     continue;
 
-                var propertiesWithJsonConverterAttribute = typeDef.Properties.Where(x => x.Info.GetCustomAttributes<StronglyTypedIdAttribute>().Any()).ToList();
+                var propertiesWithStronglyTypedIdAttribute = typeDef.Properties.Where(x => x.Info.GetCustomAttributes<StronglyTypedIdAttribute>().Any(x => x.IncludeJsonConverter)).ToList();
 
-                if (propertiesWithJsonConverterAttribute.Count == 0)
+                if (propertiesWithStronglyTypedIdAttribute.Count == 0)
                     continue;
 
                 file.WithUsing("System.Text.Json");
@@ -39,15 +39,15 @@ public class EfCoreValueConverterModule : IGeneratorModule<CSharpCodeGenerator>
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
 
-                foreach (var property in propertiesWithJsonConverterAttribute)
+                foreach (var property in propertiesWithStronglyTypedIdAttribute)
                 {
                     var converterClass = ns
-                        .Type($"{property.Name}EfCoreValueConverter", MemberFlags.Public)
+                        .Type($"{property.Name}EfCoreValueConverter", MemberFlags.Public | MemberFlags.Partial)
                         .WithInheritsFrom(CsharpTypeReference.ToRaw($"global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<{property.Name}, global::System.Guid>"));
 
                     converterClass
                         .Constructor(MemberFlags.Public)
-                        .WithBaseConstructorCall("id => id.Id, value => new ConfigId(value), mappingHints")
+                        .WithBaseConstructorCall($"id => id.Id, value => new {property.Name}(value), mappingHints")
                         .WithArgument(CsharpTypeReference.ToRaw("global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ConverterMappingHints?"), "mappingHints")
                         .DefaultValue("null");
 

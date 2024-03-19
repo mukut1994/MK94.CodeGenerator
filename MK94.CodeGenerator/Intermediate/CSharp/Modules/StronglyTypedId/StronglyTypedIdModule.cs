@@ -147,13 +147,13 @@ public static class StronglyTypedIdModuleExtensions
     }
 }
 
-[AttributeUsage(AttributeTargets.Property)]
+[AttributeUsage(AttributeTargets.Struct)]
 public class StronglyTypedIdAttribute : Attribute
 {
-    public bool IncludeJsonConverter { get; set; }
+    public Type Type { get; set; }
 
-    public StronglyTypedIdAttribute(bool includeJsonConverter = false)
+    public StronglyTypedIdAttribute(Type? type = null)
     {
-        IncludeJsonConverter = includeJsonConverter;
+        Type = type ?? typeof(Guid);
     }
 }
