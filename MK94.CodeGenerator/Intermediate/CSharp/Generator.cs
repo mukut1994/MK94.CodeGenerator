@@ -162,6 +162,9 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 if (Flags.HasFlag(MemberFlags.Public))
                     builder.AppendWord("public");
 
+                if (Flags.HasFlag(MemberFlags.Partial))
+                    builder.AppendWord("partial");
+
                 if (Flags.HasFlag(MemberFlags.Static))
                     builder.AppendWord("static");
 
@@ -355,6 +358,8 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public CsharpTypeReference Type { get; }
 
+            private string? defaultValue { get; set; }
+
             public IntermediateArgumentDefinition(CSharpCodeGenerator root, CsharpTypeReference type, string name)
             {
                 Name = name;
@@ -362,9 +367,28 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 this.root = root;
             }
 
+            public IntermediateArgumentDefinition DefaultValue(string defaultValue)
+            {
+                this.defaultValue = defaultValue;
+
+                return this;
+            }
+
             public void Generate(CodeBuilder builder)
             {
-                builder.AppendWord(Type.Resolve(root)).AppendWord(Name).AppendOptionalComma();
+                builder
+                    .AppendWord(Type.Resolve(root))
+                    .AppendWord(Name)
+                    .Append(AppendDefaultValue)
+                    .AppendOptionalComma();
+            }
+
+            private void AppendDefaultValue(CodeBuilder builder)
+            {
+                if (defaultValue is null)
+                    return;
+
+                builder.AppendWord($"= {defaultValue}");
             }
         }
 
@@ -429,6 +453,8 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             private CSharpCodeGenerator root { get; }
 
+            private string? baseConstructorCall { get; set; }
+
             public IntermediateConstructorDefinition(CSharpCodeGenerator root, MemberFlags flags, string name) : base(flags, name)
             {
                 Body = CodeBuilder.FromMemoryStream(out var stream);
@@ -436,9 +462,18 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 this.root = root;
             }
 
-            public IntermediateConstructorDefinition WithArgument(CsharpTypeReference type, string name)
+            public IntermediateArgumentDefinition WithArgument(CsharpTypeReference type, string name)
             {
-                Arguments.Add(new(root, type, name));
+                var argument = new IntermediateArgumentDefinition(root, type, name);
+
+                Arguments.Add(argument);
+
+                return argument;
+            }
+
+            public IntermediateConstructorDefinition WithBaseConstructorCall(string baseConstructorCall)
+            {
+                this.baseConstructorCall = baseConstructorCall;
 
                 return this;
             }
@@ -455,7 +490,16 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .OpenParanthesis()
                         .Append((b, arg) => arg.Generate(b), Arguments)
                     .CloseParanthesis()
+                    .Append(AppendBaseConstructorCall)
                     .WithBlock(b => b.Append(BodyStream));
+            }
+
+            private void AppendBaseConstructorCall(CodeBuilder builder)
+            {
+                if (baseConstructorCall is null)
+                    return;
+
+                builder.AppendWord($": base({baseConstructorCall})");
             }
         }
 

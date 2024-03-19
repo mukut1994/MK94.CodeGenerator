@@ -3,6 +3,7 @@ using MK94.CodeGenerator.Generator;
 using MK94.CodeGenerator.Intermediate;
 using MK94.CodeGenerator.Intermediate.CSharp;
 using MK94.CodeGenerator.Intermediate.CSharp.Modules;
+using MK94.CodeGenerator.Intermediate.CSharp.Modules.StronglyTypedId;
 using MK94.CodeGenerator.Test.Controller;
 using NUnit.Framework;
 using System;
@@ -122,7 +123,8 @@ public class CSharpTests
             .WithinNamespace("TestNameSpace")
             .WithPropertiesGenerator()
             .WithStronglyTypedIdGenerator()
-            .WithJsonConverterGenerator()
+            .WithJsonConverterForStronglyTypedIdGenerator()
+            .WithEfCoreValueConverterForStronglyTypedIdGenerator()
             .GenerateTo(csharpCode);
 
         csharpCode.AssertMatches();

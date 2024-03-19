@@ -5,7 +5,7 @@ namespace TestNameSpace;
 
 public class Page
 {
-    public Guid PageId { get; set; } 
+    public PageId PageId { get; set; } 
     public Int32 Size { get; set; } 
     public Int32 Index { get; set; } 
 }
@@ -39,5 +39,12 @@ public class PageIdConverter : JsonConverter<PageId>
     public override void Write(Utf8JsonWriter writer, PageId value, JsonSerializerOptions options)
     {
         writer.WriteStringValue(value.Id);
+    }
+}
+public partial class PageIdEfCoreValueConverter : global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<PageId, global::System.Guid>
+{
+    public PageIdEfCoreValueConverter(global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ConverterMappingHints? mappingHints = null): base(id => id.Id, value => new PageId(value), mappingHints)
+    {
+        
     }
 }

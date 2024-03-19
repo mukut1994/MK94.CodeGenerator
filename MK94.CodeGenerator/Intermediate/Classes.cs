@@ -58,6 +58,8 @@ public enum MemberFlags
     Interface = 16,
     Async = 32,
     Method = 64,
+
+    Partial = 128,
 }
 
 [Flags]

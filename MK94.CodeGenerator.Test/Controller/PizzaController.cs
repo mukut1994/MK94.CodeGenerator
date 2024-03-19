@@ -1,5 +1,5 @@
 ﻿using MK94.CodeGenerator.Attributes;
-using MK94.CodeGenerator.Intermediate.CSharp.Modules;
+using MK94.CodeGenerator.Intermediate.CSharp.Modules.StronglyTypedId;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +9,14 @@ using System.Threading.Tasks;
 namespace MK94.CodeGenerator.Test.Controller;
 
 [File("Data")]
+[StronglyTypedId]
+public struct PageId { }
+
+[File("Data")]
 public class Page
 {
-    [StronglyTypedId]
-    [JsonConverter]
     [Query]
-    public Guid PageId { get; set; }
+    public PageId PageId { get; set; }
 
     [Query]
     public int Size { get; set; }
