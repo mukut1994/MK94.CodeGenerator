@@ -12,5 +12,7 @@
   "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/DataAndSerializerMixedModuleTest/Data.ts": "yhhf0stys924pxfhmyrdgkuofnczldhjpvwi1goziea=",
   "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/DataAndSerializerMixedModuleTest/Controller.ts": "iub5g6hwzfjei3qao3gi-nyv5ztshyrsvttqtwak2f0=",
   "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/DataModuleTest/Data.ts": "yhhf0stys924pxfhmyrdgkuofnczldhjpvwi1goziea=",
-  "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/Test/file.ts": "gj42pguesikriiaziwra9zcm3jvr1oc8-tmofjtqkpu="
+  "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/Test/file.ts": "gj42pguesikriiaziwra9zcm3jvr1oc8-tmofjtqkpu=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_Controller/Data.g.cs": "as9f7eptz7rqv6nqbrzfztua5qhvrlakpzmbbvxfk44=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_Controller/Controller.g.cs": "shlavxscta7whkow\u002Blyfja2bmyzluhr7zcinzwm3kvq="
 }

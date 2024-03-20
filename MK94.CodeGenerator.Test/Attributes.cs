@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace MK94.CodeGenerator.Test
 {
-    public class ControllerFeature : ProjectAttribute
+    public class Controllers : ProjectAttribute
     {
-        private const string Name = nameof(ControllerFeature);
+        private const string Name = nameof(Controllers);
 
         public static Parser Parser = new Parser(new ParserConfig() { Project = Name, MandatoryFileAttribute = true });
 
-        public ControllerFeature() : base(Name) { }
+        public Controllers() : base(Name) { }
     }
 
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Class)]
