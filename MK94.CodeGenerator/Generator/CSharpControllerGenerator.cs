@@ -38,7 +38,7 @@ namespace MK94.CodeGenerator.Generator
         private void Generate(CodeBuilder builder, TypeDefinition type)
         {
             builder
-                .AppendLine(@"[Route(""api/{Controller}/{Action}"")]")
+                .AppendLine(@"[Route(""api/[controller]/[action]"")]")
                 .AppendLine($"public partial class {type.Type.Name.Substring(1, type.Type.Name.Length - 1)}")
                 .WithBlock(Generate, type.Methods);
         }
