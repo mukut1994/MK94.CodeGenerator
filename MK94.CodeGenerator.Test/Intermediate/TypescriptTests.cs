@@ -58,7 +58,7 @@ public class TypescriptTests
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
-        var controllerFeature = Controllers.Parser.ParseFromAssemblyContainingType<Page>();
+        var controllerFeature = ControllersProject.Parser.ParseFromAssemblyContainingType<Page>();
 
         var csharpCode = new TypescriptCodeGenerator();
 
@@ -81,7 +81,7 @@ public class TypescriptTests
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
-        var controllerFeature = Controllers.Parser.ParseFromAssemblyContainingType<Page>();
+        var controllerFeature = ControllersProject.Parser.ParseFromAssemblyContainingType<Page>();
 
         var csharpCode = new TypescriptCodeGenerator();
 

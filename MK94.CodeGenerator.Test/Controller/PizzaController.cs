@@ -26,7 +26,7 @@ public class Page
     public int Index { get; set; }
 }
 
-[Controllers]
+[ControllersProject]
 [ControllerFeature]
 [File("Controller")]
 public interface IPizzaController
