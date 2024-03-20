@@ -1,11 +1,4 @@
-﻿using MK94.CodeGenerator.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp.Modules.StronglyTypedId;
 

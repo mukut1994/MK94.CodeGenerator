@@ -37,7 +37,7 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
 
                 switch (attribute.Type)
                 {
-                    case Type guidType when guidType == typeof(Guid):
+                    case var guidType when guidType == typeof(Guid):
                         CreateGuidId(ns, typeDef.Type.Name, attribute.Type.Name);
                         break;
 
@@ -102,7 +102,7 @@ public static class StronglyTypedIdModuleExtensions
     public static T WithJsonConverterForStronglyTypedIdGenerator<T>(this T project, Action<StronglyTypedIdJsonConverterModule>? configure = null)
         where T : ICSharpProject
     {
-        if (!project.GeneratorModules.Any(x => x.GetType() == typeof(StronglyTypedIdModule)))
+        if (project.GeneratorModules.All(x => x.GetType() != typeof(StronglyTypedIdModule)))
             throw new InvalidProgramException("Cannot add JsonConverterGenerator when StronglyTypedIdGenerator is not added");
 
         var mod = new StronglyTypedIdJsonConverterModule(project);
@@ -118,7 +118,7 @@ public static class StronglyTypedIdModuleExtensions
     public static T WithEfCoreValueConverterForStronglyTypedIdGenerator<T>(this T project, Action<EfCoreValueConverterModule>? configure = null)
         where T : ICSharpProject
     {
-        if (!project.GeneratorModules.Any(x => x.GetType() == typeof(StronglyTypedIdModule)))
+        if (project.GeneratorModules.All(x => x.GetType() != typeof(StronglyTypedIdModule)))
             throw new InvalidProgramException("Cannot add EfCoreValueConverter when StronglyTypedIdGenerator is not added");
 
         var mod = new EfCoreValueConverterModule(project);

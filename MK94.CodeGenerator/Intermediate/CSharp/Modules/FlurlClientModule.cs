@@ -3,15 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp.Modules;
 
 public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
 {
-    public static HashSet<Type> QueryFriendlyTypes = new()
-    {
+    public static HashSet<Type> QueryFriendlyTypes =
+    [
         typeof(bool),
         typeof(byte),
         typeof(sbyte),
@@ -29,7 +27,7 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
         typeof(ushort),
         typeof(string),
         typeof(Guid),
-    };
+    ];
 
     private readonly ICSharpProject project;
 
@@ -49,7 +47,7 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
 
             foreach (var typeDef in fileDef.Types)
             {
-                string name = typeDef!.AsClassName();
+                var name = typeDef.AsClassName();
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
                 var type = ns.Type(name, MemberFlags.Public);

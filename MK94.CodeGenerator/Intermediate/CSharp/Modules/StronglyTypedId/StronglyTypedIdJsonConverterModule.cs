@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.Json.Serialization;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp.Modules.StronglyTypedId;
