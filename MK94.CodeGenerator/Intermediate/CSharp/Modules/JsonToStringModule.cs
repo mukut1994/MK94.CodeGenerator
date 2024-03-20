@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp.Modules;
 
 public class JsonToStringModule : IGeneratorModule<CSharpCodeGenerator>
 {
     private readonly ICSharpProject project;
-    private string Namespace = "Todo";
 
     public JsonToStringModule(ICSharpProject project)
     {

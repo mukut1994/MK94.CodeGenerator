@@ -692,7 +692,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
                 builder.AppendWord(":");
 
-                for (int i = 0; i < InheritsFrom.Count; i++)
+                for (var i = 0; i < InheritsFrom.Count; i++)
                 {
                     if (i == InheritsFrom.Count - 1)
                     {
