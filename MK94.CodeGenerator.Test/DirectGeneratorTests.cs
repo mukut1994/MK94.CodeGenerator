@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.VisualBasic;
 using MK94.CodeGenerator.Attributes;
 using MK94.CodeGenerator.Test.Controller;
+using MK94.CodeGenerator.Intermediate.CSharp.Modules;
 
 namespace MK94.CodeGenerator.Test
 {
@@ -21,7 +22,7 @@ namespace MK94.CodeGenerator.Test
         {
             // DiskAssert.EnableWriteMode();
 
-            var controllerFeature = CodeGeneratorTestsControllerFeature.Parser.ParseFromAssemblyContainingType<DirectGeneratorTests>();
+            var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<DirectGeneratorTests>();
 
             new CSharpControllerClientGenerator().Generate(CodeBuilder.FactoryFromMemoryStream(out var files), @"space", controllerFeature);
 
@@ -38,7 +39,7 @@ namespace MK94.CodeGenerator.Test
         {
             // DiskAssert.EnableWriteMode();
 
-            var controllerFeature = CodeGeneratorTestsControllerFeature.Parser.ParseFromAssemblyContainingType<DirectGeneratorTests>();
+            var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<DirectGeneratorTests>();
 
             var all = new Parser().ParseFromAssemblyContainingType<Page>();
             var cache = all.BuildCache();

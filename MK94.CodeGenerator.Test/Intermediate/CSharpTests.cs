@@ -89,7 +89,7 @@ public class CSharpTests
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
-        var controllerFeature = CodeGeneratorTestsControllerFeature.Parser.ParseFromAssemblyContainingType<Page>();
+        var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
         var csharpCode = new CSharpCodeGenerator();
 
@@ -113,7 +113,7 @@ public class CSharpTests
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
-        var controllerFeature = CodeGeneratorTestsControllerFeature.Parser.ParseFromAssemblyContainingType<Page>();
+        var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
         var csharpCode = new CSharpCodeGenerator();
 
@@ -136,7 +136,7 @@ public class CSharpTests
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
-        var controllerFeature = CodeGeneratorTestsControllerFeature.Parser.ParseFromAssemblyContainingType<Page>();
+        var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
         var csharpCode = new CSharpCodeGenerator();
 
@@ -161,7 +161,7 @@ public class CSharpTests
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
-        var controllerFeature = CodeGeneratorTestsControllerFeature.Parser.ParseFromAssemblyContainingType<Page>();
+        var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
         var csharpCode = new CSharpCodeGenerator();
 

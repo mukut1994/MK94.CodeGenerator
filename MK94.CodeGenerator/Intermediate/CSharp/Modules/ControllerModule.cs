@@ -73,6 +73,11 @@ public static class ControllerModuleExtensions
     }
 }
 
-public class ControllerFeatureAttribute : Attribute
+public class ControllerFeatureAttribute : ProjectAttribute
 {
+    private const string Name = nameof(ControllerFeatureAttribute);
+
+    public static Parser Parser = new Parser(new ParserConfig() { Project = Name, MandatoryFileAttribute = true });
+
+    public ControllerFeatureAttribute() : base(Name) { }
 }

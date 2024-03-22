@@ -1,6 +1,7 @@
 ﻿using MK94.Assert;
 using MK94.CodeGenerator.Generator;
 using MK94.CodeGenerator.Intermediate;
+using MK94.CodeGenerator.Intermediate.CSharp.Modules;
 using MK94.CodeGenerator.Intermediate.Typescript;
 using MK94.CodeGenerator.Intermediate.Typescript.Modules;
 using MK94.CodeGenerator.Test.Controller;
@@ -58,7 +59,7 @@ public class TypescriptTests
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
-        var controllerFeature = CodeGeneratorTestsControllerFeature.Parser.ParseFromAssemblyContainingType<Page>();
+        var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
         var csharpCode = new TypescriptCodeGenerator();
 
@@ -81,7 +82,7 @@ public class TypescriptTests
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
-        var controllerFeature = CodeGeneratorTestsControllerFeature.Parser.ParseFromAssemblyContainingType<Page>();
+        var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
         var csharpCode = new TypescriptCodeGenerator();
 
