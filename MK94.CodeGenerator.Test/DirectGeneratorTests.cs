@@ -21,7 +21,7 @@ namespace MK94.CodeGenerator.Test
         {
             // DiskAssert.EnableWriteMode();
 
-            var controllerFeature = ControllersProject.Parser.ParseFromAssemblyContainingType<DirectGeneratorTests>();
+            var controllerFeature = CodeGeneratorTestsControllerFeature.Parser.ParseFromAssemblyContainingType<DirectGeneratorTests>();
 
             new CSharpControllerClientGenerator().Generate(CodeBuilder.FactoryFromMemoryStream(out var files), @"space", controllerFeature);
 
@@ -38,7 +38,7 @@ namespace MK94.CodeGenerator.Test
         {
             // DiskAssert.EnableWriteMode();
 
-            var controllerFeature = ControllersProject.Parser.ParseFromAssemblyContainingType<DirectGeneratorTests>();
+            var controllerFeature = CodeGeneratorTestsControllerFeature.Parser.ParseFromAssemblyContainingType<DirectGeneratorTests>();
 
             var all = new Parser().ParseFromAssemblyContainingType<Page>();
             var cache = all.BuildCache();
