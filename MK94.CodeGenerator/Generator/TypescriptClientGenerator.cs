@@ -337,7 +337,7 @@ namespace MK94.CodeGenerator.Generator
                 {
                     var type = GetTypeText(prop.Type);
 
-                    builder.AppendLine($"{prop.Name.ToLowercaseFirst()}: {type} | null | undefined;");
+                    builder.AppendLine($"{prop.Name.ToCamelCase()}: {type} | null | undefined;");
                 }
 
                 builder.CloseBlock();
@@ -354,7 +354,7 @@ namespace MK94.CodeGenerator.Generator
                     .AppendLine("@Injectable({")
                     .AppendLine("    providedIn: 'root',")
                     .AppendLine("})")
-                    .Append($"export class {apiName.ToUppercaseFirst()}Api")
+                    .Append($"export class {apiName.ToPascalCase()}Api")
                     .OpenBlock()
                     .AppendLine("constructor(private http: HttpClient) { }");
 
@@ -389,7 +389,7 @@ namespace MK94.CodeGenerator.Generator
 
             builder
                 .NewLine()
-                .Append($"{method.Name.ToLowercaseFirst()}")
+                .Append($"{method.Name.ToCamelCase()}")
                 .OpenParanthesis();
 
             foreach (var prop in method.Parameters)

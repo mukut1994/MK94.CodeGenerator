@@ -39,14 +39,12 @@ public static class Extensions
         }
     }
 
-    public static string ToLowercaseFirst(this string s)
+    public static string ToCamelCase(this string s)
     {
-        char[] a = s.ToCharArray();
-        a[0] = char.ToLower(a[0]);
-        return new string(a);
+        return System.Text.Json.JsonNamingPolicy.CamelCase.ConvertName(s);
     }
 
-    public static string ToUppercaseFirst(this string s)
+    public static string ToPascalCase(this string s)
     {
         char[] a = s.ToCharArray();
         a[0] = char.ToUpper(a[0]);

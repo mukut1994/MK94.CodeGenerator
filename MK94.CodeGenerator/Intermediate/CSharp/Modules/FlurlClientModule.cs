@@ -88,7 +88,7 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
             {
                 var query = property.PropertyType.GetCustomAttributesUngrouped<QueryAttribute>();
 
-                method.Body.AppendLine($@"  .SetQueryParam(""{property.Name.ToLowercaseFirst()}"", {queryDef.Name}.{property.Name})");
+                method.Body.AppendLine($@"  .SetQueryParam(""{property.Name.ToCamelCase()}"", {queryDef.Name}.{property.Name})");
             }
         }
     }

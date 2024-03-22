@@ -35,7 +35,7 @@ public class PropertiesModule : IGeneratorModule<TypescriptCodeGenerator>
                     var name = propertyDef.Name;
 
                     if (LowercaseFirst)
-                        name = name.ToLowercaseFirst();
+                        name = name.ToCamelCase();
 
                     type.Property(
                         MemberFlags.Public, 
