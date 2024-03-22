@@ -45,6 +45,11 @@ public abstract record TsTypeReference
         return new TypedTypeReference(t);
     }
 
+    public static TsTypeReference ToPromiseType(Type t)
+    {
+        return new PromiseTypedTypeReference(t);
+    }
+
     public abstract TypeResolveMatch Resolve(TypeResolveContext context);
 
     public enum TypeText
@@ -131,6 +136,18 @@ public abstract record TsTypeReference
     }
 }
 
+internal record PromiseTypedTypeReference : TypedTypeReference
+{
+    public PromiseTypedTypeReference(Type type) : base(type)
+    {
+    }
+
+    public override TypeResolveMatch Resolve(TypeResolveContext context)
+    {
+        return new TypeResolveMatch(null, $"Promise<{base.Resolve(context).name}>");
+    }
+}
+
 internal record AnonymousReference : TsTypeReference
 {
     public override TypeResolveMatch Resolve(TypeResolveContext context)
@@ -170,7 +187,7 @@ internal record TypedTypeReference : TsTypeReference
         if (context.Root.TypeNameLookups.TryGetValue(type, out var lookup))
             return new(null, lookup);
 
-        return new(null, "TODO");
+        return new(null, type.Name);
     }
 }
 
@@ -225,9 +242,10 @@ public class TypescriptCodeGenerator : IFileGenerator
         { typeof(ushort), "number" },
         { typeof(string), "string" },
         { typeof(Guid), "string" },
+        { typeof(Task), "void" }
     };
 
-public Dictionary<string, IntermediateFileDefinition> Files { get; } = new();
+    public Dictionary<string, IntermediateFileDefinition> Files { get; } = new();
 
     public IntermediateFileDefinition File(string fileName)
     {
