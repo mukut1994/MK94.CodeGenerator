@@ -20,10 +20,10 @@ public class ControllerModule : IGeneratorModule<CSharpCodeGenerator>
         {
             foreach (var typeDef in fileDef.Types)
             {
-                if (typeDef.Type.GetCustomAttribute<ControllerFeatureAttribute>() is null)
+                if (typeDef.Methods.Count == 0)
                     continue;
 
-                if (!typeDef.Methods.Any())
+                if (typeDef.Type.GetCustomAttribute<ControllerFeatureAttribute>() is null)
                     continue;
 
                 var file = codeGenerator.File($"{fileDef.Name}.g.cs");
@@ -32,9 +32,7 @@ public class ControllerModule : IGeneratorModule<CSharpCodeGenerator>
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
 
-                var typeName = typeDef.Type.Name.StartsWith('I') ? typeDef.Type.Name[1..] : typeDef.Type.Name;
-
-                var type = ns.Type(typeName, MemberFlags.Public);
+                var type = ns.Type(typeDef.AsClassName(), MemberFlags.Public);
 
                 type
                     .Attribute(CsharpTypeReference.ToRaw("Route"))
@@ -54,11 +52,6 @@ public class ControllerModule : IGeneratorModule<CSharpCodeGenerator>
                     if (postAttribute is not null)
                         generatedMethod.Attribute(CsharpTypeReference.ToRaw("HttpPost"));
                 }
-
-                //var method = type.Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToType<string>(), "ToString");
-
-                //// TODO add support for methods to import namespaces;
-                //method.Body.Append("return System.Text.Json.JsonSerializer.Serialize(this);");
             }
         }
     }
