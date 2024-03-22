@@ -89,7 +89,7 @@ public class CSharpTests
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
-        var controllerFeature = ControllerFeature.Parser.ParseFromAssemblyContainingType<Page>();
+        var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
         var csharpCode = new CSharpCodeGenerator();
 
@@ -106,6 +106,29 @@ public class CSharpTests
     }
 
     [Test]
+    public void DataModuleTest_Controller()
+    {
+        // DiskAssert.EnableWriteMode();
+
+        var solution = Solution.FromAssemblyContaining<Page>();
+
+        // TODO cleaner parser syntax
+        var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
+
+        var csharpCode = new CSharpCodeGenerator();
+
+        var project = solution
+            .CSharpProject()
+            .WhichImplements(controllerFeature)
+            .WithinNamespace("TestNameSpace")
+            .WithPropertiesGenerator()
+            .WithControllerModuleGenerator()
+            .GenerateTo(csharpCode);
+
+        csharpCode.AssertMatches();
+    }
+
+    [Test]
     public void DataModule_StronglyTypedId()
     {
         // DiskAssert.EnableWriteMode();
@@ -113,7 +136,7 @@ public class CSharpTests
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
-        var controllerFeature = ControllerFeature.Parser.ParseFromAssemblyContainingType<Page>();
+        var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
         var csharpCode = new CSharpCodeGenerator();
 
@@ -138,7 +161,7 @@ public class CSharpTests
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
-        var controllerFeature = ControllerFeature.Parser.ParseFromAssemblyContainingType<Page>();
+        var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
         var csharpCode = new CSharpCodeGenerator();
 

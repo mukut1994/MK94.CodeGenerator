@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MK94.CodeGenerator.Intermediate.CSharp.Modules;
 
 namespace MK94.CodeGenerator.Test.Controller;
 

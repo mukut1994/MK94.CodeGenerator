@@ -426,11 +426,20 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
                 builder
                     .Append((b, a) => a.Generate(b), attributes)
-                    .Append(AppendMemberFlags).AppendWord(Type.Resolve(root)).Append(MemberName)
+                    .Append(AppendMemberFlags)
+                    .AppendWord(Type.Resolve(root))
+                    .Append(MemberName)
                     .OpenParanthesis()
                         .Append((b, arg) => arg.Generate(b), Arguments)
-                    .CloseParanthesis()
-                    .WithBlock(b => b.Append(BodyStream));
+                    .CloseParanthesis();
+
+                if (Flags.HasFlag(MemberFlags.Partial) && BodyStream.Capacity == 0)
+                {
+                    builder.Append(";");
+                    return;
+                }
+                
+                builder.WithBlock(b => b.Append(BodyStream));
             }
 
             public IntermediateAttributeDefinition Attribute(CsharpTypeReference attribute)
