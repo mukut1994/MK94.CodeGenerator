@@ -1,6 +1,6 @@
 export interface Page
 {
-    pageId: TODO;
+    pageId: PageId;
     size: number;
     index: number;
 }

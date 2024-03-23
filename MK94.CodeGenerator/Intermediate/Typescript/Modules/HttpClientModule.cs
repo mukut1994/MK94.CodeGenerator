@@ -32,7 +32,7 @@ public class HttpClientModule : IGeneratorModule<TypescriptCodeGenerator>
                 foreach(var methodDef in typeDef.Methods)
                 {
                     var method = type.Method(MemberFlags.Public | MemberFlags.Static | MemberFlags.Async,
-                        TsTypeReference.ToType(methodDef.ResponseType),
+                        TsTypeReference.ToPromiseType(methodDef.ResponseType),
                         methodDef.Name);
 
                     foreach (var argDef in methodDef.Parameters)

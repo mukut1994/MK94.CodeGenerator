@@ -61,7 +61,7 @@ public class TypescriptTests
         // TODO cleaner parser syntax
         var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
-        var csharpCode = new TypescriptCodeGenerator();
+        var typescriptCode = new TypescriptCodeGenerator();
 
         var project = solution
             .TypescriptProject()
@@ -69,9 +69,9 @@ public class TypescriptTests
 
             .WithPropertiesGenerator()
 
-            .GenerateTo(csharpCode);
+            .GenerateTo(typescriptCode);
 
-        csharpCode.AssertMatches();
+        typescriptCode.AssertMatches();
     }
 
     [Test]
@@ -84,7 +84,7 @@ public class TypescriptTests
         // TODO cleaner parser syntax
         var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
-        var csharpCode = new TypescriptCodeGenerator();
+        var typescriptCode = new TypescriptCodeGenerator();
 
         var project = solution
             .TypescriptProject()
@@ -93,8 +93,8 @@ public class TypescriptTests
             .WithPropertiesGenerator()
             .WithHttpClientModuleGenerator()
 
-            .GenerateTo(csharpCode);
+            .GenerateTo(typescriptCode);
 
-        csharpCode.AssertMatches();
+        typescriptCode.AssertMatches();
     }
 }
