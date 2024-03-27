@@ -37,7 +37,7 @@ public class ControllerModule : IGeneratorModule<CSharpCodeGenerator>
 
                 type
                     .Attribute(CsharpTypeReference.ToRaw("Route"))
-                    .WithParam("api/[controller]/[action]");
+                    .WithParam(@"""api/[controller]/[action]""");
 
                 foreach (var method in typeDef.Methods)
                 {
