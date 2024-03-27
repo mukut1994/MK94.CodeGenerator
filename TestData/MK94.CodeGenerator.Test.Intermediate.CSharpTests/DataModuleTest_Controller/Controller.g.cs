@@ -6,6 +6,5 @@ namespace TestNameSpace;
 public class PizzaController
 {
     [HttpGet]
-    public partial Task PizzaList([FromQuery]
-        Page page);
+    public partial Task PizzaList([FromQuery]Page page);
 }

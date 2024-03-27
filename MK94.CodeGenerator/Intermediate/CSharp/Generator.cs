@@ -217,7 +217,11 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public void Generate(CodeBuilder builder)
             {
                 builder
-                    .Append((b, a) => a.Generate(b), attributes)
+                    .Append((b, a) =>
+                    {
+                        a.Generate(b);
+                        b.NewLine();
+                    }, attributes)
                     .Append(AppendMemberFlags)
                     .AppendWord(Type.Resolve(root))
                     .Append(MemberName)
@@ -316,8 +320,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .OpenSquareParanthesis()
                     .Append(attributeName)
                     .Append(AppendParameters)
-                    .CloseSquareParanthesis()
-                    .AppendLine(string.Empty);
+                    .CloseSquareParanthesis();
             }
 
             public void GetRequiredReferences(HashSet<CsharpTypeReference> refs)
@@ -446,7 +449,11 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 BodyStream.Position = 0;
 
                 builder
-                    .Append((b, a) => a.Generate(b), attributes)
+                    .Append((b, a) =>
+                    {
+                        a.Generate(b);
+                        b.NewLine();
+                    }, attributes)
                     .Append(AppendMemberFlags)
                     .AppendWord(Type.Resolve(root))
                     .Append(MemberName)
@@ -660,7 +667,11 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public void Generate(CodeBuilder builder)
             {
                 builder
-                    .Append((b, a) => a.Generate(b), attributes)
+                    .Append((b, a) =>
+                    {
+                        a.Generate(b);
+                        b.NewLine();
+                    }, attributes)
                     .Append(AppendMemberFlags)
                     .Append(AppendDefinitionFlags)
                     .Append(MemberName)
