@@ -445,6 +445,13 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 return argument;
             }
 
+            public IntermediateMethodDefinition WithArgument(CsharpTypeReference type, string name)
+            {
+                Argument(type, name);
+
+                return this;
+            }
+
             public void Generate(CodeBuilder builder)
             {
                 Body.Flush();
