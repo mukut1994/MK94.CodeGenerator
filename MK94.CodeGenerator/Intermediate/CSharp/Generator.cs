@@ -292,8 +292,6 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             private List<string> parameters { get; } = new();
 
-            private bool addNewLine { get; set; } = true;
-
             public IntermediateAttributeDefinition(CSharpCodeGenerator root, CsharpTypeReference type)
             {
                 this.type = type;
@@ -303,13 +301,6 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public IntermediateAttributeDefinition WithParam(string parameter)
             {
                 parameters.Add(parameter);
-
-                return this;
-            }
-
-            public IntermediateAttributeDefinition WithoutNewLine()
-            {
-                addNewLine = false;
 
                 return this;
             }
@@ -325,12 +316,8 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .OpenSquareParanthesis()
                     .Append(attributeName)
                     .Append(AppendParameters)
-                    .CloseSquareParanthesis();
-
-                if (addNewLine)
-                {
-                    builder.AppendLine(string.Empty);
-                }
+                    .CloseSquareParanthesis()
+                    .AppendLine(string.Empty);
             }
 
             public void GetRequiredReferences(HashSet<CsharpTypeReference> refs)
@@ -401,7 +388,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public IntermediateAttributeDefinition Attribute(CsharpTypeReference attribute)
             {
-                var ret = new IntermediateAttributeDefinition(root, attribute).WithoutNewLine();
+                var ret = new IntermediateAttributeDefinition(root, attribute);
 
                 attributes.Add(ret);
 
