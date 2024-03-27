@@ -70,12 +70,11 @@ public class CSharpTests
             .Type("TypeB", MemberFlags.Public);
 
         t2.Property(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "PropA");
-        t2.Method(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "MethodA")
+        t2
+            .Method(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "MethodA")
             .WithArgument(CsharpTypeReference.ToType<int>(), "c")
             .WithArgument(CsharpTypeReference.ToType<int>(), "d")
-            .Body
-            .Append("return c + d;");
-
+            .Body.Append("return c + d;");
 
         c.AssertMatches();
     }
