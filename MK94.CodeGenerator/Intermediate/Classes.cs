@@ -108,6 +108,14 @@ public class Project : IProject
 
 public static class ProjectExtensions
 {
+    public static T WhichUses<T>(this T project, List<FileDefinition> files)
+        where T : IProject
+    {
+        project.Files.AddRange(files);
+
+        return project;
+    }
+
     public static T WhichImplements<T>(this T project, List<FileDefinition> files)
         where T : IProject
     {

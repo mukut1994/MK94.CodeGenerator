@@ -88,7 +88,7 @@ public class ControllerFeatureAttribute : ProjectAttribute
 {
     private const string Name = nameof(ControllerFeatureAttribute);
 
-    public static Parser Parser = new Parser(new ParserConfig() { Project = Name, MandatoryFileAttribute = true });
+    public static Parser Parser = new Parser(new ParserConfig() { Project = Name });
 
     public ControllerFeatureAttribute() : base(Name) { }
 }
