@@ -14,6 +14,17 @@
   "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/DataModuleTest/Data.ts": "c\u002Bgmbjdi6nofjix67c\u002B-jis2bcrhioha6rkwlyguzbe=",
   "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/Test/file.ts": "-ha0kgpaqclx-q7e99pqd2omzjwenmkgxvruxawh1qa=",
   "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_Controller/Data.g.cs": "as9f7eptz7rqv6nqbrzfztua5qhvrlakpzmbbvxfk44=",
-  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_Controller/Controller.g.cs": "bvo0g8cernnikt45vqbmqhaz\u002Bjvhzb2xxoualzcjajk=",
-  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/SpecificTypesOnlyTest/generated.g.cs": "as9f7eptz7rqv6nqbrzfztua5qhvrlakpzmbbvxfk44="
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_Controller/Controller.g.cs": "bt\u002B-pkcybugmge2h8ptdjuzxjfe5n81wqfamp1cswjc=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/SpecificTypesOnlyTest/generated.g.cs": "as9f7eptz7rqv6nqbrzfztua5qhvrlakpzmbbvxfk44=",
+  "MK94.CodeGenerator.Test.DirectGeneratorTests/Test2/Order.g.cs": "1-awszoqkr6qdcbdoan2u8lqsnz-eq-k3c3f2\u002B1qyjq=",
+  "MK94.CodeGenerator.Test.DirectGeneratorTests/Test2/Pizza.g.cs": "wmyxcg30lpvijrizmmwrhbjpagh5q2zbipg\u002Bwpofp4o=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataAndSerializerMixedModuleTest/Order.g.cs": "hmo5b0xssgymv51li-kyska-v2npyotl7msn2nh7st0=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataAndSerializerMixedModuleTest/Pizza.g.cs": "8v4b35y\u002Bf1qrid\u002Bcrmq6wpqig11qkuhf14ykxmngifm=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModule_StronglyTypedId/Order.g.cs": "2e\u002Bftrll0e1p4cqfufuk0audgi5oecxm-zkunghmiji=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModule_StronglyTypedId/Pizza.g.cs": "47deqpj8hbsa\u002B-timw\u002B5jceuqerkm5nmpjwzg3hsufu=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest/Order.g.cs": "2e\u002Bftrll0e1p4cqfufuk0audgi5oecxm-zkunghmiji=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_Controller/Order.g.cs": "2e\u002Bftrll0e1p4cqfufuk0audgi5oecxm-zkunghmiji=",
+  "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/DataAndSerializerMixedModuleTest/Order.ts": "zhbu2ysipvpzgilztznmdwmlb-dshwlspkwh3bk5ae8=",
+  "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/DataAndSerializerMixedModuleTest/Pizza.ts": "ifcts-eiuqgt0yx1fuyldygemlseajxzgsl4dty7c-e=",
+  "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/DataModuleTest/Order.ts": "otprkvcho-zifxjuq1nm6jfal4efqihjxduchcd8y2u="
 }
