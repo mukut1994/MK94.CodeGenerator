@@ -67,8 +67,6 @@ public class ParameterDefinition
 public class ParserConfig
 {
     public string? Project { get; set; }
-
-    public bool MandatoryFileAttribute { get; set; }
 }
 
 public class Parser
@@ -88,6 +86,28 @@ public class Parser
         this.config = config;
     }
 
+    public List<FileDefinition> ParseFromTypes(params Type[] types)
+    {
+        var typesForProject = types
+            .ToDictionary(
+                x => x,
+                x => GetAttributeForCurrentProject(x))
+            .Where(x => (config.Project == null && x.Key.GetCustomAttribute<FileAttribute>() != null) || x.Value != null);
+
+        return Parse(typesForProject.Select(x => (type: x.Key, path: GetFilePath(x.Key))));
+    }
+
+    public List<FileDefinition> ParseFromTypes(Func<Type, string> pathResolver, params Type[] types)
+    {
+        var typesForProject = types
+            .ToDictionary(
+                x => x,
+                x => pathResolver(x))
+            .Where(x => x.Value != null);
+
+        return Parse(typesForProject.Select(x => (type: x.Key, path: x.Value)));
+    }
+
     public List<FileDefinition> ParseFromAssemblyContainingType<T>() => ParseFromAssembly(typeof(T).Assembly);
 
     public List<FileDefinition> ParseFromEntryAssembly() => ParseFromAssembly(Assembly.GetEntryAssembly()!);
@@ -102,6 +122,14 @@ public class Parser
             .Where(x => (config.Project == null && x.Key.GetCustomAttribute<FileAttribute>() != null) || x.Value != null);
 
         var typesGroupedByOutputFile = typesForProject.GroupBy(x => GetFilePath(x.Key), x => x.Key);
+
+        return typesGroupedByOutputFile.Select(ParseFile).ToList();
+    }
+
+    public List<FileDefinition> Parse(IEnumerable<(Type type, string path)> types)
+    {
+        var typesGroupedByOutputFile = types
+            .GroupBy(x => x.path, x => x.type);
 
         return typesGroupedByOutputFile.Select(ParseFile).ToList();
     }
@@ -219,7 +247,7 @@ public class Parser
         if (attr != null)
             return attr.Name;
 
-        if (config.MandatoryFileAttribute && attr == null)
+        if (attr == null)
             throw new InvalidProgramException($"Type {type} is missing the File attribute");
 
         return type.Name;
