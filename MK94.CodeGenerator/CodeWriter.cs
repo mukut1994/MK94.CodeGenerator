@@ -247,6 +247,12 @@ public class CodeBuilder
         return this;
     }
 
+    public CodeBuilder EndOptionalComma()
+    {
+        optionalComma = false;
+        return this;
+    }
+
     public CodeBuilder NewLine()
     {
         lineHasContent = false;

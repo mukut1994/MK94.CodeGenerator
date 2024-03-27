@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime;
 using System.Threading.Tasks;
 
 namespace MK94.CodeGenerator.Intermediate.Typescript;
@@ -16,7 +17,7 @@ public interface IGenerator
 
 public record TypeResolveContext(TypescriptCodeGenerator Root, string FilePath, IntermediateFileDefinition File);
 
-public record TypeResolveMatch(string? import, string? name);
+public record TypeResolveMatch(string? import, string? name, string? importName = null);
 
 public abstract record TsTypeReference
 {
@@ -136,15 +137,18 @@ public abstract record TsTypeReference
     }
 }
 
-internal record PromiseTypedTypeReference : TypedTypeReference
+internal record PromiseTypedTypeReference : TsTypeReference
 {
-    public PromiseTypedTypeReference(Type type) : base(type)
+    private TsTypeReference helperReference;
+
+    public PromiseTypedTypeReference(Type type)
     {
+        helperReference = TsTypeReference.ToType(type.UnwrapTask());
     }
 
     public override TypeResolveMatch Resolve(TypeResolveContext context)
     {
-        return new TypeResolveMatch(null, $"Promise<{base.Resolve(context).name}>");
+        return new TypeResolveMatch(null, $"Promise<{helperReference.Resolve(context).name}>");
     }
 }
 
@@ -184,10 +188,22 @@ internal record TypedTypeReference : TsTypeReference
 
     public override TypeResolveMatch Resolve(TypeResolveContext context)
     {
-        if (context.Root.TypeNameLookups.TryGetValue(type, out var lookup))
-            return new(null, lookup);
+        return Resolve(type, context);
+    }
 
-        return new(null, type.Name);
+    private TypeResolveMatch Resolve(Type type, TypeResolveContext context)
+    {
+        if (context.Root.TypeNameLookups.TryGetValue(type, out var lookup))
+            return new(context.Root.RelativeFileResolver.GetImportPath(context.File.FileName, type), lookup);
+
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+        {
+            var ret = Resolve(type.GetGenericArguments()[0], context);
+
+            return new(ret.import, ret.name + " | null", ret.name);
+        }
+
+        return new(context.Root.RelativeFileResolver.GetImportPath(context.File.FileName, type), type.Name);
     }
 }
 
@@ -245,6 +261,13 @@ public class TypescriptCodeGenerator : IFileGenerator
         { typeof(Task), "void" }
     };
 
+    public RelativeFileResolver RelativeFileResolver { get; }
+
+    public TypescriptCodeGenerator(RelativeFileResolver resolver)
+    {
+        RelativeFileResolver = resolver;
+    }
+
     public Dictionary<string, IntermediateFileDefinition> Files { get; } = new();
 
     public IntermediateFileDefinition File(string fileName)
@@ -269,13 +292,19 @@ public class TypescriptCodeGenerator : IFileGenerator
 
 public class IntermediateFileDefinition : IGenerator
 {
+    public string FileName { get; }
+
     private TypeResolveContext context { get; }
 
     public Dictionary<string, IntermediateMemberDefinition> Members { get; } = new();
 
+    public Dictionary<string, HashSet<string>> Imports { get; } = new();
+
     public IntermediateFileDefinition(TypescriptCodeGenerator root, string fileName)
     {
-        this.context = new(root, fileName, this);
+        context = new(root, fileName, this);
+
+        FileName = fileName;
     }
 
     public IntermediateTypeDefinition Type(string name, MemberFlags flags)
@@ -288,6 +317,24 @@ public class IntermediateFileDefinition : IGenerator
 
         return definition;
     }
+
+    public IntermediateEnumDefinition Enum(string name, MemberFlags flags)
+    {
+        var ret = new IntermediateEnumDefinition(name, flags);
+
+        Members.Add(name, ret);
+
+        return ret;
+    }
+
+    //public IntermediateFileDefinition WithImport(string path, string type)
+    //{
+    //    var set = Imports.GetOrAdd(path, () => new());
+    //
+    //    set.Add(type);
+    //
+    //    return this;
+    //}
 
     public void Generate(CodeBuilder builder)
     {
@@ -310,9 +357,10 @@ public class IntermediateFileDefinition : IGenerator
         foreach(var importFile in imports)
         {
             builder.AppendWord("import")
-                .OpenBlock()
-                    .Append((b, x) => b.AppendWord(x.name).AppendOptionalComma(), importFile)
-                .CloseBlock()
+                .AppendWord("{")
+                .Append((b, x) => b.AppendWord(x.importName ?? x.name!).AppendOptionalComma(), importFile)
+                .EndOptionalComma()
+                .AppendWord("}")
                 .AppendWord("from")
                 .AppendWord(@$"""{importFile.Key}"";")
                 .NewLine();
@@ -469,6 +517,8 @@ public class IntermediateMethodDefinition : IntermediateTypedMemberDefinition, I
 
     public override void Generate(CodeBuilder builder)
     {
+        builder.NewLine();
+
         Body.Flush();
         BodyStream.Flush();
         BodyStream.Position = 0;
@@ -549,5 +599,44 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
         foreach (var methods in Methods)
             foreach (var resolved in methods.Value.ResolveReferences(context))
                 yield return resolved;
+    }
+}
+
+
+public class IntermediateEnumDefinition : IntermediateMemberDefinition, IGenerator
+{
+    private List<(string key, string value)> keyValues = new();
+
+    public IntermediateEnumDefinition(string name, MemberFlags flags) : base(flags | MemberFlags.Type, name)
+    {
+    }
+
+    public IntermediateEnumDefinition WithKeyValue(string key, string value)
+    {
+        keyValues.Add((key, value));
+
+        return this;
+    }
+
+    public override void Generate(CodeBuilder builder)
+    {
+        WriteMemberFlags(builder);
+
+        builder
+            .AppendWord("enum")
+            .AppendWord(Name)
+            .OpenBlock()
+            .Append((b, kv) =>
+            {
+                b.Append($"{kv.key} = {kv.value},")
+                .NewLine();
+            }, keyValues)
+            .CloseBlock()
+            .NewLine();
+    }
+
+    public override IEnumerable<TypeResolveMatch> ResolveReferences(TypeResolveContext context)
+    {
+        yield break;
     }
 }

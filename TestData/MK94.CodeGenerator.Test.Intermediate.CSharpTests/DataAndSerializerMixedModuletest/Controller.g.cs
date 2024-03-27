@@ -13,4 +13,9 @@ public class PizzaController
           .SetQueryParam("index", page.Index)
           .ReceiveStringAsync();
     }
+    public static Task Order(Order order)
+    {
+        return "Order"
+          .ReceiveStringAsync();
+    }
 }
