@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TestNameSpace;
 
-[Route(api/[controller]/[action])]
+[Route("api/[controller]/[action]")]
 public class PizzaController
 {
     [HttpGet]
