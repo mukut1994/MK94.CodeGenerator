@@ -21,6 +21,7 @@ namespace MK94.CodeGenerator.Generator
     public static class ExtensionsController
     {
         public static bool IsGetRequest(this MethodDefinition m) => m.MethodInfo.GetCustomAttributesUngrouped<GetAttribute>().Any();
+        public static bool IsPostRequest(this MethodDefinition m) => m.MethodInfo.GetCustomAttributesUngrouped<PostAttribute>().Any();
         public static bool IsAnonymous(this MethodDefinition m) => m.MethodInfo.GetCustomAttributesUngrouped<AnonymousAttribute>().Any();
 
         public static string Route(this MethodDefinition m) 
