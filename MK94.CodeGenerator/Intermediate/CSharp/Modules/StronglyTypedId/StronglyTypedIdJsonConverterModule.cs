@@ -35,21 +35,21 @@ public class StronglyTypedIdJsonConverterModule : IGeneratorModule<CSharpCodeGen
                     .Type($"{originalType.Name}Converter", MemberFlags.Public)
                     .WithInheritsFrom(CsharpTypeReference.ToRaw($"JsonConverter<{originalType.Name}>"));
 
-                converterClass
-                    .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToRaw(originalType.Name), "Read")
-                    .WithArgument(CsharpTypeReference.ToRaw("Utf8JsonReader"), "reader")
-                    .WithArgument(CsharpTypeReference.ToRaw("Type"), "typeToConvert")
-                    .WithArgument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options")
-                    .Body
-                    .Append($"return new {originalType.Name}(Guid.Parse(reader.GetString()!));");
+                var readMethod = converterClass
+                    .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToRaw(originalType.Name), "Read");
 
-                converterClass
-                    .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToVoid(), "Write")
-                    .WithArgument(CsharpTypeReference.ToRaw("Utf8JsonWriter"), "writer")
-                    .WithArgument(CsharpTypeReference.ToRaw(originalType.Name), "value")
-                    .WithArgument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options")
-                    .Body
-                    .Append("writer.WriteStringValue(value.Id);");
+                readMethod.Argument(CsharpTypeReference.ToRaw("Utf8JsonReader"), "reader");
+                readMethod.Argument(CsharpTypeReference.ToRaw("Type"), "typeToConvert");
+                readMethod.Argument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options");
+                readMethod.Body.Append($"return new {originalType.Name}(Guid.Parse(reader.GetString()!));");
+
+                var writeMethod = converterClass
+                    .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToVoid(), "Write");
+
+                writeMethod.Argument(CsharpTypeReference.ToRaw("Utf8JsonWriter"), "writer");
+                writeMethod.Argument(CsharpTypeReference.ToRaw(originalType.Name), "value");
+                writeMethod.Argument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options");
+                writeMethod.Body.Append("writer.WriteStringValue(value.Id);");
             }
         }
     }

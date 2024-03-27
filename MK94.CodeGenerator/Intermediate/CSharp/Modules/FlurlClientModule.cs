@@ -59,7 +59,7 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
                         methodDef.Name);
 
                     foreach (var argDef in methodDef.Parameters)
-                        method.WithArgument(CsharpTypeReference.ToType(argDef.Type), argDef.Name);
+                        method.Argument(CsharpTypeReference.ToType(argDef.Type), argDef.Name);
 
                     method.Body.AppendLine($@"return ""{method.Name}""");
 

@@ -53,9 +53,10 @@ public class CSharpTests
         propA.WithDefaultExpression(" = 0;");
         propA.Attribute(CsharpTypeReference.ToType<ExampleAttribute>());
 
-        var method = typeA.Method(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "MethodA")
-            .WithArgument(CsharpTypeReference.ToType<int>(), "a")
-            .WithArgument(CsharpTypeReference.ToType<int>(), "b");
+        var method = typeA.Method(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "MethodA");
+
+        method.Argument(CsharpTypeReference.ToType<int>(), "a");
+        method.Argument(CsharpTypeReference.ToType<int>(), "b");
 
         method.Attribute(CsharpTypeReference.ToType<ExampleAttribute>());
 
@@ -70,12 +71,12 @@ public class CSharpTests
             .Type("TypeB", MemberFlags.Public);
 
         t2.Property(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "PropA");
-        t2.Method(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "MethodA")
-            .WithArgument(CsharpTypeReference.ToType<int>(), "c")
-            .WithArgument(CsharpTypeReference.ToType<int>(), "d")
-            .Body
-            .Append("return c + d;");
+        var methodA = t2.Method(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "MethodA");
 
+        methodA.Argument(CsharpTypeReference.ToType<int>(), "c");
+        methodA.Argument(CsharpTypeReference.ToType<int>(), "d");
+
+        methodA.Body.Append("return c + d;");
 
         c.AssertMatches();
     }

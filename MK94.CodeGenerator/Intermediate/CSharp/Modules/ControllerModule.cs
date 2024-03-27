@@ -42,6 +42,18 @@ public class ControllerModule : IGeneratorModule<CSharpCodeGenerator>
                 {
                     var generatedMethod = type.Method(MemberFlags.Public | MemberFlags.Partial, CsharpTypeReference.ToType(method.ResponseType), method.Name);
 
+                    foreach (var parameter in method.Parameters)
+                    {
+                        var arg = generatedMethod.Argument(CsharpTypeReference.ToType(parameter.Type), parameter.Name);
+
+                        var queryAttribute = parameter.Parameter.GetCustomAttribute<QueryAttribute>();
+
+                        if (queryAttribute is not null)
+                        {
+                            arg.Attribute(CsharpTypeReference.ToRaw("FromQuery"));
+                        }
+                    }
+
                     var getAttribute = method.MethodInfo.GetCustomAttribute<GetAttribute>();
 
                     if (getAttribute is not null)
