@@ -40,16 +40,14 @@ public class StronglyTypedIdJsonConverterModule : IGeneratorModule<CSharpCodeGen
                     .WithArgument(CsharpTypeReference.ToRaw("Utf8JsonReader"), "reader")
                     .WithArgument(CsharpTypeReference.ToRaw("Type"), "typeToConvert")
                     .WithArgument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options")
-                    .Body
-                    .Append($"return new {originalType.Name}(Guid.Parse(reader.GetString()!));");
+                    .Body.Append($"return new {originalType.Name}(Guid.Parse(reader.GetString()!));");
 
                 converterClass
                     .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToVoid(), "Write")
                     .WithArgument(CsharpTypeReference.ToRaw("Utf8JsonWriter"), "writer")
                     .WithArgument(CsharpTypeReference.ToRaw(originalType.Name), "value")
                     .WithArgument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options")
-                    .Body
-                    .Append("writer.WriteStringValue(value.Id);");
+                    .Body.Append("writer.WriteStringValue(value.Id);");
             }
         }
     }

@@ -217,7 +217,11 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public void Generate(CodeBuilder builder)
             {
                 builder
-                    .Append((b, a) => a.Generate(b), attributes)
+                    .Append((b, a) =>
+                    {
+                        a.Generate(b);
+                        b.NewLine();
+                    }, attributes)
                     .Append(AppendMemberFlags)
                     .AppendWord(Type.Resolve(root))
                     .Append(MemberName)
@@ -316,8 +320,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .OpenSquareParanthesis()
                     .Append(attributeName)
                     .Append(AppendParameters)
-                    .CloseSquareParanthesis()
-                    .AppendLine(string.Empty);
+                    .CloseSquareParanthesis();
             }
 
             public void GetRequiredReferences(HashSet<CsharpTypeReference> refs)
@@ -358,6 +361,8 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public CsharpTypeReference Type { get; }
 
+            private List<IntermediateAttributeDefinition> attributes { get; } = new();
+
             private string? defaultValue { get; set; }
 
             public IntermediateArgumentDefinition(CSharpCodeGenerator root, CsharpTypeReference type, string name)
@@ -377,10 +382,20 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public void Generate(CodeBuilder builder)
             {
                 builder
+                    .Append((b, a) => a.Generate(b), attributes)
                     .AppendWord(Type.Resolve(root))
                     .AppendWord(Name)
                     .Append(AppendDefaultValue)
                     .AppendOptionalComma();
+            }
+
+            public IntermediateAttributeDefinition Attribute(CsharpTypeReference attribute)
+            {
+                var ret = new IntermediateAttributeDefinition(root, attribute);
+
+                attributes.Add(ret);
+
+                return ret;
             }
 
             private void AppendDefaultValue(CodeBuilder builder)
@@ -402,7 +417,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             private CSharpCodeGenerator root { get; }
             
-            private List<IntermediateAttributeDefinition> attributes { get; set; } = new();
+            private List<IntermediateAttributeDefinition> attributes { get; } = new();
 
             public IntermediateMethodDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name) : base(flags, type, name)
             {
@@ -411,9 +426,18 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 this.root = root;
             }
 
+            public IntermediateArgumentDefinition Argument(CsharpTypeReference type, string name)
+            {
+                var argument = new IntermediateArgumentDefinition(root, type, name);
+
+                Arguments.Add(argument);
+
+                return argument;
+            }
+
             public IntermediateMethodDefinition WithArgument(CsharpTypeReference type, string name)
             {
-                Arguments.Add(new(root, type, name));
+                Argument(type, name);
 
                 return this;
             }
@@ -425,7 +449,11 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 BodyStream.Position = 0;
 
                 builder
-                    .Append((b, a) => a.Generate(b), attributes)
+                    .Append((b, a) =>
+                    {
+                        a.Generate(b);
+                        b.NewLine();
+                    }, attributes)
                     .Append(AppendMemberFlags)
                     .AppendWord(Type.Resolve(root))
                     .Append(MemberName)
@@ -639,7 +667,11 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             public void Generate(CodeBuilder builder)
             {
                 builder
-                    .Append((b, a) => a.Generate(b), attributes)
+                    .Append((b, a) =>
+                    {
+                        a.Generate(b);
+                        b.NewLine();
+                    }, attributes)
                     .Append(AppendMemberFlags)
                     .Append(AppendDefinitionFlags)
                     .Append(MemberName)
