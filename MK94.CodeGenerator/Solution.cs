@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MK94.CodeGenerator;
@@ -15,6 +16,15 @@ public class Solution
     public Extensions.DependencyLookupCache LookupCache { init; get; }
 
     public string? BasePath { get; set; }
+
+    public static Solution From(List<FileDefinition> files)
+    {
+        return new Solution
+        {
+            AllFiles = files,
+            LookupCache = files.BuildCache()
+        };
+    }
 
     public static Solution FromAssemblyContaining<Type>()
     {

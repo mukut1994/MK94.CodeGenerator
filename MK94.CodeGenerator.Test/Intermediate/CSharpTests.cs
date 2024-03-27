@@ -177,4 +177,31 @@ public class CSharpTests
 
         csharpCode.AssertMatches();
     }
+
+    [Test]
+    public void SpecificTypesOnlyTest()
+    {
+        // DiskAssert.EnableWriteMode();
+
+        // TODO parser should be created from solution
+        // This requires all files multiple times otherwise
+        // The solution should be defining all of them instead
+        var allfiles = new Parser().ParseFromTypes(t => "generated", typeof(Page), typeof(PageId));
+        var solution = Solution.From(allfiles);
+
+        // TODO cleaner parser syntax
+        var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
+
+        var csharpCode = new CSharpCodeGenerator();
+
+        var project = solution
+            .CSharpProject()
+            .WhichUses(allfiles)
+            .WithinNamespace("TestNameSpace")
+            .WithPropertiesGenerator()
+
+            .GenerateTo(csharpCode);
+
+        csharpCode.AssertMatches();
+    }
 }
