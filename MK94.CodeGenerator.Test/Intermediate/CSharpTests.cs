@@ -128,6 +128,30 @@ public class CSharpTests
     }
 
     [Test]
+    public void DataModuleTest_ControllerClient()
+    {
+        DiskAssert.EnableWriteMode();
+
+        var solution = Solution.FromAssemblyContaining<Page>();
+
+        // TODO cleaner parser syntax
+        var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
+
+        var csharpCode = new CSharpCodeGenerator();
+
+        var project = solution
+            .CSharpProject()
+            .WhichImplements(controllerFeature)
+            .WithinNamespace("TestNameSpace")
+            .WithPropertiesGenerator()
+            .WithControllerModuleGenerator()
+            .WithControllerClientModuleGenerator()
+            .GenerateTo(csharpCode);
+
+        csharpCode.AssertMatches();
+    }
+
+    [Test]
     public void DataModule_StronglyTypedId()
     {
         // DiskAssert.EnableWriteMode();

@@ -15,5 +15,7 @@
   "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/Test/file.ts": "gj42pguesikriiaziwra9zcm3jvr1oc8-tmofjtqkpu=",
   "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_Controller/Data.g.cs": "as9f7eptz7rqv6nqbrzfztua5qhvrlakpzmbbvxfk44=",
   "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_Controller/Controller.g.cs": "ln-w8mp1v9g3asa9wspeds0\u002Bqyvxlsarpevbavupjno=",
-  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/SpecificTypesOnlyTest/generated.g.cs": "as9f7eptz7rqv6nqbrzfztua5qhvrlakpzmbbvxfk44="
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/SpecificTypesOnlyTest/generated.g.cs": "as9f7eptz7rqv6nqbrzfztua5qhvrlakpzmbbvxfk44=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_ControllerClient/Data.g.cs": "as9f7eptz7rqv6nqbrzfztua5qhvrlakpzmbbvxfk44=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_ControllerClient/Controller.g.cs": "bfgljyvvuxt0m9xr47ui9pfo2\u002B6yf67vqp-6jcxkjgu="
 }
