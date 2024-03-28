@@ -11,9 +11,9 @@ namespace MK94.CodeGenerator.Test;
 
 public static class Extensions
 {
-    public static void AssertMatches(this IFileGenerator generator)
+    public static void AssertMatches(this IFileGenerator generator, IndentStyle indentStyle = IndentStyle.NewLine)
     {
-        generator.Generate(CodeBuilder.FactoryFromMemoryStream(out var files));
+        generator.Generate(CodeBuilder.FactoryFromMemoryStream(out var files, indentStyle));
 
         CodeBuilder.FlushAll();
 

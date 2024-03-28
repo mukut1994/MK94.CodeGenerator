@@ -21,7 +21,7 @@ public class TypescriptTests
     {
         // DiskAssert.EnableWriteMode();
 
-        var c = new TypescriptCodeGenerator();
+        var c = new TypescriptCodeGenerator(new(new()));
 
         var t = c
             .File("file.ts")
@@ -61,7 +61,7 @@ public class TypescriptTests
         // TODO cleaner parser syntax
         var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
-        var typescriptCode = new TypescriptCodeGenerator();
+        var typescriptCode = new TypescriptCodeGenerator(new(new()));
 
         var project = solution
             .TypescriptProject()
@@ -84,17 +84,18 @@ public class TypescriptTests
         // TODO cleaner parser syntax
         var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
-        var typescriptCode = new TypescriptCodeGenerator();
+        var typescriptCode = new TypescriptCodeGenerator(new(solution.AllFiles.ToList()));
 
         var project = solution
             .TypescriptProject()
             .WhichImplements(controllerFeature)
             
             .WithPropertiesGenerator()
-            .WithHttpClientModuleGenerator()
+            .WithEnumsGenerator()
+            .WithFetchClientModuleGenerator()
 
             .GenerateTo(typescriptCode);
 
-        typescriptCode.AssertMatches();
+        typescriptCode.AssertMatches(IndentStyle.SameLine);
     }
 }

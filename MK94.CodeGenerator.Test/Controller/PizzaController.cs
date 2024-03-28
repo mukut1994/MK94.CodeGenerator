@@ -26,10 +26,26 @@ public class Page
     public int Index { get; set; }
 }
 
+[File("Pizza")]
+public enum PizzaType
+{
+    DoughOnly,
+    Pineapple,
+}
+
+[File("Order")]
+public class Order
+{
+    public PizzaType? PizzaType { get; set; }
+}
+
 [ControllerFeature]
 [File("Controller")]
 public interface IPizzaController
 {
     [Get]
     Task PizzaList([Query] Page page);
+
+    [Post]
+    Task Order([Body] Order order);
 }

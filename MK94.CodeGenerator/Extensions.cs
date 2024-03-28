@@ -12,6 +12,14 @@ namespace MK94.CodeGenerator;
 
 public static class Extensions
 {
+    public static Type UnwrapTask(this Type type)
+    {
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Task<>))
+            return type.GetGenericArguments()[0];
+
+        return type;
+    }
+
     public static string AsClassName(this TypeDefinition typeDef)
     {
         return typeDef.Type.Name.StartsWith('I') && typeDef.Type.IsInterface ?
