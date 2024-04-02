@@ -13,16 +13,22 @@ namespace TestNameSpace;
 public class PizzaController
 {
     [HttpGet]
-    public partial Task<List<Pizza>> PizzaList([FromQuery]Page page);
+    public partial Task PizzaList([FromQuery]Page page);
+    [HttpGet]
+    public partial Task<Pizza> Get([FromQuery]Guid id);
     [HttpPost]
     public partial Task Order([FromBody]Order order);
 }
 public class PizzaControllerClient(FlurlClient client)
 {
 
-    public async Task<List<Pizza>> PizzaList()
+    public async Task PizzaList()
     {
-        return await client.Request("/api/Pizza/PizzaList").GetJsonAsync<List`1>();
+        await client.Request("/api/Pizza/PizzaList").GetAsync();
+    }
+    public async Task<Pizza> Get()
+    {
+        return await client.Request("/api/Pizza/Get").GetJsonAsync<Pizza>();
     }
     public async Task Order()
     {

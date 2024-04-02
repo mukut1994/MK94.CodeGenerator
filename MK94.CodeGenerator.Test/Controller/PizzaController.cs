@@ -50,7 +50,10 @@ public class Pizza
 public interface IPizzaController
 {
     [Get]
-    Task<List<Pizza>> PizzaList([Query] Page page);
+    Task PizzaList([Query] Page page);
+
+    [Get]
+    Task<Pizza> Get([Query] Guid id);
 
     [Post]
     Task Order([Body] Order order);
