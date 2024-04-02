@@ -39,12 +39,18 @@ public class Order
     public PizzaType? PizzaType { get; set; }
 }
 
+[File("Pizza")]
+public class Pizza
+{
+    public string Name { get; set; }
+}
+
 [ControllerFeature]
 [File("Controller")]
 public interface IPizzaController
 {
     [Get]
-    Task PizzaList([Query] Page page);
+    Task<List<Pizza>> PizzaList([Query] Page page);
 
     [Post]
     Task Order([Body] Order order);

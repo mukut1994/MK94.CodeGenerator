@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using MK94.CodeGenerator.Attributes;
 using MK94.CodeGenerator.Generator;
 
@@ -55,14 +56,16 @@ public class ControllerClientModule : IGeneratorModule<CSharpCodeGenerator>
                 foreach (var method in typeDef.Methods)
                 {
                     var generatedMethod = type.Method(MemberFlags.Public | MemberFlags.Async, CsharpTypeReference.ToType(method.ResponseType), method.Name);
-                    
+
                     if (method.IsGetRequest())
                     {
                         generatedMethod.Body
+                            .Append(method.IsVoidReturn() ? "" : "return ")
                             .Append("await client.Request")
                             .OpenParanthesis()
                             .Append(@$"""/api/{controllerName}/{method.Name}""")
                             .CloseParanthesis()
+                            .Append(method.IsVoidReturn() ? ".GetAsync()" : $".GetJsonAsync<{method.ResponseType.UnwrapTask().Name}>()")
                             .Append(";");
                     }
 
