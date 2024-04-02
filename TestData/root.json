@@ -26,5 +26,8 @@
   "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_Controller/Order.g.cs": "2e\u002Bftrll0e1p4cqfufuk0audgi5oecxm-zkunghmiji=",
   "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/DataAndSerializerMixedModuleTest/Order.ts": "zhbu2ysipvpzgilztznmdwmlb-dshwlspkwh3bk5ae8=",
   "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/DataAndSerializerMixedModuleTest/Pizza.ts": "ifcts-eiuqgt0yx1fuyldygemlseajxzgsl4dty7c-e=",
-  "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/DataModuleTest/Order.ts": "otprkvcho-zifxjuq1nm6jfal4efqihjxduchcd8y2u="
+  "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/DataModuleTest/Order.ts": "otprkvcho-zifxjuq1nm6jfal4efqihjxduchcd8y2u=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_ControllerClient/Data.g.cs": "as9f7eptz7rqv6nqbrzfztua5qhvrlakpzmbbvxfk44=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_ControllerClient/Order.g.cs": "2e\u002Bftrll0e1p4cqfufuk0audgi5oecxm-zkunghmiji=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_ControllerClient/Controller.g.cs": "0htix5l-hupcntyx0x3qlcuz8g4kcvc-fgclpmdpk2e="
 }

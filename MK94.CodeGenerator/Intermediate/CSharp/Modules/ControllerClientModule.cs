@@ -54,7 +54,7 @@ public class ControllerClientModule : IGeneratorModule<CSharpCodeGenerator>
 
                 foreach (var method in typeDef.Methods)
                 {
-                    var generatedMethod = type.Method(MemberFlags.Public, CsharpTypeReference.ToType(method.ResponseType), method.Name);
+                    var generatedMethod = type.Method(MemberFlags.Public | MemberFlags.Async, CsharpTypeReference.ToType(method.ResponseType), method.Name);
                     
                     if (method.IsGetRequest())
                     {
@@ -68,7 +68,13 @@ public class ControllerClientModule : IGeneratorModule<CSharpCodeGenerator>
 
                     if (method.IsPostRequest())
                     {
-
+                        generatedMethod.Body
+                            .Append("await client.Request")
+                            .OpenParanthesis()
+                            .Append(@$"""/api/{controllerName}/{method.Name}""")
+                            .CloseParanthesis()
+                            .Append(".PostJsonAsync()")
+                            .Append(";");
                     }
                 }
 

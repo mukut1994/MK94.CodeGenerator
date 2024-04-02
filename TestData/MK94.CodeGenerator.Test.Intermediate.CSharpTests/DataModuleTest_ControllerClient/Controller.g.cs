@@ -14,12 +14,18 @@ public class PizzaController
 {
     [HttpGet]
     public partial Task PizzaList([FromQuery]Page page);
+    [HttpPost]
+    public partial Task Order([FromBody]Order order);
 }
 public class PizzaControllerClient(FlurlClient client)
 {
 
-    public Task PizzaList()
+    public async Task PizzaList()
     {
         await client.Request("/api/Pizza/PizzaList");
+    }
+    public async Task Order()
+    {
+        await client.Request("/api/Pizza/Order").PostJsonAsync();
     }
 }
