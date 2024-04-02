@@ -19,7 +19,7 @@ namespace MK94.CodeGenerator.Test
         {
             // DiskAssert.EnableWriteMode();
 
-            var c = new TypescriptCodeGenerator();
+            var c = new TypescriptCodeGenerator(new(new()));
 
             var t = c
                 .File("filea.ts")

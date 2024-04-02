@@ -20,5 +20,10 @@ namespace space
             await client.Request("/api/Pizza/PizzaList".SetQueryParam("page", page)).GetAsync();
         }
 
+        public async Task Order(Order order)
+        {
+            await client.Request("/api/Pizza/Order").PostJsonAsync(order);
+        }
+
     }
 }
