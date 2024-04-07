@@ -19,8 +19,6 @@ public class CSharpTests
     [Test]
     public void Test()
     {
-        // DiskAssert.EnableWriteMode();
-
         var c = new CSharpCodeGenerator();
 
         var namespaceA = c
@@ -83,8 +81,6 @@ public class CSharpTests
     [Test]
     public void DataModuleTest()
     {
-        // DiskAssert.EnableWriteMode();
-
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
@@ -107,8 +103,6 @@ public class CSharpTests
     [Test]
     public void DataModuleTest_Controller()
     {
-        // DiskAssert.EnableWriteMode();
-
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
@@ -130,8 +124,6 @@ public class CSharpTests
     [Test]
     public void DataModule_StronglyTypedId()
     {
-        // DiskAssert.EnableWriteMode();
-
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
@@ -155,8 +147,6 @@ public class CSharpTests
     [Test]
     public void DataAndSerializerMixedModuleTest()
     {
-        // DiskAssert.EnableWriteMode();
-
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
@@ -180,8 +170,6 @@ public class CSharpTests
     [Test]
     public void SpecificTypesOnlyTest()
     {
-        // DiskAssert.EnableWriteMode();
-
         // TODO parser should be created from solution
         // This requires all files multiple times otherwise
         // The solution should be defining all of them instead

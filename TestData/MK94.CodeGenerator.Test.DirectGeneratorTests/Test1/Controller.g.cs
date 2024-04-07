@@ -17,7 +17,7 @@ namespace space
 
         public async Task PizzaList(Page page)
         {
-            await client.Request("/api/Pizza/PizzaList".SetQueryParam("page", page)).GetAsync();
+            await client.Request("/api/Pizza/PizzaList").GetAsync();
         }
 
         public async Task Order(Order order)

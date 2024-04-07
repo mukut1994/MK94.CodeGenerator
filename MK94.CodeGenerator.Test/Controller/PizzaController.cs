@@ -44,7 +44,7 @@ public class Order
 public interface IPizzaController
 {
     [Get]
-    Task PizzaList([Query] Page page);
+    Task PizzaList(Page page);
 
     [Post]
     Task Order([Body] Order order);

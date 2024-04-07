@@ -23,12 +23,12 @@ public class PropertiesModule : IGeneratorModule<TypescriptCodeGenerator>
         {
             foreach(var typeDef in fileDef.Types)
             {
-                if (!typeDef.Properties.Any())
-                    continue;
-
                 var file = codeGenerator.File($"{fileDef.Name}.ts");
 
-                var type = file.Type(typeDef.Type.Name, MemberFlags.Public | MemberFlags.Interface);
+                var type = file.Type(TsTypeReference.CleanName(typeDef.Type), MemberFlags.Public | MemberFlags.Interface);
+
+                if (typeDef.Type.BaseType != null && typeDef.Type.BaseType != typeof(object))
+                    type.WithExtends(TsTypeReference.ToType(typeDef.Type.BaseType));
 
                 foreach(var propertyDef in typeDef.Properties)
                 {

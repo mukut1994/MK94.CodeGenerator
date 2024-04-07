@@ -19,8 +19,6 @@ public class TypescriptTests
     [Test]
     public void Test()
     {
-        // DiskAssert.EnableWriteMode();
-
         var c = new TypescriptCodeGenerator(new(new()));
 
         var t = c
@@ -54,8 +52,6 @@ public class TypescriptTests
     [Test]
     public void DataModuleTest()
     {
-        // DiskAssert.EnableWriteMode();
-
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
@@ -77,8 +73,6 @@ public class TypescriptTests
     [Test]
     public void DataAndSerializerMixedModuleTest()
     {
-        // DiskAssert.EnableWriteMode();
-
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax

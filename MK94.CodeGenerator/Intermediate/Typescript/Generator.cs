@@ -17,7 +17,23 @@ public interface IGenerator
 
 public record TypeResolveContext(TypescriptCodeGenerator Root, string FilePath, IntermediateFileDefinition File);
 
-public record TypeResolveMatch(string? import, string? name, string? importName = null);
+public record TsImport(string name, string? path);
+
+public record TypeResolveMatch(string? name)
+{
+    public List<TsImport> Imports = new();
+
+    public TypeResolveMatch WithImport(TsImport import)
+    {
+        Imports.Add(import);
+        return this;
+    }
+    public TypeResolveMatch WithImports(List<TsImport> imports)
+    {
+        Imports.AddRange(imports);
+        return this;
+    }
+}
 
 public abstract record TsTypeReference
 {
@@ -60,11 +76,14 @@ public abstract record TsTypeReference
         Extension
     }
 
+    [Obsolete("Use resolve instead; This method does not use the typeNameLookup configuration property")]
     public static string CleanName(Type type, TypeText mode = TypeText.Generic)
     {
         if (type == typeof(bool))
             return "boolean";
         else if (type == typeof(int))
+            return "number";
+        else if (type == typeof(double))
             return "number";
         else if (type == typeof(decimal))
             return "number";
@@ -148,7 +167,7 @@ internal record PromiseTypedTypeReference : TsTypeReference
 
     public override TypeResolveMatch Resolve(TypeResolveContext context)
     {
-        return new TypeResolveMatch(null, $"Promise<{helperReference.Resolve(context).name}>");
+        return new TypeResolveMatch($"Promise<{helperReference.Resolve(context).name}>");
     }
 }
 
@@ -156,7 +175,7 @@ internal record AnonymousReference : TsTypeReference
 {
     public override TypeResolveMatch Resolve(TypeResolveContext context)
     {
-        return new(null, null);
+        return new(null);
     }
 }
 
@@ -173,7 +192,7 @@ internal record NamedTypeReference : TsTypeReference
 
     public override TypeResolveMatch Resolve(TypeResolveContext context)
     {
-        return new(ImportFrom, Name);
+        return new(Name);
     }
 }
 
@@ -194,16 +213,35 @@ internal record TypedTypeReference : TsTypeReference
     private TypeResolveMatch Resolve(Type type, TypeResolveContext context)
     {
         if (context.Root.TypeNameLookups.TryGetValue(type, out var lookup))
-            return new(context.Root.RelativeFileResolver.GetImportPath(context.File.FileName, type), lookup);
+            return new TypeResolveMatch(lookup)
+                .WithImport(new TsImport(lookup, context.Root.RelativeFileResolver.GetImportPath(context.File.FileName, type)));
 
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
         {
             var ret = Resolve(type.GetGenericArguments()[0], context);
 
-            return new(ret.import, ret.name + " | null", ret.name);
+            return new TypeResolveMatch(ret.name + " | null")
+                .WithImports(ret.Imports);
         }
 
-        return new(context.Root.RelativeFileResolver.GetImportPath(context.File.FileName, type), type.Name);
+        if (type.IsGenericType)
+        {
+            var ret = Resolve(type.GetGenericArguments()[0], context);
+
+            return new TypeResolveMatch(CleanName(type))
+                .WithImports(ret.Imports);
+        }
+
+        if (type.IsArray)
+        {
+            var ret = Resolve(type.GetElementType()!, context);
+
+            return new TypeResolveMatch("[" + ret.name + "]" + " | null")
+                .WithImports(ret.Imports);
+        }
+
+        return new TypeResolveMatch(type.Name)
+            .WithImport(new TsImport(type.Name, context.Root.RelativeFileResolver.GetImportPath(context.File.FileName, type)));
     }
 }
 
@@ -233,7 +271,7 @@ internal record StringTypedTypeReference : TsTypeReference
         else 
             importPath = Path.Combine(Path.GetRelativePath(directoryCurrent, directoryMatch), Path.GetFileName(match.file.Key));
 
-        return new (importPath, match.member.Key);
+        return new(match.member.Key);
     }
 }
 
@@ -258,7 +296,8 @@ public class TypescriptCodeGenerator : IFileGenerator
         { typeof(ushort), "number" },
         { typeof(string), "string" },
         { typeof(Guid), "string" },
-        { typeof(Task), "void" }
+        { typeof(Task), "void" },
+        { typeof(DateTime), "Date" },
     };
 
     public RelativeFileResolver RelativeFileResolver { get; }
@@ -290,6 +329,27 @@ public class TypescriptCodeGenerator : IFileGenerator
     }
 }
 
+public class IntermediateTypeDefinitionAlias : IntermediateMemberDefinition
+{
+    private string Value { get; set; }
+
+    public IntermediateTypeDefinitionAlias(MemberFlags flags, string name, string value) : base(flags, name)
+    {
+        Value = value;
+    }
+
+    public override IEnumerable<TypeResolveMatch> ResolveReferences(TypeResolveContext context)
+    {
+        yield break;
+    }
+
+    public override void Generate(CodeBuilder builder)
+    {
+        WriteMemberFlags(builder);
+        builder.AppendLine($"type {Name} = {Value};");
+    }
+}
+
 public class IntermediateFileDefinition : IGenerator
 {
     public string FileName { get; }
@@ -318,13 +378,22 @@ public class IntermediateFileDefinition : IGenerator
         return definition;
     }
 
+    public IntermediateFileDefinition WithTypeAlias(string name, MemberFlags flags, string value)
+    {
+        flags = flags | MemberFlags.Type;
+
+        Members.GetOrAdd(name, () => new IntermediateTypeDefinitionAlias(flags, name, value));
+
+        return this;
+    }
+
     public IntermediateEnumDefinition Enum(string name, MemberFlags flags)
     {
-        var ret = new IntermediateEnumDefinition(name, flags);
+        // TODO validation
+        var definition = (IntermediateEnumDefinition)Members
+            .GetOrAdd(name, () => new IntermediateEnumDefinition(name, flags));
 
-        Members.Add(name, ret);
-
-        return ret;
+        return definition;
     }
 
     //public IntermediateFileDefinition WithImport(string path, string type)
@@ -350,15 +419,16 @@ public class IntermediateFileDefinition : IGenerator
     {
         var anyImports = false;
         var imports = Members.SelectMany(m => m.Value.ResolveReferences(context))
+            .SelectMany(x => x.Imports)
             .Distinct()
-            .Where(x => x.import != null)
-            .GroupBy(x => x.import);
+            .Where(x => x.path != null)
+            .GroupBy(x => x.path);
 
         foreach(var importFile in imports)
         {
             builder.AppendWord("import")
                 .AppendWord("{")
-                .Append((b, x) => b.AppendWord(x.importName ?? x.name!).AppendOptionalComma(), importFile)
+                .Append((b, x) => b.AppendWord(x.name).AppendOptionalComma(), (IEnumerable<TsImport>)importFile)
                 .EndOptionalComma()
                 .AppendWord("}")
                 .AppendWord("from")
@@ -421,6 +491,8 @@ public class IntermediatePropertyDefinition : IntermediateTypedMemberDefinition,
 {
     private TypeResolveContext context { get; }
 
+    private string Default { get; set; }
+
     public IntermediatePropertyDefinition(TypeResolveContext context, MemberFlags flags, TsTypeReference type, string name) : base(flags, type, name)
     {
         this.context = context;
@@ -439,11 +511,13 @@ public class IntermediatePropertyDefinition : IntermediateTypedMemberDefinition,
                 .Append(": ")
                 .Append(type);
 
+        if(Default != null)
+            builder.Append($" = {Default}");
+
         builder
             .Append(";")
             .NewLine();
     }
-
 
     public void GetRequiredReferences(HashSet<TsTypeReference> refs)
     {
@@ -453,6 +527,13 @@ public class IntermediatePropertyDefinition : IntermediateTypedMemberDefinition,
     public override IEnumerable<TypeResolveMatch> ResolveReferences(TypeResolveContext context)
     {
         yield return Type.Resolve(context);
+    }
+
+    public IntermediatePropertyDefinition WithDefaultValue(string value)
+    {
+        Default = value;
+
+        return this;
     }
 }
 
@@ -552,6 +633,7 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
     private TypeResolveContext context { get; }
     public Dictionary<string, IntermediatePropertyDefinition> Properties = new();
     public Dictionary<string, IntermediateMethodDefinition> Methods = new();
+    public HashSet<TsTypeReference> Extensions = new();
 
     public IntermediateTypeDefinition(
         TypeResolveContext context, 
@@ -575,12 +657,20 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
         return definition;
     }
 
+    public IntermediateTypeDefinition WithExtends(TsTypeReference type)
+    {
+        Extensions.Add(type);
+
+        return this;
+    }
+
     public override void Generate(CodeBuilder builder)
     {
         builder
             .Append(WriteMemberFlags)
             .AppendWord(Flags.HasFlag(MemberFlags.Interface) ? "interface" : "class")
             .Append(MemberName)
+            .Append(AppendExtensions)
             .OpenBlock()
                 .Append((b, p) => p.Value.Generate(b), Properties);
 
@@ -591,6 +681,22 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
                 .Append((b, p) => p.Value.Generate(b), Methods)
             .CloseBlock();
     }
+
+    public void AppendExtensions(CodeBuilder builder)
+    {
+        if (!Extensions.Any())
+            return;
+
+        builder.Append(" extends ");
+
+        foreach(var extension in Extensions)
+        {
+            builder
+                .Append(extension.Resolve(context).name!)
+                .AppendOptionalComma();
+        }
+    }
+
     public override IEnumerable<TypeResolveMatch> ResolveReferences(TypeResolveContext context)
     {
         foreach (var props in Properties)
@@ -601,7 +707,6 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
                 yield return resolved;
     }
 }
-
 
 public class IntermediateEnumDefinition : IntermediateMemberDefinition, IGenerator
 {
@@ -630,7 +735,7 @@ public class IntermediateEnumDefinition : IntermediateMemberDefinition, IGenerat
             {
                 b.Append($"{kv.key} = {kv.value},")
                 .NewLine();
-            }, keyValues)
+            }, keyValues.Distinct())
             .CloseBlock()
             .NewLine();
     }

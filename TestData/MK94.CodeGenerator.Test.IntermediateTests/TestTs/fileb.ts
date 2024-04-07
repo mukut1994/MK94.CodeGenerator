@@ -1,6 +1,4 @@
-import { TypeA } from "filea.ts";
-
- export class TypeB {
+export class TypeB {
     PropA: number;
 
 
