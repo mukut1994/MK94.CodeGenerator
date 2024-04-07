@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Runtime;
 using System.Threading.Tasks;
 
@@ -387,6 +388,16 @@ public class IntermediateFileDefinition : IGenerator
         return this;
     }
 
+    public IntermediateConstantDefinition Constant(string name, MemberFlags flags, TsTypeReference type)
+    {
+        flags = flags | MemberFlags.Const;
+
+        var definition = (IntermediateConstantDefinition)Members
+            .GetOrAdd(name, () => new IntermediateConstantDefinition(context, type, flags, name));
+
+        return definition;
+    }
+
     public IntermediateEnumDefinition Enum(string name, MemberFlags flags)
     {
         // TODO validation
@@ -409,9 +420,21 @@ public class IntermediateFileDefinition : IGenerator
     {
         GenerateImports(builder);
 
-        foreach (var member in Members)
+        var membersLeftToEmit = Members.Keys.ToHashSet();
+
+        while (membersLeftToEmit.Any())
         {
-            member.Value.Generate(builder);
+            foreach (var member in Members)
+            {
+                if (member.Value.AfterMembers.Intersect(membersLeftToEmit).Any())
+                    continue;
+
+                if (!membersLeftToEmit.Contains(member.Key))
+                    continue;
+
+                member.Value.Generate(builder);
+                membersLeftToEmit.Remove(member.Key);
+            }
         }
     }
 
@@ -443,11 +466,254 @@ public class IntermediateFileDefinition : IGenerator
     }
 }
 
+public class IntermediateConstantDefinition : IntermediateMemberDefinition
+{
+    private readonly TypeResolveContext context;
+
+    public TsTypeReference Type { get; set; }
+    public IntermediateConstantValueDefinition? Value { get; set; }
+
+    public IntermediateConstantDefinition(TypeResolveContext context, TsTypeReference type, MemberFlags flags, string name) : base(flags, name)
+    {
+        this.context = context;
+
+        Type = type;
+    }
+
+    public override void Generate(CodeBuilder builder)
+    {
+        WriteMemberFlags(builder);
+        builder.Append("const ");
+        MemberName(builder);
+
+        var type = Type.Resolve(context)?.name;
+
+        if(!string.IsNullOrEmpty(type))
+        {
+            builder.Append(": ");
+            builder.Append(type);
+        }
+
+        if (Value != null)
+        {
+            builder.Append(" = ");
+            Value.Generate(builder);
+        }
+
+        builder.AppendLine(";");
+    }
+
+    public override IEnumerable<TypeResolveMatch> ResolveReferences(TypeResolveContext context)
+    {
+        yield break;
+    }
+
+    public IntermediateConstantDefinition WithStringAsValue(string value)
+    {
+        Value = new IntermediateConstantStringDefinition(value);
+        return this;
+    }
+
+    public IntermediateConstantDefinition WithNumberAsValue(long value)
+    {
+        Value = new IntermediateConstantNumberDefinition(value);
+        return this;
+    }
+
+    public IntermediateObjectConstantDefinition ObjectAsValue()
+    {
+        var def = new IntermediateObjectConstantDefinition();
+
+        Value = def;
+
+        return def;
+    }
+
+    public IntermediateArrayConstantDefinition ArrayAsValue()
+    {
+        var def = new IntermediateArrayConstantDefinition();
+
+        Value = def;
+
+        return def;
+    }
+}
+
+public abstract class IntermediateConstantValueDefinition : IGenerator
+{
+    public abstract void Generate(CodeBuilder builder);
+}
+
+public class IntermediateConstantStringDefinition : IntermediateConstantValueDefinition
+{
+    public string Value { get; set; }
+
+    public IntermediateConstantStringDefinition(string value)
+    {
+        Value = value;
+    }
+
+    public override void Generate(CodeBuilder builder)
+    {
+        builder.Append("\"");
+        builder.Append(Value);
+        builder.Append("\"");
+    }
+}
+
+public class IntermediateConstantReferenceDefinition : IntermediateConstantValueDefinition
+{
+    public string Value { get; set; }
+
+    public IntermediateConstantReferenceDefinition(string value)
+    {
+        Value = value;
+    }
+
+    public override void Generate(CodeBuilder builder)
+    {
+        builder.Append(Value);
+    }
+}
+
+public class IntermediateConstantNumberDefinition : IntermediateConstantValueDefinition
+{
+    public long Value { get; set; }
+
+    public IntermediateConstantNumberDefinition(long value)
+    {
+        Value = value;
+    }
+
+    public override void Generate(CodeBuilder builder)
+    {
+        builder.Append(Value.ToString());
+    }
+}
+
+public record ObjectKeyValue(string key, IntermediateConstantValueDefinition value);
+
+public class IntermediateObjectConstantDefinition : IntermediateConstantValueDefinition
+{
+    public List<ObjectKeyValue> KeyValues = new();
+
+    public override void Generate(CodeBuilder builder)
+    {
+        builder.OpenBlock();
+
+        foreach(var kv in KeyValues)
+        {
+            builder.Append(kv.key);
+            builder.Append(": ");
+            kv.value.Generate(builder);
+            builder.AppendLine(",");
+        }
+
+        builder.CloseBlock();
+    }
+
+    public IntermediateObjectConstantDefinition WithStringProperty(string key, string value)
+    {
+        KeyValues.Add(new(key, new IntermediateConstantStringDefinition(value)));
+
+        return this;
+    }
+
+    public IntermediateObjectConstantDefinition WithReferenceToConstantProperty(string key, string value)
+    {
+        KeyValues.Add(new(key, new IntermediateConstantReferenceDefinition(value)));
+
+        return this;
+    }
+
+    public IntermediateObjectConstantDefinition WithNumberProperty(string key, long value)
+    {
+        KeyValues.Add(new(key, new IntermediateConstantNumberDefinition(value)));
+
+        return this;
+    }
+
+    public IntermediateObjectConstantDefinition ObjectProperty(string key)
+    {
+        var existing = KeyValues.FirstOrDefault(x => x.key == key);
+
+        if (existing != null && existing.value is IntermediateObjectConstantDefinition objDef)
+            return objDef;
+
+        var def = new IntermediateObjectConstantDefinition();
+
+        KeyValues.Add(new(key, def));
+
+        return def;
+    }
+
+    public IntermediateArrayConstantDefinition ArrayProperty(string key)
+    {
+        var existing = KeyValues.FirstOrDefault(x => x.key == key);
+
+        if (existing != null && existing.value is IntermediateArrayConstantDefinition objDef)
+            return objDef;
+
+        var def = new IntermediateArrayConstantDefinition();
+
+        KeyValues.Add(new(key, def));
+
+        return def;
+    }
+}
+
+public class IntermediateArrayConstantDefinition : IntermediateConstantValueDefinition
+{
+    public List<IntermediateConstantValueDefinition> Values = new();
+
+    public override void Generate(CodeBuilder builder)
+    {
+        builder.OpenSquareParanthesis();
+
+        foreach (var value in Values)
+        {
+            value.Generate(builder);
+            builder.AppendLine(",");
+        }
+
+        builder.CloseSquareParanthesis();
+    }
+
+    public IntermediateArrayConstantDefinition WithStringValue(string value)
+    {
+        Values.Add(new IntermediateConstantStringDefinition(value));
+        return this;
+    }
+
+    public IntermediateArrayConstantDefinition WithReferenceToConstantValue(string value)
+    {
+        Values.Add(new IntermediateConstantReferenceDefinition(value));
+        return this;
+    }
+
+    public IntermediateArrayConstantDefinition WithNumberValue(long value)
+    {
+        Values.Add(new IntermediateConstantNumberDefinition(value));
+        return this;
+    }
+
+    public IntermediateObjectConstantDefinition ObjectValue()
+    {
+        var def = new IntermediateObjectConstantDefinition();
+
+        Values.Add(def);
+
+        return def;
+    }
+}
+
 public abstract class IntermediateMemberDefinition : IGenerator
 {
     public string Name { get; set; }
 
     public MemberFlags Flags { get; set; }
+
+    public HashSet<string> AfterMembers { get; set; } = new();
 
     public IntermediateMemberDefinition(MemberFlags flags, string name)
     {
@@ -460,6 +726,9 @@ public abstract class IntermediateMemberDefinition : IGenerator
         if (Flags.HasFlag(MemberFlags.Public) && Flags.HasFlag(MemberFlags.Type))
             builder.AppendWord("export");
 
+        if (Flags.HasFlag(MemberFlags.Public) && Flags.HasFlag(MemberFlags.Const))
+            builder.AppendWord("export");
+
         if (Flags.HasFlag(MemberFlags.Static))
             builder.AppendWord("static");
 
@@ -470,6 +739,11 @@ public abstract class IntermediateMemberDefinition : IGenerator
     public void MemberName(CodeBuilder builder)
     {
         builder.Append(Name);
+    }
+
+    public void AfterMember(string memberName)
+    {
+        AfterMembers.Add(memberName);
     }
 
     public abstract IEnumerable<TypeResolveMatch> ResolveReferences(TypeResolveContext context);
@@ -631,9 +905,11 @@ public class IntermediateMethodDefinition : IntermediateTypedMemberDefinition, I
 public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerator
 {
     private TypeResolveContext context { get; }
+
     public Dictionary<string, IntermediatePropertyDefinition> Properties = new();
     public Dictionary<string, IntermediateMethodDefinition> Methods = new();
     public HashSet<TsTypeReference> Extensions = new();
+    public HashSet<string> GenericArguments = new();
 
     public IntermediateTypeDefinition(
         TypeResolveContext context, 
@@ -657,10 +933,15 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
         return definition;
     }
 
+    public IntermediateTypeDefinition WithGenericArgument(string name)
+    {
+        GenericArguments.Add(name);
+        return this;
+    }
+
     public IntermediateTypeDefinition WithExtends(TsTypeReference type)
     {
         Extensions.Add(type);
-
         return this;
     }
 
@@ -670,6 +951,7 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
             .Append(WriteMemberFlags)
             .AppendWord(Flags.HasFlag(MemberFlags.Interface) ? "interface" : "class")
             .Append(MemberName)
+            .Append(ApppendGenericArguments)
             .Append(AppendExtensions)
             .OpenBlock()
                 .Append((b, p) => p.Value.Generate(b), Properties);
@@ -680,6 +962,24 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
         builder
                 .Append((b, p) => p.Value.Generate(b), Methods)
             .CloseBlock();
+    }
+
+    public void ApppendGenericArguments(CodeBuilder builder)
+    {
+        if (!GenericArguments.Any())
+            return;
+
+        builder.Append("<");
+        
+        foreach(var generic in GenericArguments.Select((x, i) => (x, i)))
+        {
+            builder.Append(generic.x);
+
+            if (generic.i < GenericArguments.Count - 1)
+                builder.Append(", ");
+        }
+
+        builder.Append(">");
     }
 
     public void AppendExtensions(CodeBuilder builder)

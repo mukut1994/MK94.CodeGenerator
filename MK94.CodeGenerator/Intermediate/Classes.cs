@@ -60,6 +60,7 @@ public enum MemberFlags
     Method = 64,
 
     Partial = 128,
+    Const = 256,
 }
 
 [Flags]
