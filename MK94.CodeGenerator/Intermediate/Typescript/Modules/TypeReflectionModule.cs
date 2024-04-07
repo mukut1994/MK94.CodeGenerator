@@ -27,7 +27,7 @@ public class TypeReflectionModule : IGeneratorModule<TypescriptCodeGenerator>
             typeInfoType.Property(MemberFlags.Public, TsTypeReference.ToNamed(null, "TKey"), "name");
 
             var infoConst = codeGenerator.File($"{fileDef.Name}.ts")
-                .Constant("TypeInfomations", MemberFlags.Public | MemberFlags.Interface, TsTypeReference.ToAnonymous());
+                .Constant("TypeInformations", MemberFlags.Public | MemberFlags.Interface, TsTypeReference.ToAnonymous());
 
             foreach (var typeDef in fileDef.Types)
             {
