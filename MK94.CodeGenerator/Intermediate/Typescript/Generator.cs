@@ -910,6 +910,7 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
     public Dictionary<string, IntermediateMethodDefinition> Methods = new();
     public HashSet<TsTypeReference> Extensions = new();
     public HashSet<string> GenericArguments = new();
+    public List<IntermediateDecoratorDefinition> Decorators = new();
 
     public IntermediateTypeDefinition(
         TypeResolveContext context, 
@@ -933,6 +934,15 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
         return definition;
     }
 
+    public IntermediateDecoratorDefinition Decorator(TsTypeReference typeRef)
+    {
+        var decorator = new IntermediateDecoratorDefinition(typeRef, context);
+
+        Decorators.Add(decorator);
+
+        return decorator;
+    }
+
     public IntermediateTypeDefinition WithGenericArgument(string name)
     {
         GenericArguments.Add(name);
@@ -948,10 +958,11 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
     public override void Generate(CodeBuilder builder)
     {
         builder
+            .Append((b, d) => d.Generate(b), Decorators)
             .Append(WriteMemberFlags)
             .AppendWord(Flags.HasFlag(MemberFlags.Interface) ? "interface" : "class")
             .Append(MemberName)
-            .Append(ApppendGenericArguments)
+            .Append(AppendGenericArguments)
             .Append(AppendExtensions)
             .OpenBlock()
                 .Append((b, p) => p.Value.Generate(b), Properties);
@@ -964,7 +975,7 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
             .CloseBlock();
     }
 
-    public void ApppendGenericArguments(CodeBuilder builder)
+    public void AppendGenericArguments(CodeBuilder builder)
     {
         if (!GenericArguments.Any())
             return;
@@ -1005,6 +1016,36 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
         foreach (var methods in Methods)
             foreach (var resolved in methods.Value.ResolveReferences(context))
                 yield return resolved;
+    }
+}
+
+public class IntermediateDecoratorDefinition : IGenerator
+{
+    public TsTypeReference Type { get; set; }
+    private TypeResolveContext context { get; }
+
+    public IntermediateDecoratorDefinition(TsTypeReference type, TypeResolveContext context)
+    {
+        Type = type;
+        this.context = context;
+    }
+
+    public void Generate(CodeBuilder builder)
+    {
+        var attributeName = Type.Resolve(context);
+
+        if (attributeName?.name is null)
+            return;
+
+        var attrName = attributeName.name;
+
+        if (attrName.EndsWith("Attribute"))
+            attrName = attrName[..^"Attribute".Length];
+
+        builder
+            .Append("@")
+            .Append(attrName)
+            .NewLine();
     }
 }
 

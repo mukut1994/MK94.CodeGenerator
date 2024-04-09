@@ -1,6 +1,7 @@
 ﻿using MK94.Assert;
 using MK94.CodeGenerator.Generator;
 using MK94.CodeGenerator.Intermediate;
+using MK94.CodeGenerator.Intermediate.CSharp;
 using MK94.CodeGenerator.Intermediate.CSharp.Modules;
 using MK94.CodeGenerator.Intermediate.Typescript;
 using MK94.CodeGenerator.Intermediate.Typescript.Modules;
@@ -19,11 +20,15 @@ public class TypescriptTests
     [Test]
     public void Test()
     {
+        DiskAssert.EnableWriteMode();
+
         var c = new TypescriptCodeGenerator(new(new()));
 
         var t = c
             .File("file.ts")
             .Type("TypeA", MemberFlags.Public);
+
+        t.Decorator(TsTypeReference.ToType<ExampleAttribute>());
 
         t.Property(MemberFlags.Public, TsTypeReference.ToType<int>(), "PropA");
         t.Method(MemberFlags.Public, TsTypeReference.ToType<int>(), "MethodA")

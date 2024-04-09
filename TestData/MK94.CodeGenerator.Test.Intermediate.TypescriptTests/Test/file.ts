@@ -1,3 +1,4 @@
+@Example
 export class TypeA
 {
     PropA: number;
