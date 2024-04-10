@@ -47,20 +47,20 @@ public class ControllerModule : IGeneratorModule<CSharpCodeGenerator>
                     {
                         var arg = generatedMethod.Argument(CsharpTypeReference.ToType(parameter.Type), parameter.Name);
 
-                        if (parameter.FromQuery())
+                        if (ControllerResolver.Instance.IsQueryParameter(parameter))
                             arg.Attribute(CsharpTypeReference.ToRaw("FromQuery"));
 
-                        if (parameter.FromBody())
+                        if (ControllerResolver.Instance.IsBodyParameter(parameter))
                             arg.Attribute(CsharpTypeReference.ToRaw("FromBody"));
 
-                        if (parameter.FromForm())
+                        if (ControllerResolver.Instance.IsFormParameter(parameter))
                             arg.Attribute(CsharpTypeReference.ToRaw("FromForm"));
                     }
                     
-                    if (method.IsGetRequest())
+                    if (ControllerResolver.Instance.IsGetMethod(method))
                         generatedMethod.Attribute(CsharpTypeReference.ToRaw("HttpGet"));
 
-                    if (method.IsPostRequest())
+                    if (ControllerResolver.Instance.IsPostMethod(method))
                         generatedMethod.Attribute(CsharpTypeReference.ToRaw("HttpPost"));
                 }
             }

@@ -32,6 +32,11 @@ public class ControllerResolver
         return method.MethodInfo.GetCustomAttributes<PostAttribute>(true).Any();
     }
 
+    public virtual bool IsQueryParameter(ParameterDefinition parameter)
+    {
+        return parameter.Parameter.GetCustomAttributes<QueryAttribute>(true).Any();
+    }
+
     public virtual bool IsBodyParameter(ParameterDefinition parameter)
     {
         return parameter.Parameter.GetCustomAttributes<BodyAttribute>(true).Any();
