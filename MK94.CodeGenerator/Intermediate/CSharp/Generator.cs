@@ -317,10 +317,10 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     attributeName = attributeName[..^"Attribute".Length];
 
                 builder
-                    .OpenSquareParanthesis()
+                    .OpenSquareParenthesis()
                     .Append(attributeName)
                     .Append(AppendParameters)
-                    .CloseSquareParanthesis();
+                    .CloseSquareParenthesis();
             }
 
             public void GetRequiredReferences(HashSet<CsharpTypeReference> refs)
@@ -333,7 +333,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 if (parameters.Count == 0)
                     return;
 
-                builder.OpenParanthesis();
+                builder.OpenParenthesis();
 
                 for (int i = 0; i < parameters.Count; i++)
                 {
@@ -349,7 +349,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     }
                 }
 
-                builder.CloseParanthesis();
+                builder.CloseParenthesis();
             }
         }
 
@@ -457,9 +457,9 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     .Append(AppendMemberFlags)
                     .AppendWord(Type.Resolve(root))
                     .Append(MemberName)
-                    .OpenParanthesis()
+                    .OpenParenthesis()
                         .Append((b, arg) => arg.Generate(b), Arguments)
-                    .CloseParanthesis();
+                    .CloseParenthesis();
 
                 if (Flags.HasFlag(MemberFlags.Partial) && BodyStream.Capacity == 0)
                 {
@@ -524,9 +524,9 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 builder
                     .Append(AppendMemberFlags)
                     .Append(MemberName)
-                    .OpenParanthesis()
+                    .OpenParenthesis()
                         .Append((b, arg) => arg.Generate(b), Arguments)
-                    .CloseParanthesis()
+                    .CloseParenthesis()
                     .Append(AppendBaseConstructorCall)
                     .WithBlock(b => b.Append(BodyStream));
             }
@@ -751,7 +751,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 if (!PrimaryConstructor)
                     return;
 
-                builder.OpenParanthesis();
+                builder.OpenParenthesis();
 
                 foreach (var property in Properties)
                 {
@@ -762,7 +762,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     }
                 }
 
-                builder.CloseParanthesis();
+                builder.CloseParenthesis();
 
             }
         }

@@ -666,7 +666,7 @@ public class IntermediateArrayConstantDefinition : IntermediateConstantValueDefi
 
     public override void Generate(CodeBuilder builder)
     {
-        builder.OpenSquareParanthesis();
+        builder.OpenSquareParenthesis();
 
         foreach (var value in Values)
         {
@@ -674,7 +674,7 @@ public class IntermediateArrayConstantDefinition : IntermediateConstantValueDefi
             builder.AppendLine(",");
         }
 
-        builder.CloseSquareParanthesis();
+        builder.CloseSquareParenthesis();
     }
 
     public IntermediateArrayConstantDefinition WithStringValue(string value)
@@ -880,9 +880,9 @@ public class IntermediateMethodDefinition : IntermediateTypedMemberDefinition, I
 
         builder
             .Append(WriteMemberFlags).Append(MemberName)
-            .OpenParanthesis()
+            .OpenParenthesis()
                 .Append((b, arg) => arg.Generate(b), Arguments)
-            .CloseParanthesis();
+            .CloseParenthesis();
 
         if (retTypeName != null)
             builder.Append(": ").Append(retTypeName);
@@ -1060,7 +1060,7 @@ public class IntermediateDecoratorDefinition : IGenerator
         if (parameters.Count == 0)
             return;
 
-        builder.OpenParanthesis();
+        builder.OpenParenthesis();
 
         for (int i = 0; i < parameters.Count; i++)
         {
@@ -1076,7 +1076,7 @@ public class IntermediateDecoratorDefinition : IGenerator
             }
         }
 
-        builder.CloseParanthesis();
+        builder.CloseParenthesis();
     }
 }
 

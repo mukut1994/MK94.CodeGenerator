@@ -391,7 +391,7 @@ namespace MK94.CodeGenerator.Generator
             builder
                 .NewLine()
                 .Append($"{method.Name.ToCamelCase()}")
-                .OpenParanthesis();
+                .OpenParenthesis();
 
             foreach (var prop in method.Parameters)
                 builder
@@ -399,7 +399,7 @@ namespace MK94.CodeGenerator.Generator
                     .AppendOptionalComma();
 
             builder
-                .CloseParanthesis()
+                .CloseParenthesis()
                 .Append($" : Observable<{GetTypeText(method.ResponseType)}>")
                 .OpenBlock();
 
@@ -414,7 +414,7 @@ namespace MK94.CodeGenerator.Generator
             if (method.ResponseType != typeof(void) && method.ResponseType != typeof(Task))
                 builder.Append($"<{GetTypeText(method.ResponseType)}>");
 
-            builder.OpenParanthesis()
+            builder.OpenParenthesis()
                 .Append($"_url")
                 .AppendOptionalComma();
 
@@ -432,7 +432,7 @@ namespace MK94.CodeGenerator.Generator
                 builder.Append("_params");
 
             builder
-                .CloseParanthesis()
+                .CloseParenthesis()
                 .Append(";")
                 .CloseBlock();
         }
