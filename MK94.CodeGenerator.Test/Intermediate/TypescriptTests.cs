@@ -20,8 +20,6 @@ public class TypescriptTests
     [Test]
     public void Test()
     {
-        DiskAssert.EnableWriteMode();
-
         var c = new TypescriptCodeGenerator(new(new()));
 
         var t = c

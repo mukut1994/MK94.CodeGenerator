@@ -1,4 +1,5 @@
 ﻿using MK94.CodeGenerator.Attributes;
+using MK94.CodeGenerator.Generator;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Runtime;
 using System.Threading.Tasks;
+using static MK94.CodeGenerator.Intermediate.CSharp.IntermediateFileDefinition;
 
 namespace MK94.CodeGenerator.Intermediate.Typescript;
 
@@ -1023,6 +1025,7 @@ public class IntermediateDecoratorDefinition : IGenerator
 {
     public TsTypeReference Type { get; set; }
     private TypeResolveContext context { get; }
+    private List<string> parameters { get; } = [];
 
     public IntermediateDecoratorDefinition(TsTypeReference type, TypeResolveContext context)
     {
@@ -1045,7 +1048,39 @@ public class IntermediateDecoratorDefinition : IGenerator
         builder
             .Append("@")
             .Append(attrName)
+            .Append(AppendParameters)
             .NewLine();
+    }
+
+    public IntermediateDecoratorDefinition WithParam(string parameter)
+    {
+        parameters.Add(parameter);
+
+        return this;
+    }
+
+    private void AppendParameters(CodeBuilder builder)
+    {
+        if (parameters.Count == 0)
+            return;
+
+        builder.OpenParanthesis();
+
+        for (int i = 0; i < parameters.Count; i++)
+        {
+            if (i == parameters.Count - 1)
+            {
+                builder.Append(parameters[i]);
+            }
+            else
+            {
+                builder
+                    .Append(parameters[i])
+                    .AppendComma();
+            }
+        }
+
+        builder.CloseParanthesis();
     }
 }
 
