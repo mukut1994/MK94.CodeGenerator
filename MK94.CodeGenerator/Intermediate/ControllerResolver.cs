@@ -19,22 +19,22 @@ public class ControllerResolver
 
     public virtual bool IsControllerMethod(MethodDefinition method)
     {
-        return method.MethodInfo.GetCustomAttributes<ControllerMethodAttribute>(true) != null;
+        return method.MethodInfo.GetCustomAttributes<ControllerMethodAttribute>(true).Any();
     }
 
     public virtual bool IsGetMethod(MethodDefinition method)
     {
-        return method.MethodInfo.GetCustomAttributes<GetAttribute>(true) != null;
+        return method.MethodInfo.GetCustomAttributes<GetAttribute>(true).Any();
     }
 
     public virtual bool IsPostMethod(MethodDefinition method)
     {
-        return method.MethodInfo.GetCustomAttributes<PostAttribute>(true) != null;
+        return method.MethodInfo.GetCustomAttributes<PostAttribute>(true).Any();
     }
 
     public virtual bool IsBodyParameter(ParameterDefinition parameter)
     {
-        return parameter.Parameter.GetCustomAttribute<BodyAttribute>(true) != null;
+        return parameter.Parameter.GetCustomAttributes<BodyAttribute>(true).Any();
     }
 
     public virtual IEnumerable<PropertyArgumentExpression> GetQueryParameters(ParameterDefinition parameter)
@@ -71,7 +71,7 @@ public class ControllerResolver
 
     public virtual bool IsFormParameter(ParameterDefinition parameter)
     {
-        return parameter.Parameter.GetCustomAttribute<FormAttribute>(true) != null;
+        return parameter.Parameter.GetCustomAttributes<FormAttribute>(true).Any();
     }
 }
 
