@@ -323,20 +323,20 @@ public class CodeBuilder
 
     public CodeBuilder WithParenthesis(Action<CodeBuilder> blockContent)
     {
-        return this.OpenParanthesis().Append(blockContent).CloseParanthesis();
+        return this.OpenParenthesis().Append(blockContent).CloseParenthesis();
     }
 
     public CodeBuilder WithParenthesis<T>(Action<CodeBuilder, T> blockContent, T item)
     {
-        return this.OpenParanthesis().Append(blockContent, item).CloseParanthesis();
+        return this.OpenParenthesis().Append(blockContent, item).CloseParenthesis();
     }
 
     public CodeBuilder WithParenthesis<T>(Action<CodeBuilder, T> blockContent, IEnumerable<T> item)
     {
-        return this.OpenParanthesis().Append<T>((b, i) => b.Append(blockContent, i).AppendOptionalComma(), item).CloseParanthesis();
+        return this.OpenParenthesis().Append<T>((b, i) => b.Append(blockContent, i).AppendOptionalComma(), item).CloseParenthesis();
     }
 
-    public CodeBuilder OpenParanthesis()
+    public CodeBuilder OpenParenthesis()
     {
         optionalSpace = false;
         optionalComma = false;
@@ -347,7 +347,7 @@ public class CodeBuilder
         return this;
     }
 
-    public CodeBuilder CloseParanthesis()
+    public CodeBuilder CloseParenthesis()
     {
         optionalSpace = false;
         optionalComma = false;
@@ -362,7 +362,7 @@ public class CodeBuilder
         return this;
     }
 
-    public CodeBuilder OpenSquareParanthesis()
+    public CodeBuilder OpenSquareParenthesis()
     {
         optionalSpace = false;
         optionalComma = false;
@@ -372,7 +372,7 @@ public class CodeBuilder
         return this;
     }
 
-    public CodeBuilder CloseSquareParanthesis()
+    public CodeBuilder CloseSquareParenthesis()
     {
         optionalSpace = false;
         optionalComma = false;
