@@ -20,6 +20,11 @@ namespace space
             await client.Request("/api/Pizza/PizzaList").GetAsync();
         }
 
+        public async Task<Pizza> Get(Guid id)
+        {
+            return await client.Request("/api/Pizza/Get".SetQueryParam("id", id)).GetJsonAsync<Pizza>();
+        }
+
         public async Task Order(Order order)
         {
             await client.Request("/api/Pizza/Order").PostJsonAsync(order);

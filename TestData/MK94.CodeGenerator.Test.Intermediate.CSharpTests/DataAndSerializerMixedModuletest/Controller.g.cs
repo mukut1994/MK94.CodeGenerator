@@ -1,18 +1,26 @@
-using System.Threading.Task;
+using System.Text;
+using System.Linq;
+using System.IO;
+using System.Collections.Generic;
+using System;
+using Flurl.Http;
 using Flurl;
 
 namespace TestNameSpace;
 
-public class PizzaController
+public class PizzaControllerClient(FlurlClient client)
 {
-    public static Task PizzaList(Page page)
+
+    public async Task PizzaList()
     {
-        return "PizzaList"
-          .ReceiveStringAsync();
+        await client.Request("/api/Pizza/PizzaList").GetAsync();await client.Request("/api/Pizza/PizzaList").PostJsonAsync();
     }
-    public static Task Order(Order order)
+    public async Task<Pizza> Get()
     {
-        return "Order"
-          .ReceiveStringAsync();
+        return await client.Request("/api/Pizza/Get").GetJsonAsync<Pizza>();await client.Request("/api/Pizza/Get").PostJsonAsync();
+    }
+    public async Task Order()
+    {
+        await client.Request("/api/Pizza/Order").GetAsync();await client.Request("/api/Pizza/Order").PostJsonAsync();
     }
 }

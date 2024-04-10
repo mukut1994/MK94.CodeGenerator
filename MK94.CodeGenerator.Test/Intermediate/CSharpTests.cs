@@ -122,7 +122,7 @@ public class CSharpTests
     }
 
     [Test]
-    public void DataModuleTest_ControllerClient()
+    public void DataModuleTest_FlurlClient()
     {
         DiskAssert.EnableWriteMode();
 
@@ -139,7 +139,7 @@ public class CSharpTests
             .WithinNamespace("TestNameSpace")
             .WithPropertiesGenerator()
             .WithControllerModuleGenerator()
-            .WithControllerClientModuleGenerator()
+            .WithFlurlClientGenerator()
             .GenerateTo(csharpCode);
 
         csharpCode.AssertMatches();

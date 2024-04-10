@@ -7,6 +7,10 @@ using System.Numerics;
 
 namespace data
 {
+    public class Pizza
+    {
+        public required String Name { get; set; }
+    }
     public enum PizzaType
     {
         DoughOnly = 0,

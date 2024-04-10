@@ -1,11 +1,11 @@
-using using System.Text;;
-using using System.Linq;;
-using using System.IO;;
-using using System.Collections.Generic;;
-using using Flurl.Http;;
-using using Flurl;;
+using System.Text;
+using System.Linq;
+using System.IO;
+using System.Collections.Generic;
 using System;
 using Microsoft.AspNetCore.Mvc;
+using Flurl.Http;
+using Flurl;
 
 namespace TestNameSpace;
 
@@ -13,7 +13,7 @@ namespace TestNameSpace;
 public class PizzaController
 {
     [HttpGet]
-    public partial Task PizzaList([FromQuery]Page page);
+    public partial Task PizzaList(Page page);
     [HttpGet]
     public partial Task<Pizza> Get([FromQuery]Guid id);
     [HttpPost]

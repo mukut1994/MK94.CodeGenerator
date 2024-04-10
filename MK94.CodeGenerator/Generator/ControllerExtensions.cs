@@ -7,6 +7,7 @@ using MK94.CodeGenerator.Attributes;
 
 namespace MK94.CodeGenerator.Generator;
 
+[Obsolete("Use the controller resolver interface instead")]
 public static class ControllerExtensions
 {
     public static bool IsGetRequest(this MethodDefinition m) => m.MethodInfo.GetCustomAttributesUngrouped<GetAttribute>().Any();

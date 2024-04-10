@@ -1,6 +1,3 @@
-using System.Threading.Task;
-using Flurl;
-
 namespace TestNameSpace;
 
 public class Order

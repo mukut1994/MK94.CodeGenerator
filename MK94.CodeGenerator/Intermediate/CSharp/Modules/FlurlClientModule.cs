@@ -1,35 +1,17 @@
-﻿using MK94.CodeGenerator.Attributes;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using MK94.CodeGenerator.Attributes;
+using MK94.CodeGenerator.Generator;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp.Modules;
 
 public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
 {
-    public static HashSet<Type> QueryFriendlyTypes =
-    [
-        typeof(bool),
-        typeof(byte),
-        typeof(sbyte),
-        typeof(char),
-        typeof(decimal),
-        typeof(double),
-        typeof(float),
-        typeof(int),
-        typeof(uint),
-        typeof(nint),
-        typeof(nuint),
-        typeof(long),
-        typeof(ulong),
-        typeof(short),
-        typeof(ushort),
-        typeof(string),
-        typeof(Guid),
-    ];
-
     private readonly ICSharpProject project;
+
+    public ControllerResolver ControllerResolver { get; private set; } = ControllerResolver.Instance;
 
     public FlurlClientModule(ICSharpProject project)
     {
@@ -40,59 +22,71 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
     {
         foreach (var fileDef in project.Files)
         {
-            var file = codeGenerator.File($"{fileDef.Name}.g.cs");
-
-            file.Usings.Add("Flurl");
-            file.Usings.Add("System.Threading.Task");
-
             foreach (var typeDef in fileDef.Types)
             {
-                var name = typeDef.AsClassName();
+                if (typeDef.Methods.Count == 0)
+                    continue;
+
+                if (typeDef.Type.GetCustomAttribute<ControllerFeatureAttribute>() is null)
+                    continue;
+
+                var file = codeGenerator.File($"{fileDef.Name}.g.cs");
+
+                file
+                    .WithUsing("System")
+                    .WithUsing("System.Collections.Generic")
+                    .WithUsing("System.Linq")
+                    .WithUsing("System.Text")
+                    .WithUsing("System.IO")
+                    .WithUsing("Flurl")
+                    .WithUsing("Flurl.Http");
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
-                var type = ns.Type(name, MemberFlags.Public);
 
-                foreach (var methodDef in typeDef.Methods)
+                var controllerName = typeDef.AsClassName();
+
+                var type = ns.Type($"{controllerName}Client", MemberFlags.Public);
+
+                type
+                    .WithPrimaryConstructor()
+                    .Property(MemberFlags.Public, CsharpTypeReference.ToRaw("FlurlClient"), "client");
+
+                if (controllerName.EndsWith("Controller"))
+                    controllerName = controllerName[..^"Controller".Length];
+
+                foreach (var method in typeDef.Methods)
                 {
-                    var method = type.Method(MemberFlags.Public | MemberFlags.Static,
-                        CsharpTypeReference.ToType(methodDef.ResponseType),
-                        methodDef.Name);
+                    var generatedMethod = type.Method(MemberFlags.Public | MemberFlags.Async, CsharpTypeReference.ToType(method.ResponseType), method.Name);
 
-                    foreach (var argDef in methodDef.Parameters)
-                        method.WithArgument(CsharpTypeReference.ToType(argDef.Type), argDef.Name);
+                    if (ControllerResolver.IsGetMethod(method))
+                    {
+                        generatedMethod.Body
+                            .Append(method.IsVoidReturn() ? "" : "return ")
+                            .Append("await client.Request")
+                            .OpenParanthesis()
+                            .Append(@$"""/api/{controllerName}/{method.Name}""")
+                            .CloseParanthesis()
+                            .Append(method.IsVoidReturn() ? ".GetAsync()" : $".GetJsonAsync<{method.ResponseType.UnwrapTask().Name}>()")
+                            .Append(";");
+                    }
 
-                    method.Body.AppendLine($@"return ""{method.Name}""");
-
-                    SetQueryParams(methodDef, method);
-
-                    method.Body.Append($@"  .ReceiveStringAsync();");
+                    if (ControllerResolver.IsPostMethod(method))
+                    {
+                        generatedMethod.Body
+                            .Append("await client.Request")
+                            .OpenParanthesis()
+                            .Append(@$"""/api/{controllerName}/{method.Name}""")
+                            .CloseParanthesis()
+                            .Append(".PostJsonAsync()")
+                            .Append(";");
+                    }
                 }
-            }
-        }
-    }
-
-    private static void SetQueryParams(MethodDefinition methodDef, IntermediateFileDefinition.IntermediateMethodDefinition method)
-    {
-        foreach (var queryDef in methodDef.Parameters.Where(x => x.FromQuery()))
-        {
-            if(QueryFriendlyTypes.Contains(queryDef.Type))
-            {
-                method.Body.AppendLine($@"  .SetQueryParam(""{queryDef.Name}"", {queryDef.Name})");
-                continue;
-            }
-
-            foreach(var property in queryDef.Parameter.ParameterType
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance))
-            {
-                var query = property.PropertyType.GetCustomAttributesUngrouped<QueryAttribute>();
-
-                method.Body.AppendLine($@"  .SetQueryParam(""{property.Name.ToCamelCase()}"", {queryDef.Name}.{property.Name})");
             }
         }
     }
 }
 
-public static class FlurlClientModuleExtensions
+public static class ControllerClientModuleExtensions
 {
     public static T WithFlurlClientGenerator<T>(this T project, Action<FlurlClientModule>? configure = null)
         where T : ICSharpProject
