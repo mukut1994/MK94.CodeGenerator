@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace MK94.CodeGenerator.Intermediate.Typescript;
 
@@ -471,6 +472,8 @@ public class IntermediateConstantDefinition : IntermediateMemberDefinition
     public TsTypeReference Type { get; set; }
     public IntermediateConstantValueDefinition? Value { get; set; }
 
+    public bool AppendMemberInformation { get; set; } = true;
+
     public IntermediateConstantDefinition(TypeResolveContext context, TsTypeReference type, MemberFlags flags, string name) : base(flags, name)
     {
         this.context = context;
@@ -480,25 +483,39 @@ public class IntermediateConstantDefinition : IntermediateMemberDefinition
 
     public override void Generate(CodeBuilder builder)
     {
-        WriteMemberFlags(builder);
-        builder.Append("const ");
-        MemberName(builder);
-
-        var type = Type.Resolve(context)?.name;
-
-        if(!string.IsNullOrEmpty(type))
+        if (AppendMemberInformation)
         {
-            builder.Append(": ");
-            builder.Append(type);
-        }
+            WriteMemberFlags(builder);
+            builder.Append("const ");
+            MemberName(builder);
 
-        if (Value != null)
+            var type = Type.Resolve(context)?.name;
+
+            if (!string.IsNullOrEmpty(type))
+            {
+                builder.Append(": ");
+                builder.Append(type);
+            }
+
+            if (Value != null)
+            {
+                builder.Append(" = ");
+                Value.Generate(builder);
+            }
+
+            builder.AppendLine(";");
+        }
+        else
         {
-            builder.Append(" = ");
-            Value.Generate(builder);
+            Value?.Generate(builder);
         }
+    }
 
-        builder.AppendLine(";");
+    public IntermediateConstantDefinition WithoutMemberInformation()
+    {
+        AppendMemberInformation = false;
+
+        return this;
     }
 
     public override IEnumerable<TypeResolveMatch> ResolveReferences(TypeResolveContext context)
@@ -1021,7 +1038,7 @@ public class IntermediateDecoratorDefinition : IGenerator
 {
     public TsTypeReference Type { get; set; }
     private TypeResolveContext context { get; }
-    private List<string> parameters { get; } = [];
+    private List<IntermediateConstantDefinition> parameters { get; } = [];
 
     public IntermediateDecoratorDefinition(TsTypeReference type, TypeResolveContext context)
     {
@@ -1048,11 +1065,16 @@ public class IntermediateDecoratorDefinition : IGenerator
             .NewLine();
     }
 
-    public IntermediateDecoratorDefinition WithParam(string parameter)
+    public IntermediateConstantDefinition WithParam(TsTypeReference type, string value)
     {
-        parameters.Add(parameter);
+        var constDef = new IntermediateConstantDefinition(context, type, MemberFlags.Public, string.Empty);
+        
+        constDef.WithoutMemberInformation();
+        constDef.WithStringAsValue(value);
 
-        return this;
+        parameters.Add(constDef);
+
+        return constDef;
     }
 
     private void AppendParameters(CodeBuilder builder)
@@ -1064,15 +1086,11 @@ public class IntermediateDecoratorDefinition : IGenerator
 
         for (int i = 0; i < parameters.Count; i++)
         {
-            if (i == parameters.Count - 1)
+            parameters[i].Generate(builder);
+
+            if (i != parameters.Count - 1)
             {
-                builder.Append(parameters[i]);
-            }
-            else
-            {
-                builder
-                    .Append(parameters[i])
-                    .AppendComma();
+                builder.AppendComma();
             }
         }
 

@@ -26,7 +26,7 @@ public class TypescriptTests
             .File("file.ts")
             .Type("TypeA", MemberFlags.Public);
 
-        t.Decorator(TsTypeReference.ToType<ExampleAttribute>());
+        t.Decorator(TsTypeReference.ToType<ExampleAttribute>()).WithParam(TsTypeReference.ToRaw("Hello"), "Hello");
 
         t.Property(MemberFlags.Public, TsTypeReference.ToType<int>(), "PropA");
         t.Method(MemberFlags.Public, TsTypeReference.ToType<int>(), "MethodA")
