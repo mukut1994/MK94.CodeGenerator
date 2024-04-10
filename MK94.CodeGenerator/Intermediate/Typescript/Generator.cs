@@ -1,13 +1,9 @@
 ﻿using MK94.CodeGenerator.Attributes;
-using MK94.CodeGenerator.Generator;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Runtime;
 using System.Threading.Tasks;
-using static MK94.CodeGenerator.Intermediate.CSharp.IntermediateFileDefinition;
 
 namespace MK94.CodeGenerator.Intermediate.Typescript;
 
