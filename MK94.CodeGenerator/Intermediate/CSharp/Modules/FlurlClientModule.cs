@@ -86,7 +86,7 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
     }
 }
 
-public static class ControllerClientModuleExtensions
+public static class FlurlClientModuleExtensions
 {
     public static T WithFlurlClientGenerator<T>(this T project, Action<FlurlClientModule>? configure = null)
         where T : ICSharpProject

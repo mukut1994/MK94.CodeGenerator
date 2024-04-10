@@ -12,11 +12,6 @@ export class PizzaControllerApi {
         if (page?.size !== undefined && page?.size !== null) _params["Size"] = page?.size.toString();
         if (page?.index !== undefined && page?.index !== null) _params["Index"] = page?.index.toString();
         
-        init = {
-            ...init,
-            method: "POST",
-        };
-        
         const ret = await f("Pizza/PizzaList?" + new URLSearchParams(_params).toString(), init);
         return ret.json();
     }
@@ -25,11 +20,6 @@ export class PizzaControllerApi {
         const _params: Record<string, string> = {};
         
         if (id?.id !== undefined && id?.id !== null) _params["id"] = id?.id.toString();
-        
-        init = {
-            ...init,
-            method: "POST",
-        };
         
         const ret = await f("Pizza/Get?" + new URLSearchParams(_params).toString(), init);
         return ret.json();

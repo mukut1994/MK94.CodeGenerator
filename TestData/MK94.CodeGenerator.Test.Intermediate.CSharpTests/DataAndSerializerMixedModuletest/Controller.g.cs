@@ -13,14 +13,14 @@ public class PizzaControllerClient(FlurlClient client)
 
     public async Task PizzaList()
     {
-        await client.Request("/api/Pizza/PizzaList").GetAsync();await client.Request("/api/Pizza/PizzaList").PostJsonAsync();
+        await client.Request("/api/Pizza/PizzaList").GetAsync();
     }
     public async Task<Pizza> Get()
     {
-        return await client.Request("/api/Pizza/Get").GetJsonAsync<Pizza>();await client.Request("/api/Pizza/Get").PostJsonAsync();
+        return await client.Request("/api/Pizza/Get").GetJsonAsync<Pizza>();
     }
     public async Task Order()
     {
-        await client.Request("/api/Pizza/Order").GetAsync();await client.Request("/api/Pizza/Order").PostJsonAsync();
+        await client.Request("/api/Pizza/Order").PostJsonAsync();
     }
 }
