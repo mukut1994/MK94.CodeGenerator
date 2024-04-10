@@ -26,6 +26,16 @@ public static class Extensions
             typeDef.Type.Name[1..] : typeDef.Type.Name;
     }
 
+    public static string AsApiName(this TypeDefinition typeDef)
+    {
+        var name = typeDef.AsClassName();
+
+        if (name.EndsWith("Controller"))
+            name = name[0..^"Controller".Length];
+
+        return name;
+    }
+
     public static int GetStableHashCode(this string str)
     {
         // https://referencesource.microsoft.com/#mscorlib/system/string.cs,827

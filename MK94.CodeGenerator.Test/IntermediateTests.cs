@@ -17,8 +17,6 @@ namespace MK94.CodeGenerator.Test
         [Test]
         public void TestTs()
         {
-            // DiskAssert.EnableWriteMode();
-
             var c = new TypescriptCodeGenerator(new(new()));
 
             var t = c

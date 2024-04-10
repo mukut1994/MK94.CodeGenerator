@@ -60,6 +60,7 @@ public enum MemberFlags
     Method = 64,
 
     Partial = 128,
+    Const = 256,
 }
 
 [Flags]
@@ -124,6 +125,24 @@ public static class ProjectExtensions
         project.Files.AddRange(deps);
         project.Files.AddRange(files);
 
+        return project;
+    }
+
+    public static T WithDependenciesFor<T>(this T project, List<FileDefinition> files)
+        where T : IProject
+    {
+        var deps = files.GetMethodDependencies(project.Solution.LookupCache).ToFileDef(project.Solution.LookupCache).ToList();
+
+        project.Files.AddRange(deps);
+
+        return project;
+    }
+
+    public static T Without<T>(this T project, List<FileDefinition> files)
+        where T : IProject
+    {
+        project.Files = project.Files.ExcludeAndInheritFrom(files).ToList();
+        
         return project;
     }
 }

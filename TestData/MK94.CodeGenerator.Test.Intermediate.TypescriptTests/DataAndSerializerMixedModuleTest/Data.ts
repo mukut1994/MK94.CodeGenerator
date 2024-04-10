@@ -3,3 +3,5 @@ export interface Page {
     size: number;
     index: number;
 }
+export interface PageId extends ValueType {
+}

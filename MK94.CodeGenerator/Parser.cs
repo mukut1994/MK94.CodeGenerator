@@ -165,7 +165,6 @@ public class Parser
         };
     }
 
-
     private MethodDefinition ParseApiMethod(MethodInfo method)
     {
         var parameters = method.GetParameters().Select(p => Tuple.Create(p, p.GetCustomAttribute<ParameterAttribute>())).ToList();

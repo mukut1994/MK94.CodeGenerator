@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Runtime;
 using System.Threading.Tasks;
 
@@ -17,7 +18,23 @@ public interface IGenerator
 
 public record TypeResolveContext(TypescriptCodeGenerator Root, string FilePath, IntermediateFileDefinition File);
 
-public record TypeResolveMatch(string? import, string? name, string? importName = null);
+public record TsImport(string name, string? path);
+
+public record TypeResolveMatch(string? name)
+{
+    public List<TsImport> Imports = new();
+
+    public TypeResolveMatch WithImport(TsImport import)
+    {
+        Imports.Add(import);
+        return this;
+    }
+    public TypeResolveMatch WithImports(List<TsImport> imports)
+    {
+        Imports.AddRange(imports);
+        return this;
+    }
+}
 
 public abstract record TsTypeReference
 {
@@ -60,11 +77,14 @@ public abstract record TsTypeReference
         Extension
     }
 
+    [Obsolete("Use resolve instead; This method does not use the typeNameLookup configuration property")]
     public static string CleanName(Type type, TypeText mode = TypeText.Generic)
     {
         if (type == typeof(bool))
             return "boolean";
         else if (type == typeof(int))
+            return "number";
+        else if (type == typeof(double))
             return "number";
         else if (type == typeof(decimal))
             return "number";
@@ -148,7 +168,7 @@ internal record PromiseTypedTypeReference : TsTypeReference
 
     public override TypeResolveMatch Resolve(TypeResolveContext context)
     {
-        return new TypeResolveMatch(null, $"Promise<{helperReference.Resolve(context).name}>");
+        return new TypeResolveMatch($"Promise<{helperReference.Resolve(context).name}>");
     }
 }
 
@@ -156,7 +176,7 @@ internal record AnonymousReference : TsTypeReference
 {
     public override TypeResolveMatch Resolve(TypeResolveContext context)
     {
-        return new(null, null);
+        return new(null);
     }
 }
 
@@ -173,7 +193,7 @@ internal record NamedTypeReference : TsTypeReference
 
     public override TypeResolveMatch Resolve(TypeResolveContext context)
     {
-        return new(ImportFrom, Name);
+        return new(Name);
     }
 }
 
@@ -194,16 +214,35 @@ internal record TypedTypeReference : TsTypeReference
     private TypeResolveMatch Resolve(Type type, TypeResolveContext context)
     {
         if (context.Root.TypeNameLookups.TryGetValue(type, out var lookup))
-            return new(context.Root.RelativeFileResolver.GetImportPath(context.File.FileName, type), lookup);
+            return new TypeResolveMatch(lookup)
+                .WithImport(new TsImport(lookup, context.Root.RelativeFileResolver.GetImportPath(context.File.FileName, type)));
 
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
         {
             var ret = Resolve(type.GetGenericArguments()[0], context);
 
-            return new(ret.import, ret.name + " | null", ret.name);
+            return new TypeResolveMatch(ret.name + " | null")
+                .WithImports(ret.Imports);
         }
 
-        return new(context.Root.RelativeFileResolver.GetImportPath(context.File.FileName, type), type.Name);
+        if (type.IsGenericType)
+        {
+            var ret = Resolve(type.GetGenericArguments()[0], context);
+
+            return new TypeResolveMatch(CleanName(type))
+                .WithImports(ret.Imports);
+        }
+
+        if (type.IsArray)
+        {
+            var ret = Resolve(type.GetElementType()!, context);
+
+            return new TypeResolveMatch("[" + ret.name + "]" + " | null")
+                .WithImports(ret.Imports);
+        }
+
+        return new TypeResolveMatch(type.Name)
+            .WithImport(new TsImport(type.Name, context.Root.RelativeFileResolver.GetImportPath(context.File.FileName, type)));
     }
 }
 
@@ -233,7 +272,7 @@ internal record StringTypedTypeReference : TsTypeReference
         else 
             importPath = Path.Combine(Path.GetRelativePath(directoryCurrent, directoryMatch), Path.GetFileName(match.file.Key));
 
-        return new (importPath, match.member.Key);
+        return new(match.member.Key);
     }
 }
 
@@ -258,7 +297,8 @@ public class TypescriptCodeGenerator : IFileGenerator
         { typeof(ushort), "number" },
         { typeof(string), "string" },
         { typeof(Guid), "string" },
-        { typeof(Task), "void" }
+        { typeof(Task), "void" },
+        { typeof(DateTime), "Date" },
     };
 
     public RelativeFileResolver RelativeFileResolver { get; }
@@ -290,6 +330,27 @@ public class TypescriptCodeGenerator : IFileGenerator
     }
 }
 
+public class IntermediateTypeDefinitionAlias : IntermediateMemberDefinition
+{
+    private string Value { get; set; }
+
+    public IntermediateTypeDefinitionAlias(MemberFlags flags, string name, string value) : base(flags, name)
+    {
+        Value = value;
+    }
+
+    public override IEnumerable<TypeResolveMatch> ResolveReferences(TypeResolveContext context)
+    {
+        yield break;
+    }
+
+    public override void Generate(CodeBuilder builder)
+    {
+        WriteMemberFlags(builder);
+        builder.AppendLine($"type {Name} = {Value};");
+    }
+}
+
 public class IntermediateFileDefinition : IGenerator
 {
     public string FileName { get; }
@@ -318,13 +379,32 @@ public class IntermediateFileDefinition : IGenerator
         return definition;
     }
 
+    public IntermediateFileDefinition WithTypeAlias(string name, MemberFlags flags, string value)
+    {
+        flags = flags | MemberFlags.Type;
+
+        Members.GetOrAdd(name, () => new IntermediateTypeDefinitionAlias(flags, name, value));
+
+        return this;
+    }
+
+    public IntermediateConstantDefinition Constant(string name, MemberFlags flags, TsTypeReference type)
+    {
+        flags = flags | MemberFlags.Const;
+
+        var definition = (IntermediateConstantDefinition)Members
+            .GetOrAdd(name, () => new IntermediateConstantDefinition(context, type, flags, name));
+
+        return definition;
+    }
+
     public IntermediateEnumDefinition Enum(string name, MemberFlags flags)
     {
-        var ret = new IntermediateEnumDefinition(name, flags);
+        // TODO validation
+        var definition = (IntermediateEnumDefinition)Members
+            .GetOrAdd(name, () => new IntermediateEnumDefinition(name, flags));
 
-        Members.Add(name, ret);
-
-        return ret;
+        return definition;
     }
 
     //public IntermediateFileDefinition WithImport(string path, string type)
@@ -340,9 +420,21 @@ public class IntermediateFileDefinition : IGenerator
     {
         GenerateImports(builder);
 
-        foreach (var member in Members)
+        var membersLeftToEmit = Members.Keys.ToHashSet();
+
+        while (membersLeftToEmit.Any())
         {
-            member.Value.Generate(builder);
+            foreach (var member in Members)
+            {
+                if (member.Value.AfterMembers.Intersect(membersLeftToEmit).Any())
+                    continue;
+
+                if (!membersLeftToEmit.Contains(member.Key))
+                    continue;
+
+                member.Value.Generate(builder);
+                membersLeftToEmit.Remove(member.Key);
+            }
         }
     }
 
@@ -350,15 +442,16 @@ public class IntermediateFileDefinition : IGenerator
     {
         var anyImports = false;
         var imports = Members.SelectMany(m => m.Value.ResolveReferences(context))
+            .SelectMany(x => x.Imports)
             .Distinct()
-            .Where(x => x.import != null)
-            .GroupBy(x => x.import);
+            .Where(x => x.path != null)
+            .GroupBy(x => x.path);
 
         foreach(var importFile in imports)
         {
             builder.AppendWord("import")
                 .AppendWord("{")
-                .Append((b, x) => b.AppendWord(x.importName ?? x.name!).AppendOptionalComma(), importFile)
+                .Append((b, x) => b.AppendWord(x.name).AppendOptionalComma(), (IEnumerable<TsImport>)importFile)
                 .EndOptionalComma()
                 .AppendWord("}")
                 .AppendWord("from")
@@ -373,11 +466,254 @@ public class IntermediateFileDefinition : IGenerator
     }
 }
 
+public class IntermediateConstantDefinition : IntermediateMemberDefinition
+{
+    private readonly TypeResolveContext context;
+
+    public TsTypeReference Type { get; set; }
+    public IntermediateConstantValueDefinition? Value { get; set; }
+
+    public IntermediateConstantDefinition(TypeResolveContext context, TsTypeReference type, MemberFlags flags, string name) : base(flags, name)
+    {
+        this.context = context;
+
+        Type = type;
+    }
+
+    public override void Generate(CodeBuilder builder)
+    {
+        WriteMemberFlags(builder);
+        builder.Append("const ");
+        MemberName(builder);
+
+        var type = Type.Resolve(context)?.name;
+
+        if(!string.IsNullOrEmpty(type))
+        {
+            builder.Append(": ");
+            builder.Append(type);
+        }
+
+        if (Value != null)
+        {
+            builder.Append(" = ");
+            Value.Generate(builder);
+        }
+
+        builder.AppendLine(";");
+    }
+
+    public override IEnumerable<TypeResolveMatch> ResolveReferences(TypeResolveContext context)
+    {
+        yield break;
+    }
+
+    public IntermediateConstantDefinition WithStringAsValue(string value)
+    {
+        Value = new IntermediateConstantStringDefinition(value);
+        return this;
+    }
+
+    public IntermediateConstantDefinition WithNumberAsValue(long value)
+    {
+        Value = new IntermediateConstantNumberDefinition(value);
+        return this;
+    }
+
+    public IntermediateObjectConstantDefinition ObjectAsValue()
+    {
+        var def = new IntermediateObjectConstantDefinition();
+
+        Value = def;
+
+        return def;
+    }
+
+    public IntermediateArrayConstantDefinition ArrayAsValue()
+    {
+        var def = new IntermediateArrayConstantDefinition();
+
+        Value = def;
+
+        return def;
+    }
+}
+
+public abstract class IntermediateConstantValueDefinition : IGenerator
+{
+    public abstract void Generate(CodeBuilder builder);
+}
+
+public class IntermediateConstantStringDefinition : IntermediateConstantValueDefinition
+{
+    public string Value { get; set; }
+
+    public IntermediateConstantStringDefinition(string value)
+    {
+        Value = value;
+    }
+
+    public override void Generate(CodeBuilder builder)
+    {
+        builder.Append("\"");
+        builder.Append(Value);
+        builder.Append("\"");
+    }
+}
+
+public class IntermediateConstantReferenceDefinition : IntermediateConstantValueDefinition
+{
+    public string Value { get; set; }
+
+    public IntermediateConstantReferenceDefinition(string value)
+    {
+        Value = value;
+    }
+
+    public override void Generate(CodeBuilder builder)
+    {
+        builder.Append(Value);
+    }
+}
+
+public class IntermediateConstantNumberDefinition : IntermediateConstantValueDefinition
+{
+    public long Value { get; set; }
+
+    public IntermediateConstantNumberDefinition(long value)
+    {
+        Value = value;
+    }
+
+    public override void Generate(CodeBuilder builder)
+    {
+        builder.Append(Value.ToString());
+    }
+}
+
+public record ObjectKeyValue(string key, IntermediateConstantValueDefinition value);
+
+public class IntermediateObjectConstantDefinition : IntermediateConstantValueDefinition
+{
+    public List<ObjectKeyValue> KeyValues = new();
+
+    public override void Generate(CodeBuilder builder)
+    {
+        builder.OpenBlock();
+
+        foreach(var kv in KeyValues)
+        {
+            builder.Append(kv.key);
+            builder.Append(": ");
+            kv.value.Generate(builder);
+            builder.AppendLine(",");
+        }
+
+        builder.CloseBlock();
+    }
+
+    public IntermediateObjectConstantDefinition WithStringProperty(string key, string value)
+    {
+        KeyValues.Add(new(key, new IntermediateConstantStringDefinition(value)));
+
+        return this;
+    }
+
+    public IntermediateObjectConstantDefinition WithReferenceToConstantProperty(string key, string value)
+    {
+        KeyValues.Add(new(key, new IntermediateConstantReferenceDefinition(value)));
+
+        return this;
+    }
+
+    public IntermediateObjectConstantDefinition WithNumberProperty(string key, long value)
+    {
+        KeyValues.Add(new(key, new IntermediateConstantNumberDefinition(value)));
+
+        return this;
+    }
+
+    public IntermediateObjectConstantDefinition ObjectProperty(string key)
+    {
+        var existing = KeyValues.FirstOrDefault(x => x.key == key);
+
+        if (existing != null && existing.value is IntermediateObjectConstantDefinition objDef)
+            return objDef;
+
+        var def = new IntermediateObjectConstantDefinition();
+
+        KeyValues.Add(new(key, def));
+
+        return def;
+    }
+
+    public IntermediateArrayConstantDefinition ArrayProperty(string key)
+    {
+        var existing = KeyValues.FirstOrDefault(x => x.key == key);
+
+        if (existing != null && existing.value is IntermediateArrayConstantDefinition objDef)
+            return objDef;
+
+        var def = new IntermediateArrayConstantDefinition();
+
+        KeyValues.Add(new(key, def));
+
+        return def;
+    }
+}
+
+public class IntermediateArrayConstantDefinition : IntermediateConstantValueDefinition
+{
+    public List<IntermediateConstantValueDefinition> Values = new();
+
+    public override void Generate(CodeBuilder builder)
+    {
+        builder.OpenSquareParanthesis();
+
+        foreach (var value in Values)
+        {
+            value.Generate(builder);
+            builder.AppendLine(",");
+        }
+
+        builder.CloseSquareParanthesis();
+    }
+
+    public IntermediateArrayConstantDefinition WithStringValue(string value)
+    {
+        Values.Add(new IntermediateConstantStringDefinition(value));
+        return this;
+    }
+
+    public IntermediateArrayConstantDefinition WithReferenceToConstantValue(string value)
+    {
+        Values.Add(new IntermediateConstantReferenceDefinition(value));
+        return this;
+    }
+
+    public IntermediateArrayConstantDefinition WithNumberValue(long value)
+    {
+        Values.Add(new IntermediateConstantNumberDefinition(value));
+        return this;
+    }
+
+    public IntermediateObjectConstantDefinition ObjectValue()
+    {
+        var def = new IntermediateObjectConstantDefinition();
+
+        Values.Add(def);
+
+        return def;
+    }
+}
+
 public abstract class IntermediateMemberDefinition : IGenerator
 {
     public string Name { get; set; }
 
     public MemberFlags Flags { get; set; }
+
+    public HashSet<string> AfterMembers { get; set; } = new();
 
     public IntermediateMemberDefinition(MemberFlags flags, string name)
     {
@@ -390,6 +726,9 @@ public abstract class IntermediateMemberDefinition : IGenerator
         if (Flags.HasFlag(MemberFlags.Public) && Flags.HasFlag(MemberFlags.Type))
             builder.AppendWord("export");
 
+        if (Flags.HasFlag(MemberFlags.Public) && Flags.HasFlag(MemberFlags.Const))
+            builder.AppendWord("export");
+
         if (Flags.HasFlag(MemberFlags.Static))
             builder.AppendWord("static");
 
@@ -400,6 +739,11 @@ public abstract class IntermediateMemberDefinition : IGenerator
     public void MemberName(CodeBuilder builder)
     {
         builder.Append(Name);
+    }
+
+    public void AfterMember(string memberName)
+    {
+        AfterMembers.Add(memberName);
     }
 
     public abstract IEnumerable<TypeResolveMatch> ResolveReferences(TypeResolveContext context);
@@ -421,6 +765,8 @@ public class IntermediatePropertyDefinition : IntermediateTypedMemberDefinition,
 {
     private TypeResolveContext context { get; }
 
+    private string Default { get; set; }
+
     public IntermediatePropertyDefinition(TypeResolveContext context, MemberFlags flags, TsTypeReference type, string name) : base(flags, type, name)
     {
         this.context = context;
@@ -439,11 +785,13 @@ public class IntermediatePropertyDefinition : IntermediateTypedMemberDefinition,
                 .Append(": ")
                 .Append(type);
 
+        if(Default != null)
+            builder.Append($" = {Default}");
+
         builder
             .Append(";")
             .NewLine();
     }
-
 
     public void GetRequiredReferences(HashSet<TsTypeReference> refs)
     {
@@ -453,6 +801,13 @@ public class IntermediatePropertyDefinition : IntermediateTypedMemberDefinition,
     public override IEnumerable<TypeResolveMatch> ResolveReferences(TypeResolveContext context)
     {
         yield return Type.Resolve(context);
+    }
+
+    public IntermediatePropertyDefinition WithDefaultValue(string value)
+    {
+        Default = value;
+
+        return this;
     }
 }
 
@@ -550,8 +905,11 @@ public class IntermediateMethodDefinition : IntermediateTypedMemberDefinition, I
 public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerator
 {
     private TypeResolveContext context { get; }
+
     public Dictionary<string, IntermediatePropertyDefinition> Properties = new();
     public Dictionary<string, IntermediateMethodDefinition> Methods = new();
+    public HashSet<TsTypeReference> Extensions = new();
+    public HashSet<string> GenericArguments = new();
 
     public IntermediateTypeDefinition(
         TypeResolveContext context, 
@@ -575,12 +933,26 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
         return definition;
     }
 
+    public IntermediateTypeDefinition WithGenericArgument(string name)
+    {
+        GenericArguments.Add(name);
+        return this;
+    }
+
+    public IntermediateTypeDefinition WithExtends(TsTypeReference type)
+    {
+        Extensions.Add(type);
+        return this;
+    }
+
     public override void Generate(CodeBuilder builder)
     {
         builder
             .Append(WriteMemberFlags)
             .AppendWord(Flags.HasFlag(MemberFlags.Interface) ? "interface" : "class")
             .Append(MemberName)
+            .Append(ApppendGenericArguments)
+            .Append(AppendExtensions)
             .OpenBlock()
                 .Append((b, p) => p.Value.Generate(b), Properties);
 
@@ -591,6 +963,40 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
                 .Append((b, p) => p.Value.Generate(b), Methods)
             .CloseBlock();
     }
+
+    public void ApppendGenericArguments(CodeBuilder builder)
+    {
+        if (!GenericArguments.Any())
+            return;
+
+        builder.Append("<");
+        
+        foreach(var generic in GenericArguments.Select((x, i) => (x, i)))
+        {
+            builder.Append(generic.x);
+
+            if (generic.i < GenericArguments.Count - 1)
+                builder.Append(", ");
+        }
+
+        builder.Append(">");
+    }
+
+    public void AppendExtensions(CodeBuilder builder)
+    {
+        if (!Extensions.Any())
+            return;
+
+        builder.Append(" extends ");
+
+        foreach(var extension in Extensions)
+        {
+            builder
+                .Append(extension.Resolve(context).name!)
+                .AppendOptionalComma();
+        }
+    }
+
     public override IEnumerable<TypeResolveMatch> ResolveReferences(TypeResolveContext context)
     {
         foreach (var props in Properties)
@@ -601,7 +1007,6 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
                 yield return resolved;
     }
 }
-
 
 public class IntermediateEnumDefinition : IntermediateMemberDefinition, IGenerator
 {
@@ -630,7 +1035,7 @@ public class IntermediateEnumDefinition : IntermediateMemberDefinition, IGenerat
             {
                 b.Append($"{kv.key} = {kv.value},")
                 .NewLine();
-            }, keyValues)
+            }, keyValues.Distinct())
             .CloseBlock()
             .NewLine();
     }
