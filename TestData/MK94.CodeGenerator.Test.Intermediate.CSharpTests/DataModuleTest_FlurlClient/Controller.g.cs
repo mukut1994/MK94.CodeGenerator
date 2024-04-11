@@ -3,11 +3,22 @@ using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 using System;
+using Microsoft.AspNetCore.Mvc;
 using Flurl.Http;
 using Flurl;
 
 namespace TestNameSpace;
 
+[Route("api/[controller]/[action]")]
+public class PizzaController
+{
+    [HttpGet]
+    public partial Task PizzaList(Page page);
+    [HttpGet]
+    public partial Task<Pizza> Get([FromQuery]Guid id);
+    [HttpPost]
+    public partial Task Order([FromBody]Order order);
+}
 public class PizzaControllerClient(FlurlClient client)
 {
 

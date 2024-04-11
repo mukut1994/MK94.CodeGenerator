@@ -48,7 +48,7 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
         }
     }
 
-    private static void CreateGuidId(IntermediateFileDefinition.IntermediateNamespaceDefintion ns, string typeName, string backingType)
+    private static void CreateGuidId(IntermediateFileDefinition.IntermediateNamespaceDefinition ns, string typeName, string backingType)
     {
         var stronglyTypedId = ns
                                 .Type(typeName, MemberFlags.Public)
@@ -72,7 +72,7 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
             .Body.Append("return Id.ToString();");
     }
 
-    private static void CreateStronglyTypedIdInterface(IntermediateFileDefinition.IntermediateNamespaceDefintion ns, StronglyTypedIdAttribute attribute)
+    private static void CreateStronglyTypedIdInterface(IntermediateFileDefinition.IntermediateNamespaceDefinition ns, StronglyTypedIdAttribute attribute)
     {
         var type = ns
             .Type($"{attribute.Type.Name}Id", MemberFlags.Public)

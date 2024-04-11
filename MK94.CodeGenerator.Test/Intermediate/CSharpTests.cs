@@ -122,6 +122,28 @@ public class CSharpTests
     }
 
     [Test]
+    public void DataModuleTest_FlurlClient()
+    {
+        var solution = Solution.FromAssemblyContaining<Page>();
+
+        // TODO cleaner parser syntax
+        var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
+
+        var csharpCode = new CSharpCodeGenerator();
+
+        var project = solution
+            .CSharpProject()
+            .WhichImplements(controllerFeature)
+            .WithinNamespace("TestNameSpace")
+            .WithPropertiesGenerator()
+            .WithControllerModuleGenerator()
+            .WithFlurlClientGenerator()
+            .GenerateTo(csharpCode);
+
+        csharpCode.AssertMatches();
+    }
+
+    [Test]
     public void DataModule_StronglyTypedId()
     {
         var solution = Solution.FromAssemblyContaining<Page>();

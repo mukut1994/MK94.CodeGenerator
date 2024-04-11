@@ -77,7 +77,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
     {
         private CSharpCodeGenerator root { get; }
 
-        public Dictionary<string, IntermediateNamespaceDefintion> Namespaces { get; } = new();
+        public Dictionary<string, IntermediateNamespaceDefinition> Namespaces { get; } = new();
 
         public HashSet<string> Usings { get; } = new();
 
@@ -92,7 +92,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             return this;
         }
 
-        public IntermediateNamespaceDefintion Namespace(string @namespace)
+        public IntermediateNamespaceDefinition Namespace(string @namespace)
         {
             var definition = Namespaces.GetOrAdd(@namespace, () => new(root, @namespace));
 
@@ -113,7 +113,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             }
         }
 
-        public class IntermediateNamespaceDefintion : IGenerator
+        public class IntermediateNamespaceDefinition : IGenerator
         {
             private CSharpCodeGenerator root { get; }
 
@@ -121,7 +121,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public Dictionary<string, IntermediateTypeDefinition> Types { get; } = new();
 
-            public IntermediateNamespaceDefintion(CSharpCodeGenerator root, string @namespace)
+            public IntermediateNamespaceDefinition(CSharpCodeGenerator root, string @namespace)
             {
                 Namespace = @namespace;
                 this.root = root;
@@ -151,7 +151,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             public MemberFlags Flags { get; set; }
 
-            public IntermediateMemberDefinition(MemberFlags flags, string name)
+            protected IntermediateMemberDefinition(MemberFlags flags, string name)
             {
                 Name = name;
                 Flags = flags;
@@ -170,6 +170,9 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
                 if (Flags.HasFlag(MemberFlags.Override))
                     builder.AppendWord("override");
+
+                if (Flags.HasFlag(MemberFlags.Async))
+                    builder.AppendWord("async");
             }
 
             protected void MemberName(CodeBuilder builder)
@@ -464,6 +467,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 if (Flags.HasFlag(MemberFlags.Partial) && BodyStream.Capacity == 0)
                 {
                     builder.Append(";");
+                    builder.NewLine();
                     return;
                 }
                 
