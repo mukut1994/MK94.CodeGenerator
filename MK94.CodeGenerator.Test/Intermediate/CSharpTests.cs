@@ -124,8 +124,6 @@ public class CSharpTests
     [Test]
     public void DataModuleTest_FlurlClient()
     {
-        DiskAssert.EnableWriteMode();
-
         var solution = Solution.FromAssemblyContaining<Page>();
 
         // TODO cleaner parser syntax
