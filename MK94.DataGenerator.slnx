@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="MK94.CodeGenerator.Test\MK94.CodeGenerator.Test.csproj" />
+  <Project Path="MK94.CodeGenerator\MK94.CodeGenerator.csproj" />
+</Solution>
