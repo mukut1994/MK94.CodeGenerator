@@ -12,11 +12,6 @@ export class PizzaControllerApi {
         if (page?.size !== undefined && page?.size !== null) _params["Size"] = page?.size.toString();
         if (page?.index !== undefined && page?.index !== null) _params["Index"] = page?.index.toString();
         
-        init = {
-            ...init,
-            method: "POST",
-        };
-        
         const ret = await f("Pizza/PizzaList?" + new URLSearchParams(_params).toString(), init);
         return ret.json();
     }
