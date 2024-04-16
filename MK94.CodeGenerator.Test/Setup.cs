@@ -17,7 +17,7 @@ namespace MK94.CodeGenerator.Test
         [OneTimeSetUp]
         public void Setup()
         {
-            SetupDiskAssert.WithRecommendedSettings("MK94.CodeGenerator.Test", "../TestData");
+            SetupDiskAssert.WithRecommendedSettings("MK94.CodeGenerator.Test");
 
             // DiskAsserter.Default.PathResolver = PathResolver.Instance;
 
