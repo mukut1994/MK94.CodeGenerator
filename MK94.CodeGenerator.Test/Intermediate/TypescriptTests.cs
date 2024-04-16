@@ -1,6 +1,7 @@
 ﻿using MK94.Assert;
 using MK94.CodeGenerator.Generator;
 using MK94.CodeGenerator.Intermediate;
+using MK94.CodeGenerator.Intermediate.CSharp;
 using MK94.CodeGenerator.Intermediate.CSharp.Modules;
 using MK94.CodeGenerator.Intermediate.Typescript;
 using MK94.CodeGenerator.Intermediate.Typescript.Modules;
@@ -24,6 +25,8 @@ public class TypescriptTests
         var t = c
             .File("file.ts")
             .Type("TypeA", MemberFlags.Public);
+
+        t.Decorator(TsTypeReference.ToType<ExampleAttribute>()).WithParam(TsTypeReference.ToRaw("Hello"), "Hello");
 
         t.Property(MemberFlags.Public, TsTypeReference.ToType<int>(), "PropA");
         t.Method(MemberFlags.Public, TsTypeReference.ToType<int>(), "MethodA")

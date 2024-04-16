@@ -69,10 +69,10 @@ namespace MK94.CodeGenerator.Generator
                 .WithParenthesis(Generate, method.Parameters)
                 .OpenBlock()
                     .Append($"{(isVoidReturn ? "" : "return ")}await client.Request")
-                    .OpenParanthesis()
+                    .OpenParenthesis()
                         .Append(@$"""/api/{controllerName}/{method.Name}""")
                         .Append(GenerateQueryParamList, method.Parameters)
-                    .CloseParanthesis();
+                    .CloseParenthesis();
 
             if (method.IsGetRequest())
             {

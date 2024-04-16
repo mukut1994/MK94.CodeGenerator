@@ -3,9 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Runtime;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace MK94.CodeGenerator.Intermediate.Typescript;
 
@@ -473,6 +472,8 @@ public class IntermediateConstantDefinition : IntermediateMemberDefinition
     public TsTypeReference Type { get; set; }
     public IntermediateConstantValueDefinition? Value { get; set; }
 
+    public bool AppendMemberInformation { get; set; } = true;
+
     public IntermediateConstantDefinition(TypeResolveContext context, TsTypeReference type, MemberFlags flags, string name) : base(flags, name)
     {
         this.context = context;
@@ -482,25 +483,39 @@ public class IntermediateConstantDefinition : IntermediateMemberDefinition
 
     public override void Generate(CodeBuilder builder)
     {
-        WriteMemberFlags(builder);
-        builder.Append("const ");
-        MemberName(builder);
-
-        var type = Type.Resolve(context)?.name;
-
-        if(!string.IsNullOrEmpty(type))
+        if (AppendMemberInformation)
         {
-            builder.Append(": ");
-            builder.Append(type);
-        }
+            WriteMemberFlags(builder);
+            builder.Append("const ");
+            MemberName(builder);
 
-        if (Value != null)
+            var type = Type.Resolve(context)?.name;
+
+            if (!string.IsNullOrEmpty(type))
+            {
+                builder.Append(": ");
+                builder.Append(type);
+            }
+
+            if (Value != null)
+            {
+                builder.Append(" = ");
+                Value.Generate(builder);
+            }
+
+            builder.AppendLine(";");
+        }
+        else
         {
-            builder.Append(" = ");
-            Value.Generate(builder);
+            Value?.Generate(builder);
         }
+    }
 
-        builder.AppendLine(";");
+    public IntermediateConstantDefinition WithoutMemberInformation()
+    {
+        AppendMemberInformation = false;
+
+        return this;
     }
 
     public override IEnumerable<TypeResolveMatch> ResolveReferences(TypeResolveContext context)
@@ -668,7 +683,7 @@ public class IntermediateArrayConstantDefinition : IntermediateConstantValueDefi
 
     public override void Generate(CodeBuilder builder)
     {
-        builder.OpenSquareParanthesis();
+        builder.OpenSquareParenthesis();
 
         foreach (var value in Values)
         {
@@ -676,7 +691,7 @@ public class IntermediateArrayConstantDefinition : IntermediateConstantValueDefi
             builder.AppendLine(",");
         }
 
-        builder.CloseSquareParanthesis();
+        builder.CloseSquareParenthesis();
     }
 
     public IntermediateArrayConstantDefinition WithStringValue(string value)
@@ -882,9 +897,9 @@ public class IntermediateMethodDefinition : IntermediateTypedMemberDefinition, I
 
         builder
             .Append(WriteMemberFlags).Append(MemberName)
-            .OpenParanthesis()
+            .OpenParenthesis()
                 .Append((b, arg) => arg.Generate(b), Arguments)
-            .CloseParanthesis();
+            .CloseParenthesis();
 
         if (retTypeName != null)
             builder.Append(": ").Append(retTypeName);
@@ -910,6 +925,7 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
     public Dictionary<string, IntermediateMethodDefinition> Methods = new();
     public HashSet<TsTypeReference> Extensions = new();
     public HashSet<string> GenericArguments = new();
+    public List<IntermediateDecoratorDefinition> Decorators = new();
 
     public IntermediateTypeDefinition(
         TypeResolveContext context, 
@@ -933,6 +949,15 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
         return definition;
     }
 
+    public IntermediateDecoratorDefinition Decorator(TsTypeReference typeRef)
+    {
+        var decorator = new IntermediateDecoratorDefinition(typeRef, context);
+
+        Decorators.Add(decorator);
+
+        return decorator;
+    }
+
     public IntermediateTypeDefinition WithGenericArgument(string name)
     {
         GenericArguments.Add(name);
@@ -948,10 +973,11 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
     public override void Generate(CodeBuilder builder)
     {
         builder
+            .Append((b, d) => d.Generate(b), Decorators)
             .Append(WriteMemberFlags)
             .AppendWord(Flags.HasFlag(MemberFlags.Interface) ? "interface" : "class")
             .Append(MemberName)
-            .Append(ApppendGenericArguments)
+            .Append(AppendGenericArguments)
             .Append(AppendExtensions)
             .OpenBlock()
                 .Append((b, p) => p.Value.Generate(b), Properties);
@@ -964,7 +990,7 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
             .CloseBlock();
     }
 
-    public void ApppendGenericArguments(CodeBuilder builder)
+    public void AppendGenericArguments(CodeBuilder builder)
     {
         if (!GenericArguments.Any())
             return;
@@ -1005,6 +1031,70 @@ public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerat
         foreach (var methods in Methods)
             foreach (var resolved in methods.Value.ResolveReferences(context))
                 yield return resolved;
+    }
+}
+
+public class IntermediateDecoratorDefinition : IGenerator
+{
+    public TsTypeReference Type { get; set; }
+    private TypeResolveContext context { get; }
+    private List<IntermediateConstantDefinition> parameters { get; } = [];
+
+    public IntermediateDecoratorDefinition(TsTypeReference type, TypeResolveContext context)
+    {
+        Type = type;
+        this.context = context;
+    }
+
+    public void Generate(CodeBuilder builder)
+    {
+        var attributeName = Type.Resolve(context);
+
+        if (attributeName?.name is null)
+            return;
+
+        var attrName = attributeName.name;
+
+        if (attrName.EndsWith("Attribute"))
+            attrName = attrName[..^"Attribute".Length];
+
+        builder
+            .Append("@")
+            .Append(attrName)
+            .Append(AppendParameters)
+            .NewLine();
+    }
+
+    public IntermediateConstantDefinition WithParam(TsTypeReference type, string value)
+    {
+        var constDef = new IntermediateConstantDefinition(context, type, MemberFlags.Public, string.Empty);
+        
+        constDef.WithoutMemberInformation();
+        constDef.WithStringAsValue(value);
+
+        parameters.Add(constDef);
+
+        return constDef;
+    }
+
+    private void AppendParameters(CodeBuilder builder)
+    {
+        if (parameters.Count == 0)
+            return;
+
+        builder.OpenParenthesis();
+
+        for (int i = 0; i < parameters.Count; i++)
+        {
+            parameters[i].Generate(builder);
+
+            if (i != parameters.Count - 1)
+            {
+                builder.AppendComma();
+            }
+        }
+
+        builder.CloseParenthesis();
     }
 }
 
