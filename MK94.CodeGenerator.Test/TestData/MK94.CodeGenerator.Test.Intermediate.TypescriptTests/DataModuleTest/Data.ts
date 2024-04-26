@@ -1,3 +1,8 @@
+export interface PageResult<T>
+{
+    total: number;
+    items: T[];
+}
 export interface Page
 {
     pageId: PageId;

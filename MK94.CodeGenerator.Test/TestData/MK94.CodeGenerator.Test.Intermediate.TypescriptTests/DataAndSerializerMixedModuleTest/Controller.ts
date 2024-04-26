@@ -5,7 +5,7 @@ import { Page } from "./Data";
 }
 export class PizzaControllerApi {
 
-    static async PizzaList(f = fetch, page: Page, init?: RequestInit): Promise<void> {
+    static async PizzaList(f = fetch, page: Page, init?: RequestInit): Promise<PageResult<Order>> {
         const _params: Record<string, string> = {};
         
         if (page?.pageId !== undefined && page?.pageId !== null) _params["PageId"] = page?.pageId.toString();
