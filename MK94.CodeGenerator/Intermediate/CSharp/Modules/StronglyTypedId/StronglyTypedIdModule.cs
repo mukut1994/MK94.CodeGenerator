@@ -38,7 +38,7 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
                 switch (attribute.Type)
                 {
                     case var guidType when guidType == typeof(Guid):
-                        CreateGuidId(ns, typeDef.Type.Name, attribute.Type.Name);
+                        CreateGuidId(ns, typeDef.Type.Name, attribute.Type.Name, CsharpTypeReference.ToType(typeDef.Type));
                         break;
 
                     default:
@@ -48,10 +48,10 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
         }
     }
 
-    private static void CreateGuidId(IntermediateFileDefinition.IntermediateNamespaceDefintion ns, string typeName, string backingType)
+    private static void CreateGuidId(IntermediateFileDefinition.IntermediateNamespaceDefintion ns, string typeName, string backingType, CsharpTypeReference type)
     {
         var stronglyTypedId = ns
-                                .Type(typeName, MemberFlags.Public, CsharpTypeReference.ToRaw(typeName))
+                                .Type(typeName, MemberFlags.Public, type)
                                 .WithTypeAsRecord()
                                 .WithTypeAsStruct()
                                 .WithInheritsFrom(CsharpTypeReference.ToRaw($"{backingType}Id"))
