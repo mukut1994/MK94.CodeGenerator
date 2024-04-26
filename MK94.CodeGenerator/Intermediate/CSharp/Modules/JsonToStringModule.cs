@@ -24,7 +24,7 @@ public class JsonToStringModule : IGeneratorModule<CSharpCodeGenerator>
                 var file = codeGenerator.File($"{fileDef.Name}.g.cs");
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
-                var type = ns.Type(typeDef.Type.Name, MemberFlags.Public);
+                var type = ns.Type(typeDef.Type.Name, MemberFlags.Public, CsharpTypeReference.ToRaw(typeDef.Type.Name));
 
                 var method = type.Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToType<string>(), "ToString");
 

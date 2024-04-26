@@ -51,7 +51,7 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
     private static void CreateGuidId(IntermediateFileDefinition.IntermediateNamespaceDefintion ns, string typeName, string backingType)
     {
         var stronglyTypedId = ns
-                                .Type(typeName, MemberFlags.Public)
+                                .Type(typeName, MemberFlags.Public, CsharpTypeReference.ToRaw(typeName))
                                 .WithTypeAsRecord()
                                 .WithTypeAsStruct()
                                 .WithInheritsFrom(CsharpTypeReference.ToRaw($"{backingType}Id"))
@@ -75,7 +75,7 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
     private static void CreateStronglyTypedIdInterface(IntermediateFileDefinition.IntermediateNamespaceDefintion ns, StronglyTypedIdAttribute attribute)
     {
         var type = ns
-            .Type($"{attribute.Type.Name}Id", MemberFlags.Public)
+            .Type($"{attribute.Type.Name}Id", MemberFlags.Public, CsharpTypeReference.ToRaw($"{attribute.Type.Name}Id"))
             .WithTypeAsInterface();
 
         type

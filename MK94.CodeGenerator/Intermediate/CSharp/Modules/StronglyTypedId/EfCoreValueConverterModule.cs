@@ -24,7 +24,7 @@ public class EfCoreValueConverterModule : IGeneratorModule<CSharpCodeGenerator>
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
 
                 var converterClass = ns
-                    .Type($"{typeDef.Type.Name}EfCoreValueConverter", MemberFlags.Public | MemberFlags.Partial)
+                    .Type($"{typeDef.Type.Name}EfCoreValueConverter", MemberFlags.Public | MemberFlags.Partial, CsharpTypeReference.ToRaw($"{typeDef.Type.Name}EfCoreValueConverter"))
                     .WithInheritsFrom(CsharpTypeReference.ToRaw($"global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<{typeDef.Type.Name}, global::System.Guid>"));
 
                 converterClass

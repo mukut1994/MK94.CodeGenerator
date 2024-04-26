@@ -27,12 +27,12 @@ public class StronglyTypedIdJsonConverterModule : IGeneratorModule<CSharpCodeGen
 
                 var ns = file.Namespace(project.NamespaceResolver(typeDef));
 
-                var originalType = ns.Type(typeDef.Type.Name, MemberFlags.Public);
+                var originalType = ns.Type(typeDef.Type.Name, MemberFlags.Public, CsharpTypeReference.ToRaw(typeDef.Type.Name));
 
                 originalType.Attribute(CsharpTypeReference.ToType<JsonConverterAttribute>()).WithParam($"typeof({originalType.Name}Converter)");
 
                 var converterClass = ns
-                    .Type($"{originalType.Name}Converter", MemberFlags.Public)
+                    .Type($"{originalType.Name}Converter", MemberFlags.Public, CsharpTypeReference.ToRaw($"{originalType.Name}Converter"))
                     .WithInheritsFrom(CsharpTypeReference.ToRaw($"JsonConverter<{originalType.Name}>"));
 
                 converterClass
