@@ -10,6 +10,7 @@ using MK94.CodeGenerator.Intermediate.CSharp.Modules;
 
 namespace MK94.CodeGenerator.Test
 {
+    [Ignore("To be removed and migrated to intermediate modules")]
     public class DirectGeneratorTests
     {
         [SetUp]
