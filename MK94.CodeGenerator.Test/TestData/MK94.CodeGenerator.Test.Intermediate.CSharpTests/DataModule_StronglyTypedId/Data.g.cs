@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace TestNameSpace;
 
-public class PageResult`1
+public class PageResult<T>
 {
     public Int32 Total { get; set; } 
     public List<T> Items { get; set; } 
@@ -35,7 +35,7 @@ public record struct PageId(Guid Id): GuidId
         return Id.ToString();
     }
 }
-public class PageIdConverter : JsonConverter<PageId>
+public class PageIdConverter: JsonConverter<PageId>
 {
     public override PageId Read(Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -46,7 +46,7 @@ public class PageIdConverter : JsonConverter<PageId>
         writer.WriteStringValue(value.Id);
     }
 }
-public partial class PageIdEfCoreValueConverter : global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<PageId, global::System.Guid>
+public partial class PageIdEfCoreValueConverter: global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<PageId, global::System.Guid>
 {
     public PageIdEfCoreValueConverter(global::Microsoft.EntityFrameworkCore.Storage.ValueConversion.ConverterMappingHints? mappingHints = null): base(id => id.Id, value => new PageId(value), mappingHints)
     {

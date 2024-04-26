@@ -3,7 +3,7 @@ using Flurl;
 
 namespace TestNameSpace;
 
-public class PageResult`1
+public class PageResult<T>
 {
     public Int32 Total { get; set; } 
     public List<T> Items { get; set; } 

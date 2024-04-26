@@ -674,7 +674,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     }, attributes)
                     .Append(AppendMemberFlags)
                     .Append(AppendDefinitionFlags)
-                    .Append(MemberName)
+                    .Append(base.Type.Resolve(root))
                     .Append(AppendPrimaryConstructor)
                     .Append(AppendInheritsFrom)
                     .OpenBlock();
