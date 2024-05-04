@@ -26,6 +26,14 @@ public class Page
     public int Index { get; set; }
 }
 
+[File("Data")]
+public class PageResult<T>
+{
+    public int Total { get; set; }
+
+    public List<T> Items { get; set; } = [];
+}
+
 [File("Pizza")]
 public enum PizzaType
 {
@@ -44,7 +52,7 @@ public class Order
 public interface IPizzaController
 {
     [Get]
-    Task PizzaList(Page page);
+    Task<PageResult<Order>> PizzaList(Page page);
 
     [Post]
     Task Order([Body] Order order);
