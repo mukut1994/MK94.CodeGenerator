@@ -89,7 +89,14 @@ public class TypeDefinition : IFeatureMarked
 
     public IEnumerable<FeatureAttribute> ReadFeatures()
     {
-        return Type.GetCustomAttributesUngrouped<FeatureAttribute>();
+        var ret = new Dictionary<Type, FeatureAttribute>();
+
+        ret.Set(new TypeNameAttribute(Type.Name));
+
+        foreach(var attr in Type.GetCustomAttributesUngrouped<FeatureAttribute>())
+            ret.Set(attr);
+
+        return ret.Values;
     }
 }
 

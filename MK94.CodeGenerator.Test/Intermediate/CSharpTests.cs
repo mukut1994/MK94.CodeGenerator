@@ -90,8 +90,8 @@ public class CSharpTests
 
         solution
             .CSharpProject()
-            .UsesFeature<ControllerFeatureAttribute>()
-            .WithinNamespace("TestNameSpace")
+            .Uses<ControllerFeatureAttribute>()
+            .WithNamespace("TestNameSpace")
             .WithPropertiesGenerator();
 
         solution.GenerateToMemory()
@@ -110,8 +110,8 @@ public class CSharpTests
 
         solution
             .CSharpProject()
-            .UsesFeature<ControllerFeatureAttribute>()
-            .WithinNamespace("TestNameSpace")
+            .Uses<ControllerFeatureAttribute>()
+            .WithNamespace("TestNameSpace")
             .WithPropertiesGenerator()
             .WithControllerModuleGenerator();
 
@@ -131,8 +131,8 @@ public class CSharpTests
 
         solution
             .CSharpProject()
-            .UsesFeature<ControllerFeatureAttribute>()
-            .WithinNamespace("TestNameSpace")
+            .Uses<ControllerFeatureAttribute>()
+            .WithNamespace("TestNameSpace")
             .WithPropertiesGenerator()
             .WithStronglyTypedIdGenerator()
             .WithJsonConverterForStronglyTypedIdGenerator()
@@ -154,8 +154,8 @@ public class CSharpTests
 
         solution
             .CSharpProject()
-            .UsesFeature<ControllerFeatureAttribute>()
-            .WithinNamespace("TestNameSpace")
+            .Uses<ControllerFeatureAttribute>()
+            .WithNamespace("TestNameSpace")
             .WithPropertiesGenerator()
             .WithJsonToStringGenerator()
             .WithFlurlClientGenerator();
@@ -182,7 +182,7 @@ public class CSharpTests
         var project = solution
             .CSharpProject()
             .UsesAllSolutionFeatures()
-            .WithinNamespace("TestNameSpace")
+            .WithNamespace("TestNameSpace")
             .WithPropertiesGenerator();
 
         solution.GenerateToMemory()

@@ -48,7 +48,7 @@ public static class NamespaceFeatureExtensions
         return solution;
     }
 
-    public static T WithinNamespace<T>(this T group, string space)
+    public static T WithNamespace<T>(this T group, string space)
         where T : IFeatureGroup
     {
         foreach (var file in group.Files)

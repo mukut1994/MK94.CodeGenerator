@@ -134,4 +134,14 @@ public static class FeatureExtensions
 
         return types.ToFileDef(cache);
     }
+
+    public static T WithTransitiveDependencies<T>(T group)
+        where T : IFeatureGroup
+    {
+        var deps = group.Files.GetMethodDependencies(group.Solution.LookupCache).ToFileDef(group.Solution.LookupCache).ToList();
+
+        group.Files.AddRange(deps);
+
+        return group;
+    }
 }

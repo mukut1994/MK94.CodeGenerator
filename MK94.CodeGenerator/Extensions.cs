@@ -31,12 +31,14 @@ public static class Extensions
         return type;
     }
 
+    [Obsolete("Use type name feature instead")]
     public static string AsClassName(this TypeDefinition typeDef)
     {
         return typeDef.Type.Name.StartsWith('I') && typeDef.Type.IsInterface ?
             typeDef.Type.Name[1..] : typeDef.Type.Name;
     }
 
+    [Obsolete("Use type name feature instead")]
     public static string AsApiName(this TypeDefinition typeDef)
     {
         var name = typeDef.AsClassName();
@@ -380,7 +382,7 @@ public static class Extensions
                     EnumTypes = new(),
                     FileInfo = originalFileDef.FileInfo,
                     Types = new(),
-                    FeatureMarks = originalFileDef.FeatureMarks,
+                    FeatureMarks = originalFileDef.FeatureMarks.ToDictionary(),
                 };
                 ret.Add(originalFileDef.Name, retDef);
             }

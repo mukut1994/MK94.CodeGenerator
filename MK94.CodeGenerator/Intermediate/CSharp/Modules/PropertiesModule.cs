@@ -20,9 +20,6 @@ public class PropertiesModule : IGeneratorModule<CSharpCodeGenerator>
         {
             foreach(var typeDef in fileDef.Types)
             {
-                if (!typeDef.Properties.Any())
-                    continue;
-
                 var file = codeGenerator.File(fileDef.GetFilename() + ".cs");
 
                 var ns = file.Namespace(typeDef.GetNamespace());

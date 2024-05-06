@@ -13,6 +13,8 @@ namespace MK94.CodeGenerator;
 
 public class Solution : IFeatureGroup
 {
+    Solution IFeatureGroup.Solution => this;
+
     public record ProjectIdentifier(string? Path, Type type);
 
     public IReadOnlyList<FileDefinition> AllFiles { init; get; }

@@ -74,6 +74,8 @@ public interface IProject
 
 public interface IFeatureGroup
 {
+    Solution Solution { get; }
+
     List<FileDefinition> Files { get; }
 }
 
@@ -86,6 +88,8 @@ public interface IFeatureGroup<TGenerator> : IFeatureGroup
 public class FeatureGroup<TGenerator> : IFeatureGroup<TGenerator> 
     where TGenerator : IFileGenerator
 {
+    public required Solution Solution { get; init; }
+ 
     public List<FileDefinition> Files { get; set; } = new();
 
     public List<IGeneratorModule<TGenerator>> GeneratorModules { get; } = new();
@@ -93,7 +97,6 @@ public class FeatureGroup<TGenerator> : IFeatureGroup<TGenerator>
 
 public abstract class Project : IProject
 {
-
     public Solution Solution { get; init; }
 
     [Obsolete]
@@ -123,7 +126,8 @@ public static class ProjectExtensions
     {
         var ret = new FeatureGroup<CSharpCodeGenerator>()
         {
-            Files = project.Solution.AllFiles.ToList()
+            Solution = project.Solution,
+            Files = project.Solution.AllFiles.ToList(),
         };
 
         project.FeatureGroups.Add(ret);
@@ -131,12 +135,31 @@ public static class ProjectExtensions
         return ret;
     }
 
-    public static IFeatureGroup<CSharpCodeGenerator> UsesFeature<T>(this ICSharpProject project)
+    public static IFeatureGroup<CSharpCodeGenerator> Uses<T>(this ICSharpProject project)
         where T : FeatureAttribute
     {
         var ret = new FeatureGroup<CSharpCodeGenerator>()
         {
-            Files = project.FindWithFeatures<T>()
+            Solution = project.Solution,
+            Files = project.FindWithFeatures<T>(),
+        };
+
+        project.FeatureGroups.Add(ret);
+
+        return ret;
+    }
+
+    public static IFeatureGroup<CSharpCodeGenerator> UsesDependenciesOf<T>(this ICSharpProject project)
+        where T : FeatureAttribute
+    {
+        var featureFiles = project.Solution.AllFiles.FindWithFeatures<T>(project.Solution.LookupCache);
+
+        var deps = featureFiles.GetMethodDependencies(project.Solution.LookupCache).ToFileDef(project.Solution.LookupCache).ToList();
+
+        var ret = new FeatureGroup<CSharpCodeGenerator>()
+        {
+            Solution = project.Solution,
+            Files = deps,
         };
 
         project.FeatureGroups.Add(ret);

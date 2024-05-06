@@ -35,7 +35,7 @@ public class ControllerModule : IGeneratorModule<CSharpCodeGenerator>
 
                 var ns = file.Namespace(typeDef.GetNamespace());
 
-                var type = ns.Type(typeDef.AsClassName(), MemberFlags.Public, CsharpTypeReference.ToRaw(typeDef.AsClassName()));
+                var type = ns.Type(typeDef.GetTypeName(), MemberFlags.Public | MemberFlags.Partial, CsharpTypeReference.ToRaw(typeDef.GetTypeName()));
 
                 type
                     .Attribute(CsharpTypeReference.ToRaw("Route"))
