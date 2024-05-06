@@ -51,7 +51,7 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
                 var name = typeDef.AsClassName();
 
                 var ns = file.Namespace(typeDef.GetNamespace());
-                var type = ns.Type(name, MemberFlags.Public);
+                var type = ns.Type(name, MemberFlags.Public, CsharpTypeReference.ToRaw(name));
 
                 foreach (var methodDef in typeDef.Methods)
                 {

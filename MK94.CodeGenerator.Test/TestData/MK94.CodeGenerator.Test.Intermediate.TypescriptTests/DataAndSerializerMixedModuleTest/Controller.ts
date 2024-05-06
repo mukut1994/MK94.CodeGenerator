@@ -5,17 +5,12 @@ import { Page } from "./Data";
 }
 export class PizzaControllerApi {
 
-    static async PizzaList(f = fetch, page: Page, init?: RequestInit): Promise<void> {
+    static async PizzaList(f = fetch, page: Page, init?: RequestInit): Promise<PageResult<Order>> {
         const _params: Record<string, string> = {};
         
         if (page?.pageId !== undefined && page?.pageId !== null) _params["PageId"] = page?.pageId.toString();
         if (page?.size !== undefined && page?.size !== null) _params["Size"] = page?.size.toString();
         if (page?.index !== undefined && page?.index !== null) _params["Index"] = page?.index.toString();
-        
-        init = {
-            ...init,
-            method: "POST",
-        };
         
         const ret = await f("Pizza/PizzaList?" + new URLSearchParams(_params).toString(), init);
         return ret.json();

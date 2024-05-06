@@ -5,7 +5,7 @@ namespace TestNameSpace;
 
 public class PizzaController
 {
-    public static Task PizzaList(Page page)
+    public static Task<PageResult<Order>> PizzaList(Page page)
     {
         return "PizzaList"
           .ReceiveStringAsync();

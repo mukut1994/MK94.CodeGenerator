@@ -28,13 +28,13 @@ public class CSharpTests
             .Namespace("Namespace.A");
 
         namespaceA
-            .Type("IId", MemberFlags.Public)
+            .Type("IId", MemberFlags.Public, CsharpTypeReference.ToRaw("IId"))
             .WithTypeAsInterface()
             .Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id")
             .WithGetter();
 
         var recordStruct = namespaceA
-            .Type("RecordStructA", MemberFlags.Public)
+            .Type("RecordStructA", MemberFlags.Public, CsharpTypeReference.ToRaw("RecordStructA"))
             .WithTypeAsRecord()
             .WithTypeAsStruct()
             .WithInheritsFrom(CsharpTypeReference.ToRaw("IId"))
@@ -42,7 +42,7 @@ public class CSharpTests
 
         recordStruct.Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id");
 
-        var typeA = namespaceA.Type("TypeA", MemberFlags.Public);
+        var typeA = namespaceA.Type("TypeA", MemberFlags.Public, CsharpTypeReference.ToRaw("TypeA"));
 
         var constructorA = typeA.Constructor(MemberFlags.Public);
 
@@ -61,12 +61,12 @@ public class CSharpTests
         method.Body
             .Append("return a + b;");
 
-        typeA.Type("TypeASubType", MemberFlags.Public);
+        typeA.Type("TypeASubType", MemberFlags.Public, CsharpTypeReference.ToRaw("TypeASubType"));
 
         var t2 = c
             .File("file.cs")
             .Namespace("Namespace.B")
-            .Type("TypeB", MemberFlags.Public);
+            .Type("TypeB", MemberFlags.Public, CsharpTypeReference.ToRaw("TypeB"));
 
         t2.Property(MemberFlags.Public, CsharpTypeReference.ToType<int>(), "PropA");
         t2

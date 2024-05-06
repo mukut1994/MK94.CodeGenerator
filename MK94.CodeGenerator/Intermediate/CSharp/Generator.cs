@@ -127,11 +127,11 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 this.root = root;
             }
 
-            public IntermediateTypeDefinition Type(string name, MemberFlags flags)
+            public IntermediateTypeDefinition Type(string name, MemberFlags flags, CsharpTypeReference type)
             {
                 flags = flags | MemberFlags.Type;
 
-                var definition = Types.GetOrAdd(name, () => new IntermediateTypeDefinition(root, flags: flags, name: name));
+                var definition = Types.GetOrAdd(name, () => new IntermediateTypeDefinition(root, flags: flags, name: name, type: type));
 
                 return definition;
             }
@@ -540,7 +540,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
             }
         }
 
-        public class IntermediateTypeDefinition : IntermediateMemberDefinition, IGenerator
+        public class IntermediateTypeDefinition : IntermediateTypedMemberDefinition, IGenerator
         {
             private CSharpCodeGenerator root { get; }
 
@@ -559,7 +559,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
 
             private bool PrimaryConstructor { get; set; }
 
-            public IntermediateTypeDefinition(CSharpCodeGenerator root, MemberFlags flags, string name) : base(flags, name)
+            public IntermediateTypeDefinition(CSharpCodeGenerator root, MemberFlags flags, string name, CsharpTypeReference type) : base(flags, type, name)
             {
                 this.root = root;
                 DefinitionType |= DefinitionType.Default;
@@ -601,11 +601,11 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                 return definition;
             }
 
-            public IntermediateTypeDefinition Type(string name, MemberFlags flags)
+            public IntermediateTypeDefinition Type(string name, MemberFlags flags, CsharpTypeReference? type)
             {
                 flags |= MemberFlags.Type;
 
-                var definition = Types.GetOrAdd(name, () => new IntermediateTypeDefinition(root, flags: flags, name: name));
+                var definition = Types.GetOrAdd(name, () => new IntermediateTypeDefinition(root, flags: flags, name: name, type: type ?? CsharpTypeReference.ToRaw(name)));
 
                 return definition;
             }
@@ -674,7 +674,7 @@ namespace MK94.CodeGenerator.Intermediate.CSharp
                     }, attributes)
                     .Append(AppendMemberFlags)
                     .Append(AppendDefinitionFlags)
-                    .Append(MemberName)
+                    .Append(base.Type.Resolve(root))
                     .Append(AppendPrimaryConstructor)
                     .Append(AppendInheritsFrom)
                     .OpenBlock();
