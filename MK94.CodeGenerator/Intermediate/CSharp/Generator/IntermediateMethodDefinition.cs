@@ -59,7 +59,7 @@ public class IntermediateMethodDefinition : IntermediateTypedMemberDefinition, I
 
         if (Flags.HasFlag(MemberFlags.Partial) && BodyStream.Capacity == 0)
         {
-            builder.Append(";");
+            builder.AppendLine(";");
             return;
         }
 

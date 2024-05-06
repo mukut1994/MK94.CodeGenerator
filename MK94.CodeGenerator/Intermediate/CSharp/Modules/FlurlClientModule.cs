@@ -73,7 +73,7 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
         }
     }
 
-    private static void SetQueryParams(MethodDefinition methodDef, IntermediateFileDefinition.IntermediateMethodDefinition method)
+    private static void SetQueryParams(MethodDefinition methodDef, IntermediateMethodDefinition method)
     {
         foreach (var queryDef in methodDef.Parameters.Where(x => x.FromQuery()))
         {
