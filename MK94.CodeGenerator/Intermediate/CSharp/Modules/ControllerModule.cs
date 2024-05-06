@@ -2,15 +2,16 @@
 using System.Linq;
 using System.Reflection;
 using MK94.CodeGenerator.Attributes;
+using MK94.CodeGenerator.Features;
 using MK94.CodeGenerator.Generator;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp.Modules;
 
 public class ControllerModule : IGeneratorModule<CSharpCodeGenerator>
 {
-    private readonly ICSharpProject project;
+    private readonly IFeatureGroup<CSharpCodeGenerator> project;
 
-    public ControllerModule(ICSharpProject project)
+    public ControllerModule(IFeatureGroup<CSharpCodeGenerator> project)
     {
         this.project = project;
     }
@@ -27,11 +28,11 @@ public class ControllerModule : IGeneratorModule<CSharpCodeGenerator>
                 if (typeDef.Type.GetCustomAttribute<ControllerFeatureAttribute>() is null)
                     continue;
 
-                var file = codeGenerator.File($"{fileDef.Name}.g.cs");
+                var file = codeGenerator.File(fileDef.GetFilename() + ".cs");
 
                 file.WithUsing("Microsoft.AspNetCore.Mvc");
 
-                var ns = file.Namespace(project.NamespaceResolver(typeDef));
+                var ns = file.Namespace(typeDef.GetNamespace());
 
                 var type = ns.Type(typeDef.AsClassName(), MemberFlags.Public);
 
@@ -71,7 +72,7 @@ public class ControllerModule : IGeneratorModule<CSharpCodeGenerator>
 public static class ControllerModuleExtensions
 {
     public static T WithControllerModuleGenerator<T>(this T project, Action<ControllerModule>? configure = null)
-        where T : ICSharpProject
+        where T : IFeatureGroup<CSharpCodeGenerator>
     {
         var mod = new ControllerModule(project);
 

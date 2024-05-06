@@ -1,13 +1,14 @@
-﻿using System;
+﻿using MK94.CodeGenerator.Features;
+using System;
 using System.Linq;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp.Modules;
 
 public class JsonToStringModule : IGeneratorModule<CSharpCodeGenerator>
 {
-    private readonly ICSharpProject project;
+    private readonly IFeatureGroup<CSharpCodeGenerator> project;
 
-    public JsonToStringModule(ICSharpProject project)
+    public JsonToStringModule(IFeatureGroup<CSharpCodeGenerator> project)
     {
         this.project = project;
     }
@@ -21,9 +22,9 @@ public class JsonToStringModule : IGeneratorModule<CSharpCodeGenerator>
                 if (!typeDef.Properties.Any())
                     continue;
 
-                var file = codeGenerator.File($"{fileDef.Name}.g.cs");
+                var file = codeGenerator.File(fileDef.GetFilename() + ".cs");
 
-                var ns = file.Namespace(project.NamespaceResolver(typeDef));
+                var ns = file.Namespace(typeDef.GetNamespace());
                 var type = ns.Type(typeDef.Type.Name, MemberFlags.Public);
 
                 var method = type.Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToType<string>(), "ToString");
@@ -38,7 +39,7 @@ public class JsonToStringModule : IGeneratorModule<CSharpCodeGenerator>
 public static class JsonToStringModuleExtensions
 {
     public static T WithJsonToStringGenerator<T>(this T project, Action<JsonToStringModule>? configure = null)
-        where T : ICSharpProject
+        where T : IFeatureGroup<CSharpCodeGenerator>
     {
         var mod = new JsonToStringModule(project);
 

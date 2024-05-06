@@ -3,17 +3,15 @@ using System.Collections.Generic;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp;
 
-public interface ICSharpProject : 
-    IProject, 
-    IGeneratorModuleUser<CSharpCodeGenerator>, 
-    INamespaceResolver<CSharpCodeGenerator>,
-    ICodeGenerator<CSharpCodeGenerator, ICSharpProject>
-{ }
-
-public class CSharpProject : Project, ICSharpProject
+public interface ICSharpProject :
+    IProject,
+    IGeneratorModuleUser<CSharpCodeGenerator>
 {
-    public Func<TypeDefinition, string> NamespaceResolver { get; set; } = _ => "NotSet";
+    List<FeatureGroup<CSharpCodeGenerator>> FeatureGroups { get; }
+}
 
+public class CSharpProject : Project<CSharpCodeGenerator>, ICSharpProject
+{
     public string RelativePath { get; set; }
     public List<IGeneratorModule<CSharpCodeGenerator>> GeneratorModules { get; } = new();
 
@@ -22,11 +20,19 @@ public class CSharpProject : Project, ICSharpProject
         RelativePath = relativePath;
     }
 
-    public ICSharpProject GenerateTo(CSharpCodeGenerator target)
+    public override void Generate(Func<string, CodeBuilder> outputFactory)
     {
-        foreach (var gen in GeneratorModules)
-            gen.AddTo(target);
+        var output = new CSharpCodeGenerator();
 
-        return this;
+        foreach(var rootGenerator in GeneratorModules)
+            rootGenerator.AddTo(output);
+
+        foreach (var group in FeatureGroups)
+        {
+            foreach(var generator in group.GeneratorModules)
+                generator.AddTo(output);
+        }
+
+        output.Generate(path => outputFactory(System.IO.Path.Combine(RelativePath, path)));
     }
 }

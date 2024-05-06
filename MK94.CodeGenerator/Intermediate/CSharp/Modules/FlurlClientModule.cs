@@ -1,4 +1,5 @@
 ﻿using MK94.CodeGenerator.Attributes;
+using MK94.CodeGenerator.Features;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,9 +30,9 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
         typeof(Guid),
     ];
 
-    private readonly ICSharpProject project;
+    private readonly IFeatureGroup<CSharpCodeGenerator> project;
 
-    public FlurlClientModule(ICSharpProject project)
+    public FlurlClientModule(IFeatureGroup<CSharpCodeGenerator> project)
     {
         this.project = project;
     }
@@ -40,7 +41,7 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
     {
         foreach (var fileDef in project.Files)
         {
-            var file = codeGenerator.File($"{fileDef.Name}.g.cs");
+            var file = codeGenerator.File(fileDef.GetFilename() + ".cs");
 
             file.Usings.Add("Flurl");
             file.Usings.Add("System.Threading.Task");
@@ -49,7 +50,7 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
             {
                 var name = typeDef.AsClassName();
 
-                var ns = file.Namespace(project.NamespaceResolver(typeDef));
+                var ns = file.Namespace(typeDef.GetNamespace());
                 var type = ns.Type(name, MemberFlags.Public);
 
                 foreach (var methodDef in typeDef.Methods)
@@ -95,7 +96,7 @@ public class FlurlClientModule : IGeneratorModule<CSharpCodeGenerator>
 public static class FlurlClientModuleExtensions
 {
     public static T WithFlurlClientGenerator<T>(this T project, Action<FlurlClientModule>? configure = null)
-        where T : ICSharpProject
+        where T : IFeatureGroup<CSharpCodeGenerator>
     {
         var mod = new FlurlClientModule(project);
 

@@ -2,6 +2,7 @@
 using MK94.CodeGenerator.Intermediate.CSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -12,6 +13,16 @@ namespace MK94.CodeGenerator;
 
 public static class Extensions
 {
+    public static Dictionary<string, string> DecodeUTF8(this Dictionary<string, MemoryStream> files)
+    {
+        var ret = new Dictionary<string, string>();
+
+        foreach (var file in files)
+            ret.Add(file.Key, Encoding.UTF8.GetString(file.Value.ToArray()));
+
+        return ret;
+    }
+
     public static Type UnwrapTask(this Type type)
     {
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Task<>))
@@ -368,19 +379,80 @@ public static class Extensions
                     Name = originalFileDef.Name,
                     EnumTypes = new(),
                     FileInfo = originalFileDef.FileInfo,
-                    Types = new()
+                    Types = new(),
+                    FeatureMarks = originalFileDef.FeatureMarks,
                 };
                 ret.Add(originalFileDef.Name, retDef);
             }
 
             if (cache.typeDefLookup.TryGetValue(type, out var typeDef))
-                retDef.Types.Add(typeDef);
+                retDef.Types.Add(typeDef.Clone());
 
             if (cache.enumDefLookup.TryGetValue(type, out var enumDef))
-                retDef.EnumTypes.Add(enumDef);
+                retDef.EnumTypes.Add(enumDef.Clone());
         }
 
         return ret.Values.ToList();
+    }
+
+    public static EnumDefintion Clone(this EnumDefintion orig)
+    {
+        return new EnumDefintion
+        {
+            FeatureMarks = orig.FeatureMarks.ToDictionary(),
+            KeyValuePairs = orig.KeyValuePairs.ToDictionary(),
+            Type = orig.Type,
+        };
+    }
+
+    public static TypeDefinition Clone(this TypeDefinition orig)
+    {
+        return new TypeDefinition
+        {
+            FeatureMarks = orig.FeatureMarks.ToDictionary(),
+            Methods = orig.Methods.ListClone(Clone),
+            Properties = orig.Properties.ListClone(Clone),
+            Type = orig.Type,
+        };
+    }
+
+    private static List<T> ListClone<T>(this List<T> orig, Func<T, T> cloner)
+    {
+        return orig.Select(cloner).ToList();
+    }
+
+    public static MethodDefinition Clone(MethodDefinition orig)
+    {
+        return new MethodDefinition
+        {
+            FeatureMarks = orig.FeatureMarks.ToDictionary(),
+            MethodInfo = orig.MethodInfo,
+            Name = orig.Name,
+            Parameters = orig.Parameters.ListClone(Clone),
+            ResponseType = orig.ResponseType,
+        };
+    }
+
+    public static ParameterDefinition Clone(ParameterDefinition orig)
+    {
+        return new ParameterDefinition
+        {
+            FeatureMarks = orig.FeatureMarks,
+            Name = orig.Name,
+            Parameter = orig.Parameter,
+            Type = orig.Type,
+        };
+    }
+
+    public static PropertyDefinition Clone(PropertyDefinition orig)
+    {
+        return new PropertyDefinition
+        {
+            FeatureMarks = orig.FeatureMarks.ToDictionary(),
+            Info = orig.Info,
+            Name = orig.Name,
+            Type = orig.Type,
+        };
     }
 
     public static HashSet<Type> GetMethodDependencies(this IEnumerable<FileDefinition> files, DependencyLookupCache cache)

@@ -1,4 +1,5 @@
 ﻿using MK94.CodeGenerator.Attributes;
+using MK94.CodeGenerator.Features;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +9,20 @@ using System.Threading.Tasks;
 
 namespace MK94.CodeGenerator;
 
-public class FileDefinition
+public class FeatureAttribute : Attribute { }
+
+public interface IFeatureMarked
 {
+    Dictionary<Type, FeatureAttribute> FeatureMarks { get; set; }
+
+    IEnumerable<IFeatureMarked> FeatureMarkedChildren { get; }
+
+    IEnumerable<FeatureAttribute> ReadFeatures();
+}
+
+public class FileDefinition : IFeatureMarked
+{
+    [Obsolete]
     public FileAttribute FileInfo { get; set; }
 
     public string Name { get; set; }
@@ -17,34 +30,70 @@ public class FileDefinition
     public List<EnumDefintion> EnumTypes { get; set; }
 
     public List<TypeDefinition> Types { get; set; }
+
+    public Dictionary<Type, FeatureAttribute> FeatureMarks { get; set; } = new();
+
+    public IEnumerable<IFeatureMarked> FeatureMarkedChildren => EnumTypes.Cast<IFeatureMarked>().Concat(Types);
+
+    public IEnumerable<FeatureAttribute> ReadFeatures()
+    {
+        yield return new FileAttribute(Name);
+    }
 }
 
-public class EnumDefintion
+public class EnumDefintion : IFeatureMarked
 {
     public Type Type { get; set; }
 
     public Dictionary<string, int> KeyValuePairs { get; set; }
+
+    public Dictionary<Type, FeatureAttribute> FeatureMarks { get; set; } = new();
+
+    public IEnumerable<IFeatureMarked> FeatureMarkedChildren => Enumerable.Empty<IFeatureMarked>();
+
+    public IEnumerable<FeatureAttribute> ReadFeatures()
+    {
+        return Type.GetCustomAttributesUngrouped<FeatureAttribute>();
+    }
 }
 
-public class PropertyDefinition
+public class PropertyDefinition : IFeatureMarked
 {
     public Type Type { get; set; }
 
     public string Name { get; set; }
 
     public PropertyInfo Info { get; set; }
+
+    public Dictionary<Type, FeatureAttribute> FeatureMarks { get; set; } = new();
+
+    public IEnumerable<IFeatureMarked> FeatureMarkedChildren => Enumerable.Empty<IFeatureMarked>();
+
+    public IEnumerable<FeatureAttribute> ReadFeatures()
+    {
+        return Info.GetCustomAttributesUngrouped<FeatureAttribute>();
+    }
 }
 
-public class TypeDefinition
+public class TypeDefinition : IFeatureMarked
 {
     public Type Type { get; set; }
 
     public List<MethodDefinition> Methods { get; set; }
 
     public List<PropertyDefinition> Properties { get; set; }
+
+    public Dictionary<Type, FeatureAttribute> FeatureMarks { get; set; } = new();
+
+    public IEnumerable<IFeatureMarked> FeatureMarkedChildren => Methods.Cast<IFeatureMarked>().Concat(Properties);
+
+    public IEnumerable<FeatureAttribute> ReadFeatures()
+    {
+        return Type.GetCustomAttributesUngrouped<FeatureAttribute>();
+    }
 }
 
-public class MethodDefinition
+public class MethodDefinition : IFeatureMarked
 {
     public string Name { get; set; }
 
@@ -53,15 +102,33 @@ public class MethodDefinition
     public MethodInfo MethodInfo { get; set; }
 
     public List<ParameterDefinition> Parameters { get; set; }
+
+    public Dictionary<Type, FeatureAttribute> FeatureMarks { get; set; } = new();
+
+    public IEnumerable<IFeatureMarked> FeatureMarkedChildren => Parameters;
+
+    public IEnumerable<FeatureAttribute> ReadFeatures()
+    {
+        return MethodInfo.GetCustomAttributesUngrouped<FeatureAttribute>();
+    }
 }
 
-public class ParameterDefinition
+public class ParameterDefinition : IFeatureMarked
 {
     public Type Type { get; set; }
 
     public string Name { get; set; }
 
     public ParameterInfo Parameter { get; set; }
+
+    public Dictionary<Type, FeatureAttribute> FeatureMarks { get; set; } = new();
+
+    public IEnumerable<IFeatureMarked> FeatureMarkedChildren => Enumerable.Empty<IFeatureMarked>();
+
+    public IEnumerable<FeatureAttribute> ReadFeatures()
+    {
+        return Parameter.GetCustomAttributes<FeatureAttribute>();
+    }
 }
 
 public class ParserConfig

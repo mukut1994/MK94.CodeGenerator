@@ -22,4 +22,14 @@ public static class Extensions
             DiskAssert.MatchesRaw(file.Key, Encoding.UTF8.GetString(file.Value.ToArray()).Replace("\r\n", "\n"));
         }
     }
+
+    public static void AssertMatches(this Dictionary<string, string> files, IndentStyle indentStyle = IndentStyle.NewLine)
+    {
+        CodeBuilder.FlushAll();
+
+        foreach (var file in files)
+        {
+            DiskAssert.MatchesRaw(file.Key, file.Value.Replace("\r\n", "\n"));
+        }
+    }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MK94.CodeGenerator.Features;
+using System;
 using System.Linq;
 using System.Reflection;
 
@@ -12,9 +13,9 @@ public class StronglyTypedIdAttribute(Type? type = null) : Attribute
 
 public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
 {
-    private readonly ICSharpProject project;
+    private readonly IFeatureGroup<CSharpCodeGenerator> project;
 
-    public StronglyTypedIdModule(ICSharpProject project)
+    public StronglyTypedIdModule(IFeatureGroup<CSharpCodeGenerator> project)
     {
         this.project = project;
     }
@@ -23,7 +24,7 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
     {
         foreach (var fileDef in project.Files)
         {
-            var file = codeGenerator.File($"{fileDef.Name}.g.cs");
+            var file = codeGenerator.File(fileDef.GetFilename() + ".cs");
 
             foreach (var typeDef in fileDef.Types)
             {
@@ -31,7 +32,7 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
 
                 if (attribute is null) continue;
 
-                var ns = file.Namespace(project.NamespaceResolver(typeDef));
+                var ns = file.Namespace(typeDef.GetNamespace());
 
                 CreateStronglyTypedIdInterface(ns, attribute);
 
@@ -87,7 +88,7 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
 public static class StronglyTypedIdModuleExtensions
 {
     public static T WithStronglyTypedIdGenerator<T>(this T project, Action<StronglyTypedIdModule>? configure = null)
-        where T : ICSharpProject
+        where T : IFeatureGroup<CSharpCodeGenerator>
     {
         var mod = new StronglyTypedIdModule(project);
 
@@ -100,7 +101,7 @@ public static class StronglyTypedIdModuleExtensions
     }
 
     public static T WithJsonConverterForStronglyTypedIdGenerator<T>(this T project, Action<StronglyTypedIdJsonConverterModule>? configure = null)
-        where T : ICSharpProject
+        where T : IFeatureGroup<CSharpCodeGenerator>
     {
         if (project.GeneratorModules.All(x => x.GetType() != typeof(StronglyTypedIdModule)))
             throw new InvalidProgramException("Cannot add JsonConverterGenerator when StronglyTypedIdGenerator is not added");
@@ -116,7 +117,7 @@ public static class StronglyTypedIdModuleExtensions
     }
 
     public static T WithEfCoreValueConverterForStronglyTypedIdGenerator<T>(this T project, Action<EfCoreValueConverterModule>? configure = null)
-        where T : ICSharpProject
+        where T : IFeatureGroup<CSharpCodeGenerator>
     {
         if (project.GeneratorModules.All(x => x.GetType() != typeof(StronglyTypedIdModule)))
             throw new InvalidProgramException("Cannot add EfCoreValueConverter when StronglyTypedIdGenerator is not added");

@@ -1,13 +1,14 @@
-﻿using System.Reflection;
+﻿using MK94.CodeGenerator.Features;
+using System.Reflection;
 using System.Text.Json.Serialization;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp.Modules.StronglyTypedId;
 
 public class StronglyTypedIdJsonConverterModule : IGeneratorModule<CSharpCodeGenerator>
 {
-    private readonly ICSharpProject project;
+    private readonly IFeatureGroup<CSharpCodeGenerator> project;
 
-    public StronglyTypedIdJsonConverterModule(ICSharpProject project)
+    public StronglyTypedIdJsonConverterModule(IFeatureGroup<CSharpCodeGenerator> project)
     {
         this.project = project;
     }
@@ -16,7 +17,7 @@ public class StronglyTypedIdJsonConverterModule : IGeneratorModule<CSharpCodeGen
     {
         foreach (var fileDef in project.Files)
         {
-            var file = codeGenerator.File($"{fileDef.Name}.g.cs");
+            var file = codeGenerator.File(fileDef.GetFilename() + ".cs");
 
             foreach (var typeDef in fileDef.Types)
             {
@@ -25,7 +26,7 @@ public class StronglyTypedIdJsonConverterModule : IGeneratorModule<CSharpCodeGen
                 file.WithUsing("System.Text.Json");
                 file.WithUsing("System.Text.Json.Serialization");
 
-                var ns = file.Namespace(project.NamespaceResolver(typeDef));
+                var ns = file.Namespace(typeDef.GetNamespace());
 
                 var originalType = ns.Type(typeDef.Type.Name, MemberFlags.Public);
 

@@ -39,7 +39,7 @@ namespace MK94.CodeGenerator.Attributes
     }
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
-    public class DependsOnAttribute : Attribute, TypeAttribute, PropertyAttribute
+    public class DependsOnAttribute : FeatureAttribute, TypeAttribute, PropertyAttribute
     {
         public Type Type { get; }
 
@@ -50,7 +50,7 @@ namespace MK94.CodeGenerator.Attributes
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface | AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
-    public class ProjectAttribute : Attribute, TypeAttribute, PropertyAttribute
+    public class ProjectAttribute : FeatureAttribute, TypeAttribute, PropertyAttribute
     {
         public string Project { get; }
 
@@ -60,22 +60,8 @@ namespace MK94.CodeGenerator.Attributes
         }
     }
 
-    /// <summary>
-    /// The file name where this class is located.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface | AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
-    public class FileAttribute : Attribute
-    {
-        public string Name { get; set; }
-
-        public FileAttribute(string name)
-        {
-            Name = name;
-        }
-    }
-
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
-    public class OnlyOnAttribute : Attribute, PropertyAttribute
+    public class OnlyOnAttribute : FeatureAttribute, PropertyAttribute
     {
         public string Project { get; }
 
@@ -86,7 +72,7 @@ namespace MK94.CodeGenerator.Attributes
     }
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-    public class MessageCodeAttribute : Attribute
+    public class MessageCodeAttribute : FeatureAttribute
     {
         public byte Code { get; }
 
@@ -98,7 +84,7 @@ namespace MK94.CodeGenerator.Attributes
 
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Interface, AllowMultiple = true, Inherited = false)]
-    public class DbAttribute : Attribute, TypeAttribute
+    public class DbAttribute : FeatureAttribute, TypeAttribute
     {
         public string TableName { get; }
 
@@ -109,13 +95,13 @@ namespace MK94.CodeGenerator.Attributes
     }
 
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
-    public class PrimaryKeyAttribute : Attribute, PropertyAttribute
+    public class PrimaryKeyAttribute : FeatureAttribute, PropertyAttribute
     {
 
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Interface | AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
-    public class GroupOfAttributes : Attribute, TypeAttribute
+    public class GroupOfAttributes : FeatureAttribute, TypeAttribute
     {
         public TypeAttribute[] Attributes { get; }
 
@@ -126,7 +112,7 @@ namespace MK94.CodeGenerator.Attributes
     }
 
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true, Inherited = false)]
-    public class GroupOfPropertyAttributes : Attribute, TypeAttribute
+    public class GroupOfPropertyAttributes : FeatureAttribute, TypeAttribute
     {
         public PropertyAttribute[] Attributes { get; }
 

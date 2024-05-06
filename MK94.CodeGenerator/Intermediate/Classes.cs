@@ -13,12 +13,6 @@ public interface IFileGenerator
     void Generate(Func<string, CodeBuilder> factory);
 }
 
-public interface ICodeGenerator<T, TRet>
-    where T : IFileGenerator
-{
-    TRet GenerateTo(T target);
-}
-
 public interface IGeneratorModule<T>
     where T : IFileGenerator
 {
@@ -30,21 +24,6 @@ public interface IGeneratorModuleUser<T>
 {
     List<IGeneratorModule<T>> GeneratorModules { get; }
 
-}
-
-public interface INamespaceResolver<T>
-{
-    Func<TypeDefinition, string> NamespaceResolver { get; set; }
-}
-
-public static class NamespaceResolverExtensions
-{
-    public static ICSharpProject WithinNamespace(this ICSharpProject type, string @namespace)
-    {
-        type.NamespaceResolver = _ => @namespace;
-
-        return type;
-    }
 }
 
 [Flags]
@@ -86,29 +65,85 @@ public enum PropertyType
 public interface IProject
 {
     Solution Solution { get; init; }
-   
+
+    [Obsolete]
     List<FileDefinition> Files { get; set; }
-    
-    List<Project> References { get; set; }
 
 }
 
-public class Project : IProject
+public interface IFeatureGroup
 {
-    public Solution Solution { get; init; }
+    List<FileDefinition> Files { get; }
+}
 
+public interface IFeatureGroup<TGenerator> : IFeatureGroup
+    where TGenerator : IFileGenerator
+{
+    List<IGeneratorModule<TGenerator>> GeneratorModules { get; }
+}
+
+public class FeatureGroup<TGenerator> : IFeatureGroup<TGenerator> 
+    where TGenerator : IFileGenerator
+{
     public List<FileDefinition> Files { get; set; } = new();
 
-    public List<Project> References { get; set;} = new();
+    public List<IGeneratorModule<TGenerator>> GeneratorModules { get; } = new();
+}
+
+public abstract class Project : IProject
+{
+
+    public Solution Solution { get; init; }
+
+    [Obsolete]
+    public List<FileDefinition> Files { get; set; } = new();
 
     public Project(Solution solution)
     {
         Solution = solution;
     }
+
+    public abstract void Generate(Func<string, CodeBuilder> outputFactory);
+}
+
+public abstract class Project<TGenerator> : Project
+    where TGenerator : IFileGenerator
+{
+    public List<FeatureGroup<TGenerator>> FeatureGroups { get; set; } = new();
+
+    public Project(Solution solution) : base(solution)
+    {
+    }
 }
 
 public static class ProjectExtensions
 {
+    public static IFeatureGroup<CSharpCodeGenerator> UsesAllSolutionFeatures(this ICSharpProject project)
+    {
+        var ret = new FeatureGroup<CSharpCodeGenerator>()
+        {
+            Files = project.Solution.AllFiles.ToList()
+        };
+
+        project.FeatureGroups.Add(ret);
+
+        return ret;
+    }
+
+    public static IFeatureGroup<CSharpCodeGenerator> UsesFeature<T>(this ICSharpProject project)
+        where T : FeatureAttribute
+    {
+        var ret = new FeatureGroup<CSharpCodeGenerator>()
+        {
+            Files = project.FindWithFeatures<T>()
+        };
+
+        project.FeatureGroups.Add(ret);
+
+        return ret;
+    }
+
+    [Obsolete]
     public static T WhichUses<T>(this T project, List<FileDefinition> files)
         where T : IProject
     {
@@ -117,6 +152,7 @@ public static class ProjectExtensions
         return project;
     }
 
+    [Obsolete]
     public static T WhichImplements<T>(this T project, List<FileDefinition> files)
         where T : IProject
     {
@@ -128,6 +164,7 @@ public static class ProjectExtensions
         return project;
     }
 
+    [Obsolete]
     public static T WithDependenciesFor<T>(this T project, List<FileDefinition> files)
         where T : IProject
     {
@@ -138,6 +175,7 @@ public static class ProjectExtensions
         return project;
     }
 
+    [Obsolete]
     public static T Without<T>(this T project, List<FileDefinition> files)
         where T : IProject
     {

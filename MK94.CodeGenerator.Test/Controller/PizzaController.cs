@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MK94.CodeGenerator.Intermediate.CSharp.Modules;
+using MK94.CodeGenerator.Features;
 
 namespace MK94.CodeGenerator.Test.Controller;
 

@@ -1,13 +1,14 @@
-﻿using System;
+﻿using MK94.CodeGenerator.Features;
+using System;
 using System.Linq;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp.Modules;
 
 public class PropertiesModule : IGeneratorModule<CSharpCodeGenerator>
 {
-    private readonly ICSharpProject project;
+    private readonly IFeatureGroup<CSharpCodeGenerator> project;
 
-    public PropertiesModule(ICSharpProject project)
+    public PropertiesModule(IFeatureGroup<CSharpCodeGenerator> project)
     {
         this.project = project;
     }
@@ -21,9 +22,9 @@ public class PropertiesModule : IGeneratorModule<CSharpCodeGenerator>
                 if (!typeDef.Properties.Any())
                     continue;
 
-                var file = codeGenerator.File($"{fileDef.Name}.g.cs");
+                var file = codeGenerator.File(fileDef.GetFilename() + ".cs");
 
-                var ns = file.Namespace(project.NamespaceResolver(typeDef));
+                var ns = file.Namespace(typeDef.GetNamespace());
                 var type = ns.Type(typeDef.Type.Name, MemberFlags.Public);
 
                 foreach(var propertyDef in typeDef.Properties)
@@ -41,7 +42,7 @@ public class PropertiesModule : IGeneratorModule<CSharpCodeGenerator>
 public static class DataModuleExtensions
 {
     public static T WithPropertiesGenerator<T>(this T project, Action<PropertiesModule>? configure = null)
-        where T : ICSharpProject
+        where T : IFeatureGroup<CSharpCodeGenerator>
     {
         var mod = new PropertiesModule(project);
 

@@ -1,4 +1,5 @@
 ﻿using MK94.Assert;
+using MK94.CodeGenerator.Features;
 using MK94.CodeGenerator.Generator;
 using MK94.CodeGenerator.Intermediate;
 using MK94.CodeGenerator.Intermediate.CSharp;
@@ -81,90 +82,87 @@ public class CSharpTests
     [Test]
     public void DataModuleTest()
     {
-        var solution = Solution.FromAssemblyContaining<Page>();
+        var solution = Solution.FromAssemblyContaining<Page>()
+            .WithFeaturesFromAttributes()
+            .WithFilenameDotGPostFix(); ;
 
-        // TODO cleaner parser syntax
         var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
-        var csharpCode = new CSharpCodeGenerator();
-
-        var project = solution
+        solution
             .CSharpProject()
-            .WhichImplements(controllerFeature)
+            .UsesFeature<ControllerFeatureAttribute>()
             .WithinNamespace("TestNameSpace")
+            .WithPropertiesGenerator();
 
-            .WithPropertiesGenerator()
-
-            .GenerateTo(csharpCode);
-
-        csharpCode.AssertMatches();
+        solution.GenerateToMemory()
+            .DecodeUTF8()
+            .AssertMatches();
     }
 
     [Test]
     public void DataModuleTest_Controller()
     {
-        var solution = Solution.FromAssemblyContaining<Page>();
+        var solution = Solution.FromAssemblyContaining<Page>()
+            .WithFeaturesFromAttributes()
+            .WithFilenameDotGPostFix(); ;
 
-        // TODO cleaner parser syntax
         var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
-        var csharpCode = new CSharpCodeGenerator();
-
-        var project = solution
+        solution
             .CSharpProject()
-            .WhichImplements(controllerFeature)
+            .UsesFeature<ControllerFeatureAttribute>()
             .WithinNamespace("TestNameSpace")
             .WithPropertiesGenerator()
-            .WithControllerModuleGenerator()
-            .GenerateTo(csharpCode);
+            .WithControllerModuleGenerator();
 
-        csharpCode.AssertMatches();
+        solution.GenerateToMemory()
+            .DecodeUTF8()
+            .AssertMatches();
     }
 
     [Test]
     public void DataModule_StronglyTypedId()
     {
-        var solution = Solution.FromAssemblyContaining<Page>();
+        var solution = Solution.FromAssemblyContaining<Page>()
+            .WithFeaturesFromAttributes()
+            .WithFilenameDotGPostFix(); ;
 
-        // TODO cleaner parser syntax
         var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
-        var csharpCode = new CSharpCodeGenerator();
-
-        var project = solution
+        solution
             .CSharpProject()
-            .WhichImplements(controllerFeature)
+            .UsesFeature<ControllerFeatureAttribute>()
             .WithinNamespace("TestNameSpace")
             .WithPropertiesGenerator()
             .WithStronglyTypedIdGenerator()
             .WithJsonConverterForStronglyTypedIdGenerator()
-            .WithEfCoreValueConverterForStronglyTypedIdGenerator()
-            .GenerateTo(csharpCode);
+            .WithEfCoreValueConverterForStronglyTypedIdGenerator();
 
-        csharpCode.AssertMatches();
+        solution.GenerateToMemory()
+            .DecodeUTF8()
+            .AssertMatches();
     }
 
     [Test]
     public void DataAndSerializerMixedModuleTest()
     {
-        var solution = Solution.FromAssemblyContaining<Page>();
+        var solution = Solution.FromAssemblyContaining<Page>()
+            .WithFeaturesFromAttributes()
+            .WithFilenameDotGPostFix();
 
-        // TODO cleaner parser syntax
         var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
-        var csharpCode = new CSharpCodeGenerator();
-
-        var project = solution
+        solution
             .CSharpProject()
-            .WhichImplements(controllerFeature)
+            .UsesFeature<ControllerFeatureAttribute>()
             .WithinNamespace("TestNameSpace")
             .WithPropertiesGenerator()
             .WithJsonToStringGenerator()
-            .WithFlurlClientGenerator()
-            
-            .GenerateTo(csharpCode);
+            .WithFlurlClientGenerator();
 
-        csharpCode.AssertMatches();
+        solution.GenerateToMemory()
+            .DecodeUTF8()
+            .AssertMatches();
     }
 
     [Test]
@@ -174,21 +172,21 @@ public class CSharpTests
         // This requires all files multiple times otherwise
         // The solution should be defining all of them instead
         var allfiles = new Parser().ParseFromTypes(t => "generated", typeof(Page), typeof(PageId));
-        var solution = Solution.From(allfiles);
+        var solution = Solution.From(allfiles)
+            .WithFeaturesFromAttributes()
+            .WithFilenameDotGPostFix(); ;
 
         // TODO cleaner parser syntax
         var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
 
-        var csharpCode = new CSharpCodeGenerator();
-
         var project = solution
             .CSharpProject()
-            .WhichUses(allfiles)
+            .UsesAllSolutionFeatures()
             .WithinNamespace("TestNameSpace")
-            .WithPropertiesGenerator()
+            .WithPropertiesGenerator();
 
-            .GenerateTo(csharpCode);
-
-        csharpCode.AssertMatches();
+        solution.GenerateToMemory()
+            .DecodeUTF8()
+            .AssertMatches();
     }
 }
