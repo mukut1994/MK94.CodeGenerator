@@ -57,7 +57,7 @@ public class IntermediateMethodDefinition : IntermediateTypedMemberDefinition, I
                 .Append((b, arg) => arg.Generate(b), Arguments)
             .CloseParanthesis();
 
-        if (Flags.HasFlag(MemberFlags.Partial) && BodyStream.Capacity == 0)
+        if (Flags.HasFlag(MemberFlags.Interface) && BodyStream.Capacity == 0)
         {
             builder.AppendLine(";");
             return;
