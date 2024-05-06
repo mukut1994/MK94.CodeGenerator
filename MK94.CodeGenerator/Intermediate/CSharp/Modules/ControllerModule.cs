@@ -4,6 +4,7 @@ using System.Reflection;
 using MK94.CodeGenerator.Attributes;
 using MK94.CodeGenerator.Features;
 using MK94.CodeGenerator.Generator;
+using MK94.CodeGenerator.Intermediate.CSharp.Generator;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp.Modules;
 

@@ -1,4 +1,5 @@
 ﻿using MK94.CodeGenerator.Intermediate.CSharp;
+using MK94.CodeGenerator.Intermediate.CSharp.Generator;
 using MK94.CodeGenerator.Intermediate.CSharp.Modules;
 using System;
 using System.Collections.Generic;

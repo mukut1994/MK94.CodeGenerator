@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MK94.CodeGenerator.Intermediate.CSharp.Generator;
 
 namespace MK94.CodeGenerator.Intermediate.CSharp;
 

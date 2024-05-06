@@ -2,7 +2,7 @@
 using MK94.CodeGenerator.Features;
 using MK94.CodeGenerator.Generator;
 using MK94.CodeGenerator.Intermediate;
-using MK94.CodeGenerator.Intermediate.CSharp;
+using MK94.CodeGenerator.Intermediate.CSharp.Generator;
 using MK94.CodeGenerator.Intermediate.CSharp.Modules;
 using MK94.CodeGenerator.Intermediate.CSharp.Modules.StronglyTypedId;
 using MK94.CodeGenerator.Test.Controller;
