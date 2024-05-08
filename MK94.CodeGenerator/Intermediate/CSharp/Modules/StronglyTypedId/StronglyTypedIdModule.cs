@@ -7,7 +7,7 @@ using System.Reflection;
 namespace MK94.CodeGenerator.Intermediate.CSharp.Modules.StronglyTypedId;
 
 [AttributeUsage(AttributeTargets.Struct)]
-public class StronglyTypedIdAttribute(Type? type = null) : Attribute
+public class StronglyTypedIdAttribute(Type? type = null) : FeatureAttribute
 {
     public Type Type { get; set; } = type ?? typeof(Guid);
 }
@@ -43,6 +43,10 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
                         CreateGuidId(ns, typeDef.Type.Name, attribute.Type.Name, CsharpTypeReference.ToType(typeDef.Type));
                         break;
 
+                    case var stringType when stringType == typeof(string):
+                        CreateStringId(ns, typeDef.Type.Name, attribute.Type.Name, CsharpTypeReference.ToType(typeDef.Type));
+                        break;
+
                     default:
                         throw new NotImplementedException();
                 }
@@ -63,15 +67,39 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
 
         stronglyTypedId
             .Method(MemberFlags.Public | MemberFlags.Static, CsharpTypeReference.ToType<Guid>(), "Empty")
-            .Body.Append("return new(Guid.Empty);");
+            .Body.Append("return Guid.Empty;");
 
         stronglyTypedId
             .Method(MemberFlags.Public | MemberFlags.Static, CsharpTypeReference.ToType<Guid>(), "New")
-            .Body.Append("return new(Guid.NewGuid());");
+            .Body.Append("return Guid.NewGuid();");
 
         stronglyTypedId
             .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToType<string>(), "ToString")
             .Body.Append("return Id.ToString();");
+    }
+
+    private static void CreateStringId(IntermediateNamespaceDefintion ns, string typeName, string backingType, CsharpTypeReference type)
+    {
+        var stronglyTypedId = ns
+                                .Type(typeName, MemberFlags.Public, type)
+                                .WithTypeAsRecord()
+                                .WithTypeAsStruct()
+                                .WithInheritsFrom(CsharpTypeReference.ToRaw($"{backingType}Id"))
+                                .WithPrimaryConstructor();
+
+        stronglyTypedId.Property(MemberFlags.Public, CsharpTypeReference.ToType<string>(), "Id");
+
+        stronglyTypedId
+            .Method(MemberFlags.Public | MemberFlags.Static, CsharpTypeReference.ToType<string>(), "Empty")
+            .Body.Append("return string.Empty;");
+
+        stronglyTypedId
+            .Method(MemberFlags.Public | MemberFlags.Static, CsharpTypeReference.ToType<string>(), "New")
+            .Body.Append("return Guid.NewGuid().ToString();");
+
+        stronglyTypedId
+            .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToType<string>(), "ToString")
+            .Body.Append("return Id;");
     }
 
     private static void CreateStronglyTypedIdInterface(IntermediateNamespaceDefintion ns, StronglyTypedIdAttribute attribute)

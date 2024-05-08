@@ -83,6 +83,8 @@ public interface IFeatureGroup<TGenerator> : IFeatureGroup
     where TGenerator : IFileGenerator
 {
     List<IGeneratorModule<TGenerator>> GeneratorModules { get; }
+
+    new List<FileDefinition> Files { get; set; }
 }
 
 public class FeatureGroup<TGenerator> : IFeatureGroup<TGenerator> 
@@ -147,6 +149,18 @@ public static class ProjectExtensions
         project.FeatureGroups.Add(ret);
 
         return ret;
+    }
+
+    public static IFeatureGroup<CSharpCodeGenerator> Excluding<T>(this IFeatureGroup<CSharpCodeGenerator> group)
+        where T : FeatureAttribute
+    {
+        var featureFiles = group.Solution.AllFiles.FindWithFeatures<T>(group.Solution.LookupCache);
+
+        var deps = group.Files.ExcludeAndInheritFrom(featureFiles).ToList();
+
+        group.Files = deps;
+
+        return group;
     }
 
     public static IFeatureGroup<CSharpCodeGenerator> UsesDependenciesOf<T>(this ICSharpProject project)

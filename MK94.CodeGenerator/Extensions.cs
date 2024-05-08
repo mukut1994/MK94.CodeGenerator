@@ -325,7 +325,8 @@ public static class Extensions
                 Types = file.Types.Where(x => !typesToExclude.Contains(x.Type)).ToList(),
                 EnumTypes = file.EnumTypes.Where(x => !typesToExclude.Contains(x.Type)).ToList(),
                 FileInfo = file.FileInfo,
-                Name = file.Name
+                Name = file.Name,
+                FeatureMarks = file.FeatureMarks.ToDictionary(),
             });
         }
 
