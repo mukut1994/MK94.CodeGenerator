@@ -50,7 +50,7 @@ public static class FeatureExtensions
             action(marked);
 
         foreach (var child in marked.FeatureMarkedChildren)
-            child.ForeachFeatureMarked(action);
+            child.ForeachFeatureMarked(action, filter);
     }
 
     /// <summary>

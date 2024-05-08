@@ -3,7 +3,7 @@ using Flurl;
 
 namespace TestNameSpace;
 
-public class PizzaController
+public class IPizzaController
 {
     public static Task<PageResult<Order>> PizzaList(Page page)
     {

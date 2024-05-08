@@ -53,7 +53,7 @@ public static class NamespaceFeatureExtensions
     {
         foreach (var file in group.Files)
         {
-            file.ForeachFeatureMarked(x => x.FeatureMarks.Set(new NamespaceFeature(space)), x => x is FileDefinition);
+            file.ForeachFeatureMarked(x => x.FeatureMarks.Set(new NamespaceFeature(space)), x => x is TypeDefinition || x is EnumDefintion);
         }
 
         return group;
