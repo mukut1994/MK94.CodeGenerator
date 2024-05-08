@@ -364,8 +364,6 @@ public class CodeBuilder
 
     public CodeBuilder OpenSquareParanthesis()
     {
-        optionalSpace = false;
-        optionalComma = false;
         squareParenthesisOpenCount++;
         InternalAppend("[");
 
