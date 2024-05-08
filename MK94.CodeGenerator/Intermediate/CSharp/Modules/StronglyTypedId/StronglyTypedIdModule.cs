@@ -66,12 +66,12 @@ public class StronglyTypedIdModule : IGeneratorModule<CSharpCodeGenerator>
         stronglyTypedId.Property(MemberFlags.Public, CsharpTypeReference.ToType<Guid>(), "Id");
 
         stronglyTypedId
-            .Method(MemberFlags.Public | MemberFlags.Static, CsharpTypeReference.ToType<Guid>(), "Empty")
-            .Body.Append("return Guid.Empty;");
+            .Method(MemberFlags.Public | MemberFlags.Static, CsharpTypeReference.ToRaw(typeName), "Empty")
+            .Body.Append("return new(Guid.Empty);");
 
         stronglyTypedId
-            .Method(MemberFlags.Public | MemberFlags.Static, CsharpTypeReference.ToType<Guid>(), "New")
-            .Body.Append("return Guid.NewGuid();");
+            .Method(MemberFlags.Public | MemberFlags.Static, CsharpTypeReference.ToRaw(typeName), "New")
+            .Body.Append("return new(Guid.NewGuid());");
 
         stronglyTypedId
             .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToType<string>(), "ToString")
