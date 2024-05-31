@@ -13,7 +13,7 @@
   "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModule_StronglyTypedId/Controller.g.cs": "cce5pjbuvmvwn35eiaf8mqhpgttllaqwwuyf5b1mffa=",
   "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest/Data.g.cs": "jomu9ayeolyvoohxviiwdls-xb1lvxc6yta1v3d92rq=",
   "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest/Order.g.cs": "2e\u002Bftrll0e1p4cqfufuk0audgi5oecxm-zkunghmiji=",
-  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_Controller/Data.g.cs": "jomu9ayeolyvoohxviiwdls-xb1lvxc6yta1v3d92rq=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_Controller/Data.g.cs": "p1r5iabhp3yd5zko4msvxyt0b92w\u002Bxmj1dd7qd7ovle=",
   "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_Controller/Order.g.cs": "2e\u002Bftrll0e1p4cqfufuk0audgi5oecxm-zkunghmiji=",
   "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_Controller/Controller.g.cs": "lbm5e0-pion0om0whxfph9rerchg1exo4qepy56cmgu=",
   "MK94.CodeGenerator.Test.Intermediate.CSharpTests/SpecificTypesOnlyTest/generated.g.cs": "-9irpmhnnb45ocbmdfpw1oysxksy5qgemx6ianas2ug=",
@@ -28,5 +28,6 @@
   "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/Test/file.ts": "-ha0kgpaqclx-q7e99pqd2omzjwenmkgxvruxawh1qa=",
   "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/TestTs/filea.ts": "h97uhxh12jxnlxoeqcbjm71mo8rjyobi3dexufpgvqa=",
   "MK94.CodeGenerator.Test.Intermediate.TypescriptTests/TestTs/fileb.ts": "javhitvzgz3wnvrn9tbrkuocxk\u002B4z7rhnbhczmcbvbw=",
-  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest/Controller.g.cs": "cce5pjbuvmvwn35eiaf8mqhpgttllaqwwuyf5b1mffa="
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest/Controller.g.cs": "cce5pjbuvmvwn35eiaf8mqhpgttllaqwwuyf5b1mffa=",
+  "MK94.CodeGenerator.Test.Intermediate.CSharpTests/DataModuleTest_InterfaceMethodModule/Manager.g.cs": "rmbedka8awjvc5fnxj3uwpyvdraw-juj15lrafffnho="
 }

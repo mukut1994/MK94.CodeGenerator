@@ -110,10 +110,31 @@ public class CSharpTests
 
         solution
             .CSharpProject()
-            .Uses<ControllerFeatureAttribute>()
+            .UsesDependenciesOf<ControllerFeatureAttribute>()
             .WithNamespace("TestNameSpace")
             .WithPropertiesGenerator()
             .WithControllerModuleGenerator();
+
+        solution.GenerateToMemory()
+            .DecodeUTF8()
+            .AssertMatches();
+    }
+
+    [Test]
+    public void DataModuleTest_InterfaceMethodModule()
+    {
+        var solution = Solution.FromAssemblyContaining<Page>()
+            .WithFeaturesFromAttributes()
+            .WithFilenameDotGPostFix(); ;
+
+        var controllerFeature = ControllerFeatureAttribute.Parser.ParseFromAssemblyContainingType<Page>();
+
+        solution
+            .CSharpProject()
+            .UsesAllSolutionFeatures()
+            .Excluding<ControllerFeatureAttribute>()
+            .WithNamespace("TestNameSpace")
+            .WithInterfaceMethodGenerator();
 
         solution.GenerateToMemory()
             .DecodeUTF8()
