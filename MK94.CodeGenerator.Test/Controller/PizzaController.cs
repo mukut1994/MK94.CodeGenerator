@@ -58,3 +58,13 @@ public interface IPizzaController
     [Post]
     Task Order([Body] Order order);
 }
+
+[File("Manager")]
+public interface IPizzaManager
+{
+    [Get]
+    Task<PageResult<Order>> PizzaList(Page page);
+
+    [Post]
+    Task Order([Body] Order order);
+}
