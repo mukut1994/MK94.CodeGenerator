@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MK94.CodeGenerator.Features;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,8 @@ namespace MK94.CodeGenerator.Intermediate;
 public class RelativeFileResolver
 {
     private readonly HashSet<Type> definedTypes;
-    private readonly List<FileDefinition> files;
+    // hacky fix because it's not part of feature groups
+    internal List<FileDefinition> files;
 
     private static readonly Dictionary<Type, string> externalTypes = new();
 
@@ -60,7 +62,7 @@ public class RelativeFileResolver
             return null;
 
         if (matches.Count() > 1)
-            throw new InvalidProgramException($"Type {type.FullName} exists multiple times in project");
+            throw new InvalidProgramException($"Type {type.FullName} exists multiple times in project; {matches.Select(x => x.Name).Aggregate((a, b) => $"{a},{b}")}");
 
         return matches.Single();
     }

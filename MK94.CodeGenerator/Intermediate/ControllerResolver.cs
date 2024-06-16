@@ -70,7 +70,7 @@ public class ControllerResolver
             if (attr == null)
                 continue;
 
-            yield return new(prop.Name, prop.Name);
+            yield return new(prop.Name, $"{parameter.Name}.{prop.Name}");
         }
     }
 

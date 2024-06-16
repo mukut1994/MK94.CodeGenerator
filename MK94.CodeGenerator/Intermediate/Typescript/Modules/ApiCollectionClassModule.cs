@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MK94.CodeGenerator.Features;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,10 +9,12 @@ namespace MK94.CodeGenerator.Intermediate.Typescript.Modules;
 
 public class ApiCollectionClassModule : IGeneratorModule<TypescriptCodeGenerator>
 {
-    private readonly ITypescriptProject project;
+    private readonly IFeatureGroup<TypescriptCodeGenerator> project;
     private readonly string FileName;
 
-    public ApiCollectionClassModule(ITypescriptProject project, string fileName)
+    private Func<TypeDefinition, string, string> GetPropertyName = (_, x) => x;
+
+    public ApiCollectionClassModule(IFeatureGroup<TypescriptCodeGenerator> project, string fileName)
     {
         this.project = project;
         FileName = fileName;
@@ -26,12 +29,18 @@ public class ApiCollectionClassModule : IGeneratorModule<TypescriptCodeGenerator
         {
             foreach(var typeDef in fileDef.Types)
             {
-                var name = typeDef.AsApiName();
+                var name = typeDef.GetTypeName();
 
-                type.Property(MemberFlags.Public | MemberFlags.Static, TsTypeReference.ToAnonymous(), name)
-                    .WithDefaultValue(typeDef.AsClassName() + "Api");
+                type.Property(MemberFlags.Public | MemberFlags.Static, TsTypeReference.ToAnonymous(), GetPropertyName(typeDef, name))
+                    .WithDefaultValue(name);
             }
         }
+    }
+
+    public ApiCollectionClassModule WithPropertyName(Func<TypeDefinition, string, string> nameSetter)
+    {
+        GetPropertyName = nameSetter;
+        return this;
     }
 }
 
@@ -40,7 +49,7 @@ public static class ApiCollectionClassModuleExtensions
     public static T WithApiCollectionClassModuleGenerator<T>(this T project,
         string fileName, 
         Action<ApiCollectionClassModule>? configure = null)
-        where T : ITypescriptProject
+        where T : IFeatureGroup<TypescriptCodeGenerator>
     {
         var mod = new ApiCollectionClassModule(project, fileName);
 

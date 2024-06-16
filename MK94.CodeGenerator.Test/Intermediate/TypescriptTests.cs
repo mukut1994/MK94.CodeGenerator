@@ -99,11 +99,9 @@ public class TypescriptTests
 
         var project = solution
             .TypescriptProject()
-            .WhichImplements(controllerFeature)
+            .Uses<ControllerFeatureAttribute>()
 
-            .WithPropertiesGenerator()
-
-            .GenerateTo(typescriptCode);
+            .WithPropertiesGenerator();
 
         typescriptCode.AssertMatches();
     }
@@ -120,13 +118,12 @@ public class TypescriptTests
 
         var project = solution
             .TypescriptProject()
-            .WhichImplements(controllerFeature)
-            
+            .UsesDependenciesOf<ControllerFeatureAttribute>()
+
             .WithPropertiesGenerator()
             .WithEnumsGenerator()
-            .WithFetchClientModuleGenerator()
+            .WithFetchClientModuleGenerator();
 
-            .GenerateTo(typescriptCode);
 
         typescriptCode.AssertMatches(IndentStyle.SameLine);
     }

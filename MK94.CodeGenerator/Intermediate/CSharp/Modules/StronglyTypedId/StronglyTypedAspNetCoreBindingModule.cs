@@ -47,10 +47,28 @@ public class StronglyTypedAspNetCoreBindingModule : IGeneratorModule<CSharpCodeG
                     .Type($"{originalType.Name}Binder", MemberFlags.Public, CsharpTypeReference.ToRaw($"{originalType.Name}Binder"))
                     .WithInheritsFrom(CsharpTypeReference.ToRaw($"Microsoft.AspNetCore.Mvc.ModelBinding.IModelBinder"));
 
-                converterClass
-                    .Method(MemberFlags.Public, CsharpTypeReference.ToRaw("Task"), "BindModelAsync")
-                    .WithArgument(CsharpTypeReference.ToRaw("Microsoft.AspNetCore.Mvc.ModelBinding.ModelBindingContext"), "bindingContext")
-                    .Body.Append("""
+                if(attribute.Type == typeof(Guid))
+                    ConvertMethod(converterClass, originalType.Name,
+                        "Guid.TryParse(rawValue.FirstValue, out var parsed)", 
+                        "guid");
+                else if(attribute.Type == typeof(int))
+                    ConvertMethod(converterClass, originalType.Name,
+                        "int.TryParse(rawValue.FirstValue, out var parsed)",
+                        "int");
+                else
+                    ConvertMethod(converterClass, originalType.Name, null, null);
+            }
+        }
+    }
+
+    private static void ConvertMethod(IntermediateTypeDefinition converterClass,
+        string typeName,
+        string? tryConvert,
+        string? convertFailType)
+    {
+        converterClass.Method(MemberFlags.Public, CsharpTypeReference.ToRaw("Task"), "BindModelAsync")
+                      .WithArgument(CsharpTypeReference.ToRaw("Microsoft.AspNetCore.Mvc.ModelBinding.ModelBindingContext"), "bindingContext")
+                      .Body.Append($$"""
         var rawValue = bindingContext.ValueProvider.GetValue(bindingContext.ModelName); 
 
         if (rawValue.Length != 1)
@@ -58,22 +76,23 @@ public class StronglyTypedAspNetCoreBindingModule : IGeneratorModule<CSharpCodeG
             bindingContext.ModelState.AddModelError(bindingContext.ModelName, $"Single value expected");
             bindingContext.Result = Microsoft.AspNetCore.Mvc.ModelBinding.ModelBindingResult.Failed();
         }
-        else if (!Guid.TryParse(rawValue.FirstValue, out var parsed))
-        {
-            bindingContext.ModelState.AddModelError(bindingContext.ModelName, $"Invalid guid");
-            bindingContext.Result = Microsoft.AspNetCore.Mvc.ModelBinding.ModelBindingResult.Failed();
-        }
+        {{
+            (tryConvert == null ? string.Empty : $$"""
+            else if (!{{tryConvert}})
+            {
+                bindingContext.ModelState.AddModelError(bindingContext.ModelName, $"Invalid {{convertFailType}}");
+                bindingContext.Result = Microsoft.AspNetCore.Mvc.ModelBinding.ModelBindingResult.Failed();
+            } 
+            """)
+        }}
         else
         {
             bindingContext.ModelState.SetModelValue(bindingContext.ModelName, rawValue);
-            bindingContext.Result = Microsoft.AspNetCore.Mvc.ModelBinding.ModelBindingResult.Success(new ProgramId(parsed));
+            bindingContext.Result = Microsoft.AspNetCore.Mvc.ModelBinding.ModelBindingResult.Success(new {{typeName}}({{ (tryConvert != null ? "parsed" : "rawValue.FirstValue!") }}));
         }
 
         return Task.CompletedTask;
         """);
-
-            }
-        }
     }
 }
 

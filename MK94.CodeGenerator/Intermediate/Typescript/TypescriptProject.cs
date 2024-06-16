@@ -1,4 +1,5 @@
 ﻿using MK94.CodeGenerator.Intermediate.CSharp;
+using MK94.CodeGenerator.Intermediate.CSharp.Generator;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,8 @@ public interface ITypescriptProject : IProject
     List<IGeneratorModule<TypescriptCodeGenerator>> GeneratorModules { get; }
 
     ITypescriptProject GenerateTo(TypescriptCodeGenerator target);
+
+    List<FeatureGroup<TypescriptCodeGenerator>> FeatureGroups { get; }
 }
 
 public class TypescriptProject : Project<TypescriptCodeGenerator>, ITypescriptProject
@@ -45,6 +48,9 @@ public class TypescriptProject : Project<TypescriptCodeGenerator>, ITypescriptPr
 
         foreach (var group in FeatureGroups)
         {
+            // TODO hacky fix because relative file resolver is added to ts code gen when it should be created at this point
+            output.RelativeFileResolver.files = group.Files;
+
             foreach (var generator in group.GeneratorModules)
                 generator.AddTo(output);
         }

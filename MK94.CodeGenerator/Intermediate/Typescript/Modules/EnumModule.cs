@@ -8,9 +8,9 @@ namespace MK94.CodeGenerator.Intermediate.Typescript.Modules;
 
 public class EnumModule : IGeneratorModule<TypescriptCodeGenerator>
 {
-    private readonly ITypescriptProject project;
+    private readonly IFeatureGroup<TypescriptCodeGenerator> project;
 
-    public EnumModule(ITypescriptProject project)
+    public EnumModule(IFeatureGroup<TypescriptCodeGenerator> project)
     {
         this.project = project;
     }
@@ -37,7 +37,7 @@ public class EnumModule : IGeneratorModule<TypescriptCodeGenerator>
 public static class EnumModuleExtensions
 {
     public static T WithEnumsGenerator<T>(this T project, Action<EnumModule>? configure = null)
-        where T : ITypescriptProject
+        where T : IFeatureGroup<TypescriptCodeGenerator>
     {
         var mod = new EnumModule(project);
 

@@ -303,6 +303,7 @@ public class TypescriptCodeGenerator : IFileGenerator
 
     public RelativeFileResolver RelativeFileResolver { get; }
 
+    // TODO the relative resolver needs to be part of the feature group
     public TypescriptCodeGenerator(RelativeFileResolver resolver)
     {
         RelativeFileResolver = resolver;

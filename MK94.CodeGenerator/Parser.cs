@@ -9,7 +9,19 @@ using System.Threading.Tasks;
 
 namespace MK94.CodeGenerator;
 
-public class FeatureAttribute : Attribute { }
+public class FeatureAttribute : Attribute
+{
+    /// <summary>
+    /// The unique type to map this feature against. <br />
+    /// Useful for creating thin helper attributes. <br />
+    /// For example <see cref="GetAttribute" /> and  <see cref="PostAttribute" /> are mapped to <see cref="ControllerMethodAttribute"/>
+    /// </summary>
+    /// <returns></returns>
+    public virtual Type GetFeatureType()
+    {
+        return GetType();
+    }
+}
 
 public interface IFeatureMarked
 {

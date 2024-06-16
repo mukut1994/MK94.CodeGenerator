@@ -34,30 +34,49 @@ public class StronglyTypedIdJsonConverterModule : IGeneratorModule<CSharpCodeGen
                 var originalType = ns.Type(typeDef.Type.Name, MemberFlags.Public, CsharpTypeReference.ToRaw(typeDef.Type.Name));
 
                 originalType.Attribute(CsharpTypeReference.ToType<JsonConverterAttribute>()).WithParam($"typeof({originalType.Name}Converter)");
-
-                var converterClass = ns
-                    .Type($"{originalType.Name}Converter", MemberFlags.Public, CsharpTypeReference.ToRaw($"{originalType.Name}Converter"))
-                    .WithInheritsFrom(CsharpTypeReference.ToRaw($"JsonConverter<{originalType.Name}>"));
-
-                var method = converterClass
-                    .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToRaw(originalType.Name), "Read")
-                    // TODO "ref Utf8JsonReader" is a hack
-                    .WithArgument(CsharpTypeReference.ToRaw("ref Utf8JsonReader"), "reader")
-                    .WithArgument(CsharpTypeReference.ToRaw("Type"), "typeToConvert")
-                    .WithArgument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options");
-
+                
                 if(attribute.Type == typeof(Guid))
-                    method.Body.Append($"return new {originalType.Name}(Guid.Parse(reader.GetString()!));");
-                else
-                    method.Body.Append($"return new {originalType.Name}(reader.GetString()!);");
+                    CreateConverterClass(ns, originalType,
+                        "Guid.Parse(reader.GetString()!)",
+                        "WriteStringValue(value.Id)");
 
-                converterClass
-                    .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToVoid(), "Write")
-                    .WithArgument(CsharpTypeReference.ToRaw("Utf8JsonWriter"), "writer")
-                    .WithArgument(CsharpTypeReference.ToRaw(originalType.Name), "value")
-                    .WithArgument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options")
-                    .Body.Append("writer.WriteStringValue(value.Id);");
+               else if (attribute.Type == typeof(int))
+                    CreateConverterClass(ns, originalType,
+                        "reader.GetInt32()!",
+                        "WriteNumberValue(value.Id)");
+
+                else //if (attribute.Type == typeof(string))
+                    CreateConverterClass(ns, originalType,
+                        "reader.GetString()!",
+                        "WriteStringValue(value.Id)");
             }
         }
+    }
+
+    private static void CreateConverterClass(
+        IntermediateNamespaceDefintion ns,
+        IntermediateTypeDefinition originalType,
+        string read,
+        string write)
+    {
+        var converterClass = ns
+                            .Type($"{originalType.Name}Converter", MemberFlags.Public, CsharpTypeReference.ToRaw($"{originalType.Name}Converter"))
+                            .WithInheritsFrom(CsharpTypeReference.ToRaw($"JsonConverter<{originalType.Name}>"));
+
+        var method = converterClass
+            .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToRaw(originalType.Name), "Read")
+            // TODO "ref Utf8JsonReader" is a hack
+            .WithArgument(CsharpTypeReference.ToRaw("ref Utf8JsonReader"), "reader")
+            .WithArgument(CsharpTypeReference.ToRaw("Type"), "typeToConvert")
+            .WithArgument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options");
+        
+        method.Body.Append($"return new {originalType.Name}({read});");
+
+        converterClass
+            .Method(MemberFlags.Public | MemberFlags.Override, CsharpTypeReference.ToVoid(), "Write")
+            .WithArgument(CsharpTypeReference.ToRaw("Utf8JsonWriter"), "writer")
+            .WithArgument(CsharpTypeReference.ToRaw(originalType.Name), "value")
+            .WithArgument(CsharpTypeReference.ToRaw("JsonSerializerOptions"), "options")
+            .Body.Append($"writer.{write};");
     }
 }

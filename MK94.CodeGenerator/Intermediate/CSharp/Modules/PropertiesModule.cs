@@ -27,10 +27,14 @@ public class PropertiesModule : IGeneratorModule<CSharpCodeGenerator>
 
                 foreach(var propertyDef in typeDef.Properties)
                 {
-                    type.Property(
+                    var prop = type.Property(
                         MemberFlags.Public, 
                         CsharpTypeReference.ToType(propertyDef.Type),
                         propertyDef.Name);
+
+                    if (propertyDef.Info.SetMethod == null)
+                        prop.WithGetter();
+
                 }
             }
         }

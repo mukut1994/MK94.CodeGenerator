@@ -1,6 +1,7 @@
 ﻿using MK94.CodeGenerator.Intermediate.CSharp;
 using MK94.CodeGenerator.Intermediate.CSharp.Generator;
 using MK94.CodeGenerator.Intermediate.CSharp.Modules;
+using MK94.CodeGenerator.Intermediate.Typescript;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -151,7 +152,21 @@ public static class ProjectExtensions
         return ret;
     }
 
-    public static IFeatureGroup<CSharpCodeGenerator> Excluding<T>(this IFeatureGroup<CSharpCodeGenerator> group)
+    public static IFeatureGroup<TypescriptCodeGenerator> Uses<T>(this ITypescriptProject project)
+        where T : FeatureAttribute
+    {
+        var ret = new FeatureGroup<TypescriptCodeGenerator>()
+        {
+            Solution = project.Solution,
+            Files = project.FindWithFeatures<T>(),
+        };
+
+        project.FeatureGroups.Add(ret);
+
+        return ret;
+    }
+
+    public static IFeatureGroup<CSharpCodeGenerator> ExcludingTypes<T>(this IFeatureGroup<CSharpCodeGenerator> group)
         where T : FeatureAttribute
     {
         var featureFiles = group.Solution.AllFiles.FindWithFeatures<T>(group.Solution.LookupCache);
@@ -159,6 +174,26 @@ public static class ProjectExtensions
         var deps = group.Files.ExcludeAndInheritFrom(featureFiles).ToList();
 
         group.Files = deps;
+
+        return group;
+    }
+
+    public static IFeatureGroup<CSharpCodeGenerator> ExcludingParameters<T>(this IFeatureGroup<CSharpCodeGenerator> group)
+        where T : FeatureAttribute
+    {
+        foreach(var file in group.Files)
+        {
+            foreach(var type in file.Types)
+            {
+                foreach(var method in type.Methods)
+                {
+                    // TODO add a "GetTypeFeature" or some overload for getting type features too?
+                    method.Parameters.RemoveAll(x => 
+                        x.GetFeature<T>() != null 
+                        || (group.Solution.LookupCache.typeDefLookup.TryGetValue(x.Type, out var typeDef) && typeDef.GetFeature<T>() != null));
+                }
+            }
+        }
 
         return group;
     }
@@ -179,6 +214,74 @@ public static class ProjectExtensions
         project.FeatureGroups.Add(ret);
 
         return ret;
+    }
+
+    public static IFeatureGroup<TypescriptCodeGenerator> Uses(this ITypescriptProject project, IEnumerable<FileDefinition> featureFiles)
+    {
+        var ret = new FeatureGroup<TypescriptCodeGenerator>()
+        {
+            Solution = project.Solution,
+            Files = featureFiles.ToList(),
+        };
+
+        project.FeatureGroups.Add(ret);
+
+        return ret;
+    }
+
+    public static IFeatureGroup<TypescriptCodeGenerator> UsesDependenciesOf<T>(this ITypescriptProject project)
+        where T : FeatureAttribute
+    {
+        var featureFiles = project.Solution.AllFiles.FindWithFeatures<T>(project.Solution.LookupCache);
+
+        var deps = featureFiles.GetMethodDependencies(project.Solution.LookupCache).ToFileDef(project.Solution.LookupCache).ToList();
+
+        var ret = new FeatureGroup<TypescriptCodeGenerator>()
+        {
+            Solution = project.Solution,
+            Files = deps,
+        };
+
+        project.FeatureGroups.Add(ret);
+
+        return ret;
+    }
+
+    public static IFeatureGroup<TypescriptCodeGenerator> UsesDependenciesOf(this ITypescriptProject project, IEnumerable<FileDefinition> featureFiles)
+    {
+        var deps = featureFiles.GetMethodDependencies(project.Solution.LookupCache).ToFileDef(project.Solution.LookupCache).ToList();
+
+        var ret = new FeatureGroup<TypescriptCodeGenerator>()
+        {
+            Solution = project.Solution,
+            Files = deps,
+        };
+
+        project.FeatureGroups.Add(ret);
+
+        return ret;
+    }
+
+    public static IFeatureGroup<TypescriptCodeGenerator> Without<T>(this IFeatureGroup<TypescriptCodeGenerator> project)
+        where T : FeatureAttribute
+    {
+        var exclude = project.Solution.AllFiles.FindWithFeatures<T>(project.Solution.LookupCache);
+
+        var ret = new FeatureGroup<TypescriptCodeGenerator>()
+        {
+            Solution = project.Solution,
+            Files = project.Files.ExcludeAndInheritFrom(exclude).ToList(),
+        };
+
+        return project;
+    }
+
+    // TODO these extensions need a rethink
+    public static IFeatureGroup<TypescriptCodeGenerator> Without(this IFeatureGroup<TypescriptCodeGenerator> project, IEnumerable<FileDefinition> exclude)
+    {
+        project.Files = project.Files.ExcludeAndInheritFrom(exclude).ToList();
+
+        return project;
     }
 
     [Obsolete]

@@ -15,7 +15,8 @@ public class IntermediateMethodDefinition : IntermediateTypedMemberDefinition, I
 
     private List<IntermediateAttributeDefinition> attributes { get; } = new();
 
-    public IntermediateMethodDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name) : base(flags, type, name)
+    public IntermediateMethodDefinition(CSharpCodeGenerator root, MemberFlags flags, CsharpTypeReference type, string name)
+        : base(flags | MemberFlags.Method, type, name)
     {
         Body = CodeBuilder.FromMemoryStream(out var stream);
         BodyStream = stream;

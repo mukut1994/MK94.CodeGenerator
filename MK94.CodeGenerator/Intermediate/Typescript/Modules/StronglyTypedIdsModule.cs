@@ -8,9 +8,9 @@ namespace MK94.CodeGenerator.Intermediate.Typescript.Modules;
 
 public class StronglyTypedIdsModule : IGeneratorModule<TypescriptCodeGenerator>
 {
-    private readonly ITypescriptProject project;
+    private readonly IFeatureGroup<TypescriptCodeGenerator> project;
 
-    public StronglyTypedIdsModule(ITypescriptProject project)
+    public StronglyTypedIdsModule(IFeatureGroup<TypescriptCodeGenerator> project)
     {
         this.project = project;
     }
@@ -31,7 +31,7 @@ public class StronglyTypedIdsModule : IGeneratorModule<TypescriptCodeGenerator>
 public static class StronglyTypedIdsModuleExtensions
 {
     public static T WithStronglyTypedIdsGenerator<T>(this T project, Action<StronglyTypedIdsModule>? configure = null)
-        where T : ITypescriptProject
+        where T : IFeatureGroup<TypescriptCodeGenerator>
     {
         var mod = new StronglyTypedIdsModule(project);
 

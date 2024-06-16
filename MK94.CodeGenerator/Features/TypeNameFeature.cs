@@ -26,10 +26,10 @@ public static class TypeNameFeature
     public static T WithTypeName<T>(this T group, string name)
         where T : IFeatureGroup
     {
-        return group.WithTypeName(_ => name);
+        return group.WithTypeName((_, _) => name);
     }
 
-    public static T WithTypeName<T>(this T group, Func<string?, string?> name)
+    public static T WithTypeName<T>(this T group, Func<IFeatureMarked, string?, string?> name)
         where T : IFeatureGroup
     {
         foreach (var file in group.Files)
@@ -37,7 +37,7 @@ public static class TypeNameFeature
             foreach (var type in file.Types.Cast<IFeatureMarked>().Concat(file.EnumTypes))
             {
                 var attribute = type.GetFeature<TypeNameAttribute>();
-                var update = name(attribute?.Name);
+                var update = name(type, attribute?.Name);
 
                 if (update == null) continue;
 

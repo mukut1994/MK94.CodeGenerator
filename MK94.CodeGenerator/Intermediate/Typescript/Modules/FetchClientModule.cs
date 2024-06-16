@@ -1,6 +1,8 @@
 ﻿using MK94.CodeGenerator.Attributes;
+using MK94.CodeGenerator.Features;
 using MK94.CodeGenerator.Generator;
 using MK94.CodeGenerator.Intermediate.CSharp;
+using MK94.CodeGenerator.Intermediate.CSharp.Generator;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +14,11 @@ namespace MK94.CodeGenerator.Intermediate.Typescript.Modules;
 
 public class FetchClientModule : IGeneratorModule<TypescriptCodeGenerator>
 {
-    private readonly ITypescriptProject project;
+    private readonly IFeatureGroup<TypescriptCodeGenerator> project;
 
     public ControllerResolver ControllerResolver { get; private set; } = ControllerResolver.Instance;
 
-    public FetchClientModule(ITypescriptProject project)
+    public FetchClientModule(IFeatureGroup<TypescriptCodeGenerator> project)
     {
         this.project = project;
     }
@@ -38,7 +40,7 @@ public class FetchClientModule : IGeneratorModule<TypescriptCodeGenerator>
 
                 var file = codeGenerator.File($"{fileDef.Name}.ts");
 
-                var type = file.Type(typeDef.AsClassName() + "Api", MemberFlags.Public);
+                var type = file.Type(typeDef.GetTypeName(), MemberFlags.Public);
 
                 foreach(var methodDef in typeDef.Methods)
                 {
@@ -174,7 +176,7 @@ public class FetchClientModule : IGeneratorModule<TypescriptCodeGenerator>
 public static class FetchClientModuleModuleExtensions
 {
     public static T WithFetchClientModuleGenerator<T>(this T project, Action<FetchClientModule>? configure = null)
-        where T : ITypescriptProject
+        where T : IFeatureGroup<TypescriptCodeGenerator>
     {
         var mod = new FetchClientModule(project);
 

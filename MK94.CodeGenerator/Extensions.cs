@@ -82,14 +82,14 @@ public static class Extensions
         return new string(a);
     }
 
-    public static IEnumerable<T> GetCustomAttributesUngrouped<T>(this MemberInfo memberInfo)
+    public static IEnumerable<T> GetCustomAttributesUngrouped<T>(this MemberInfo memberInfo, bool inherit = false)
         where T : Attribute
     {
-        foreach (var attr in memberInfo.GetCustomAttributes<T>())
+        foreach (var attr in memberInfo.GetCustomAttributes<T>(inherit))
             yield return attr;
 
-        var typeAttr = memberInfo.GetCustomAttributes<GroupOfAttributes>();
-        var propAttr = memberInfo.GetCustomAttributes<GroupOfPropertyAttributes>();
+        var typeAttr = memberInfo.GetCustomAttributes<GroupOfAttributes>(inherit);
+        var propAttr = memberInfo.GetCustomAttributes<GroupOfPropertyAttributes>(inherit);
 
         foreach (var group in typeAttr)
         {
@@ -396,6 +396,18 @@ public static class Extensions
         }
 
         return ret.Values.ToList();
+    }
+
+    public static FileDefinition Clone(this FileDefinition orig)
+    {
+        return new FileDefinition
+        {
+            EnumTypes = orig.EnumTypes.Select(Clone).ToList(),
+            FeatureMarks = orig.FeatureMarks.ToDictionary(),
+            FileInfo = orig.FileInfo,
+            Name = orig.Name,
+            Types = orig.Types.Select(Clone).ToList(),
+        };
     }
 
     public static EnumDefintion Clone(this EnumDefintion orig)

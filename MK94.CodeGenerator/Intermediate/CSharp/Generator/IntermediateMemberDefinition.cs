@@ -17,6 +17,9 @@ public abstract class IntermediateMemberDefinition
         if (Flags.HasFlag(MemberFlags.Public))
             builder.AppendWord("public");
 
+        if (Flags.HasFlag(MemberFlags.Async) && Flags.HasFlag(MemberFlags.Method))
+            builder.AppendWord("async");
+
         if (Flags.HasFlag(MemberFlags.Partial))
             builder.AppendWord("partial");
 

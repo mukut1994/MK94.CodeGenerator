@@ -205,7 +205,7 @@ public class IntermediateTypeDefinition : IntermediateTypedMemberDefinition, IGe
             }
             else
             {
-                builder.AppendWord($"{InheritsFrom[i]}, ");
+                builder.AppendWord($"{InheritsFrom[i].Resolve(root)},");
             }
         }
     }

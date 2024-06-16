@@ -60,7 +60,7 @@ public static class FeatureExtensions
     {
         foreach (var file in solution.AllFiles)
         {
-            file.ForeachFeatureMarked(x => x.FeatureMarks = x.ReadFeatures().ToDictionary(x => x.GetType(), x => x));
+            file.ForeachFeatureMarked(x => x.FeatureMarks = x.ReadFeatures().ToDictionary(x => x.GetFeatureType(), x => x));
         }
 
         return solution;

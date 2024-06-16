@@ -8,9 +8,9 @@ namespace MK94.CodeGenerator.Intermediate.Typescript.Modules;
 
 public class TypeReflectionModule : IGeneratorModule<TypescriptCodeGenerator>
 {
-    private readonly ITypescriptProject project;
+    private readonly IFeatureGroup<TypescriptCodeGenerator> project;
 
-    public TypeReflectionModule(ITypescriptProject project)
+    public TypeReflectionModule(IFeatureGroup<TypescriptCodeGenerator> project)
     {
         this.project = project;
     }
@@ -53,7 +53,7 @@ public class TypeReflectionModule : IGeneratorModule<TypescriptCodeGenerator>
 public static class TypeReflectionModuleExtensions
 {
     public static T WithTypeReflectionGenerator<T>(this T project, Action<TypeReflectionModule>? configure = null)
-        where T : ITypescriptProject
+        where T : IFeatureGroup<TypescriptCodeGenerator>
     {
         var mod = new TypeReflectionModule(project);
 

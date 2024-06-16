@@ -8,11 +8,11 @@ namespace MK94.CodeGenerator.Intermediate.Typescript.Modules;
 
 public class PropertiesModule : IGeneratorModule<TypescriptCodeGenerator>
 {
-    private readonly ITypescriptProject project;
+    private readonly IFeatureGroup<TypescriptCodeGenerator> project;
 
     public bool LowercaseFirst = true;
 
-    public PropertiesModule(ITypescriptProject project)
+    public PropertiesModule(IFeatureGroup<TypescriptCodeGenerator> project)
     {
         this.project = project;
     }
@@ -56,7 +56,7 @@ public class PropertiesModule : IGeneratorModule<TypescriptCodeGenerator>
 public static class PropertiesModuleExtensions
 {
     public static T WithPropertiesGenerator<T>(this T project, Action<PropertiesModule>? configure = null)
-        where T : ITypescriptProject
+        where T : IFeatureGroup<TypescriptCodeGenerator>
     {
         var mod = new PropertiesModule(project);
 

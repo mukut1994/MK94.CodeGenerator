@@ -1,4 +1,5 @@
 ﻿using MK94.CodeGenerator.Attributes;
+using MK94.CodeGenerator.Features;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -659,7 +660,7 @@ namespace MK94.CodeGenerator.Generator
                 return null;
 
             if (matches.Count() > 1)
-                throw new InvalidProgramException($"Type {type.FullName} exists multiple times in project");
+                throw new InvalidProgramException($"Type {type.FullName} exists multiple times in project; {matches.Select(x => x.GetFilename()).Aggregate((a, b) => $"{a},{b}")}");
 
             return matches.Single();
         }
