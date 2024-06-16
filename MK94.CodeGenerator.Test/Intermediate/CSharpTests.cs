@@ -132,7 +132,7 @@ public class CSharpTests
         solution
             .CSharpProject()
             .UsesAllSolutionFeatures()
-            .Excluding<ControllerFeatureAttribute>()
+            .ExcludingTypes<ControllerFeatureAttribute>()
             .WithNamespace("TestNameSpace")
             .WithInterfaceMethodGenerator();
 
