@@ -138,7 +138,7 @@ public class IntermediateTypeDefinition : IntermediateTypedMemberDefinition, IGe
             }, attributes)
             .Append(AppendMemberFlags)
             .Append(AppendDefinitionFlags)
-            .Append(base.Type.Resolve(root))
+            .Append(Name)
             .Append(AppendPrimaryConstructor)
             .Append(AppendInheritsFrom)
             .OpenBlock();

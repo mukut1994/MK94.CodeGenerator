@@ -1,5 +1,6 @@
 ﻿using MK94.CodeGenerator.Attributes;
 using MK94.CodeGenerator.Features;
+using MK94.CodeGenerator.Generator;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -103,7 +104,8 @@ public class TypeDefinition : IFeatureMarked
     {
         var ret = new Dictionary<Type, FeatureAttribute>();
 
-        ret.Set(new TypeNameAttribute(Type.Name));
+        // TODO should really use the csharp reference class; but generic for any language
+        ret.Set(new TypeNameAttribute(CSharpHelper.CSharpName(Type)));
 
         foreach(var attr in Type.GetCustomAttributesUngrouped<FeatureAttribute>())
             ret.Set(attr);

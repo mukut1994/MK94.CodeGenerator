@@ -23,7 +23,7 @@ public class PropertiesModule : IGeneratorModule<CSharpCodeGenerator>
                 var file = codeGenerator.File(fileDef.GetFilename() + ".cs");
 
                 var ns = file.Namespace(typeDef.GetNamespace());
-                var type = ns.Type(typeDef.Type.Name, MemberFlags.Public, CsharpTypeReference.ToType(typeDef.Type));
+                var type = ns.Type(typeDef.GetTypeName(), MemberFlags.Public, CsharpTypeReference.ToType(typeDef.Type));
 
                 foreach(var propertyDef in typeDef.Properties)
                 {
