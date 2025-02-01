@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MK94.CodeGenerator.Features;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +22,7 @@ public class StronglyTypedIdsModule : IGeneratorModule<TypescriptCodeGenerator>
         {
             foreach(var typeDef in fileDef.Types)
             {
-                codeGenerator.File($"{fileDef.Name}.ts")
+                codeGenerator.File($"{fileDef.GetFilename()}.ts")
                     .WithTypeAlias(TsTypeReference.CleanName(typeDef.Type), MemberFlags.Public | MemberFlags.Interface, "string");
             }
         }

@@ -178,6 +178,18 @@ public static class ProjectExtensions
         return group;
     }
 
+    public static IFeatureGroup<TypescriptCodeGenerator> ExcludingTypes<T>(this IFeatureGroup<TypescriptCodeGenerator> group)
+        where T : FeatureAttribute
+    {
+        var featureFiles = group.Solution.AllFiles.FindWithFeatures<T>(group.Solution.LookupCache);
+
+        var deps = group.Files.ExcludeAndInheritFrom(featureFiles).ToList();
+
+        group.Files = deps;
+
+        return group;
+    }
+
     public static IFeatureGroup<CSharpCodeGenerator> ExcludingParameters<T>(this IFeatureGroup<CSharpCodeGenerator> group)
         where T : FeatureAttribute
     {

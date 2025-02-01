@@ -46,6 +46,9 @@ public class TypescriptProject : Project<TypescriptCodeGenerator>, ITypescriptPr
 
         var output = new TypescriptCodeGenerator(new(files));
 
+        foreach(var l in Solution.TypescriptTypeLookups)
+            output.TypeNameLookups[l.Key] = l.Value;
+
         foreach (var group in FeatureGroups)
         {
             // TODO hacky fix because relative file resolver is added to ts code gen when it should be created at this point

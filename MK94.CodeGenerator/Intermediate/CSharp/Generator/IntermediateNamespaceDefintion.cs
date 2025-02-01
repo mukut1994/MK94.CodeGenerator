@@ -9,6 +9,7 @@ public class IntermediateNamespaceDefintion : IGenerator
     public string Namespace { get; }
 
     public Dictionary<string, IntermediateTypeDefinition> Types { get; } = new();
+    public Dictionary<string, IntermediateEnumDefinition> Enums { get; } = new();
 
     public IntermediateNamespaceDefintion(CSharpCodeGenerator root, string @namespace)
     {
@@ -24,12 +25,21 @@ public class IntermediateNamespaceDefintion : IGenerator
 
         return definition;
     }
+    public IntermediateEnumDefinition Enum(string name, MemberFlags flags)
+    {
+        flags = flags | MemberFlags.Type;
+
+        var definition = Enums.GetOrAdd(name, () => new IntermediateEnumDefinition(name: name, flags: flags));
+
+        return definition;
+    }
 
     public void Generate(CodeBuilder builder)
     {
         builder
             .AppendLine($"namespace {Namespace};")
             .NewLine()
+            .Append((b, i) => i.Value.Generate(b), Enums)
             .Append((b, i) => i.Value.Generate(b), Types);
     }
 }

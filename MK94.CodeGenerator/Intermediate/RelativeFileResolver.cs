@@ -43,10 +43,14 @@ public class RelativeFileResolver
             return null;
         }
 
-        var relative = Path.GetRelativePath(path, importFileTarget.Name);
+        var relative = Path.GetRelativePath(path, importFileTarget.GetFilename());
 
         if (relative == ".") // same file
             return null;
+
+
+        // TODO disabled because it's bugged
+        // return null;
 
         relative = relative.Replace(".ts", "");
         relative = relative.Replace("\\", "/");

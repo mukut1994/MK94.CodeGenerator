@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MK94.CodeGenerator.Features;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,11 +24,11 @@ public class PropertiesModule : IGeneratorModule<TypescriptCodeGenerator>
         {
             foreach(var typeDef in fileDef.Types)
             {
-                var file = codeGenerator.File($"{fileDef.Name}.ts");
+                var file = codeGenerator.File($"{fileDef.GetFilename()}.ts");
 
                 var type = file.Type(TsTypeReference.CleanName(typeDef.Type), MemberFlags.Public | MemberFlags.Interface);
 
-                if (typeDef.Type.BaseType != null && typeDef.Type.BaseType != typeof(object))
+                if (typeDef.Type.BaseType != null && typeDef.Type.BaseType != typeof(object) && typeDef.Type.BaseType != typeof(ValueType))
                     type.WithExtends(TsTypeReference.ToType(typeDef.Type.BaseType));
 
                 foreach(var propertyDef in typeDef.Properties)

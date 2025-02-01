@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MK94.CodeGenerator.Features;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +22,7 @@ public class EnumModule : IGeneratorModule<TypescriptCodeGenerator>
         {
             foreach(var enumDef in fileDef.EnumTypes)
             {
-                var file = codeGenerator.File($"{fileDef.Name}.ts");
+                var file = codeGenerator.File($"{fileDef.GetFilename()}.ts");
 
                 var @enum = file.Enum(enumDef.Type.Name, MemberFlags.Public | MemberFlags.Interface);
 

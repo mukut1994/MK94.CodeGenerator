@@ -13,6 +13,9 @@ namespace MK94.CodeGenerator;
 
 public class Solution : IFeatureGroup
 {
+    // TODO Hacky fix to pass through typescript type lookups
+    public Dictionary<Type, string> TypescriptTypeLookups = new();
+
     Solution IFeatureGroup.Solution => this;
 
     public record ProjectIdentifier(string? Path, Type type);

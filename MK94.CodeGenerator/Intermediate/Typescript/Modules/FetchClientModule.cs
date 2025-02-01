@@ -38,7 +38,7 @@ public class FetchClientModule : IGeneratorModule<TypescriptCodeGenerator>
                 if (!typeDef.Methods.Any())
                     continue;
 
-                var file = codeGenerator.File($"{fileDef.Name}.ts");
+                var file = codeGenerator.File($"{fileDef.GetFilename()}.ts");
 
                 var type = file.Type(typeDef.GetTypeName(), MemberFlags.Public);
 
@@ -127,7 +127,7 @@ public class FetchClientModule : IGeneratorModule<TypescriptCodeGenerator>
             var expression = p.parameter.Name;
 
             if (p.queryArg.property.Any())
-                expression = p.parameter.Name + "?." + p.queryArg.property
+                expression =p.queryArg.property
                 .Select(x => x.ToCamelCase())
                 .Aggregate((a, b) => $"{a}?.{b}");
 
@@ -159,7 +159,7 @@ public class FetchClientModule : IGeneratorModule<TypescriptCodeGenerator>
             var expression = p.parameter.Name;
 
             if (p.queryArg.property.Any())
-                expression = p.parameter.Name + "?." + p.queryArg.property
+                expression = p.queryArg.property
                 .Select(x => x.ToCamelCase())
                 .Aggregate((a, b) => $"{a}?.{b}");
 
